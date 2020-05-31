@@ -31,7 +31,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -68,11 +67,11 @@ public class UserController {
 	 */
 	@RequestMapping(value = "/get", method = RequestMethod.GET)
 	public Object find(@RequestParam(name = "type", defaultValue = "id") String type, @RequestParam(name = "key") String key) throws Exception {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		/*Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		 if (authentication.getPrincipal() instanceof UserDetails) {
 			System.out.println("");
-			
-		}
+
+		}*/
 		User user = new User();
 		if("id".equals(type)) {
 			user = userService.find(Integer.valueOf(key));
