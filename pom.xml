@@ -58,7 +58,7 @@
 		<dependency>
 			<groupId>cn.jia</groupId>
 			<artifactId>jia-mapper-wx</artifactId>
-			<version>1.0.0</version>
+			<version>1.0.2-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>cn.jia</groupId>

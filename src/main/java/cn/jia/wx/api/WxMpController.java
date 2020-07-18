@@ -1,9 +1,7 @@
 package cn.jia.wx.api;
 
-import cn.jia.core.common.EsConstants;
 import cn.jia.core.common.EsHandler;
 import cn.jia.core.common.EsSecurityHandler;
-import cn.jia.core.configuration.SpringContextHolder;
 import cn.jia.core.entity.JSONRequestPage;
 import cn.jia.core.entity.JSONResult;
 import cn.jia.core.entity.JSONResultPage;
@@ -11,7 +9,6 @@ import cn.jia.core.exception.EsRuntimeException;
 import cn.jia.core.service.DictService;
 import cn.jia.core.util.*;
 import cn.jia.dwz.service.DwzService;
-import cn.jia.isp.entity.IspFile;
 import cn.jia.isp.service.FileService;
 import cn.jia.material.entity.VoteItem;
 import cn.jia.material.entity.VoteQuestion;
@@ -25,7 +22,9 @@ import cn.jia.user.service.UserService;
 import cn.jia.wx.common.Constants;
 import cn.jia.wx.common.ErrorConstants;
 import cn.jia.wx.entity.MpInfo;
+import cn.jia.wx.entity.MpUser;
 import cn.jia.wx.service.MpInfoService;
+import cn.jia.wx.service.MpUserService;
 import cn.jia.wx.service.PayInfoService;
 import com.github.binarywang.wxpay.bean.request.WxPaySendRedpackRequest;
 import com.github.binarywang.wxpay.bean.result.WxPaySendRedpackResult;
@@ -80,6 +79,8 @@ public class WxMpController {
 	private RestTemplate restTemplate;
 	@Autowired
 	private UserService userService;
+	@Autowired
+	private MpUserService mpUserService;
 	@Autowired
 	private PointService pointService;
 	@Autowired
@@ -141,40 +142,18 @@ public class WxMpController {
 			outMessage.setToUserName(message.getFromUser());
 			//初始化用户信息
 			WxMpUser wxMpUser = wxMpService.getUserService().userInfoList(Collections.singletonList(message.getFromUser())).get(0);
-			User params = new User();
-			params.setOpenid(wxMpUser.getOpenId());
+			MpUser params = new MpUser();
+			params.setOpenId(wxMpUser.getOpenId());
 			params.setCountry(wxMpUser.getCountry());
 			params.setProvince(wxMpUser.getProvince());
 			params.setCity(wxMpUser.getCity());
 			params.setSex(wxMpUser.getSex());
 			params.setNickname(wxMpUser.getNickname());
-			params.setSubscribe(appid);
-			if(wxMpUser.getHeadImgUrl() != null) {
-				String filename = DateUtil.getDateString() + "_" + wxMpUser.getOpenId() + ".jpg";
-				String filePath = SpringContextHolder.getProperty("jia.file.path", String.class);
-				File pathFile = new File(filePath + "/avatar");
-				//noinspection ResultOfMethodCallIgnored
-				pathFile.mkdirs();
-				FileOutputStream fos = new FileOutputStream(filePath + "/avatar/" + filename);
-				byte[] b = ImgUtil.fromURL(wxMpUser.getHeadImgUrl());
-				IOUtils.write(b, fos);
-				fos.close();
-
-				//保存文件信息
-				IspFile cf = new IspFile();
-				cf.setClientId(mpInfo.getClientId());
-				cf.setExtension(FileUtil.getExtension(filename));
-				cf.setName(wxMpUser.getOpenId() + ".jpg");
-				cf.setSize((long) b.length);
-				cf.setType(EsConstants.FILE_TYPE_AVATAR);
-				cf.setUri("avatar/" + filename);
-				fileService.create(cf);
-
-				params.setAvatar("avatar/" + filename);
-			}
-			List<User> uList = new ArrayList<>();
+			params.setSubscribe(true);
+			params.setHeadImgUrl(wxMpUser.getHeadImgUrl());
+			List<MpUser> uList = new ArrayList<>();
 			uList.add(params);
-			userService.sync(uList);
+			mpUserService.sync(uList);
 
 			User user = userService.findByOpenid(message.getFromUser());
 			if(user.getPoint() == 0){
@@ -548,61 +527,35 @@ public class WxMpController {
 	public Object userSync(HttpServletRequest request) throws Exception {
 		WxMpService wxMpService = mpInfoService.findWxMpService(request);
 		String wxAppId = wxMpService.getWxMpConfigStorage().getAppId();
+		String clientId = EsSecurityHandler.clientId();
 		//先清空所有用户的公众号订阅情况
-		List<User> users = userService.list(null, 1, Integer.MAX_VALUE);
-		for(User u : users) {
-			List<String> subscribe = new ArrayList<>(Arrays.asList(u.getSubscribe().split(",")));
-			if(subscribe.remove(wxAppId)) {
-				User upUser = new User();
-				upUser.setId(u.getId());
-				upUser.setSubscribe(Joiner.on(",").join(subscribe));
-				userService.update(upUser);
-			}
-		}
+		MpUser example = new MpUser();
+		example.setClientId(clientId);
+		example.setAppid(wxAppId);
+		mpUserService.unsubstribe(example);
+
 		WxMpUserList userList = wxMpService.getUserService().userList(null);
 		do {
 			List<String> openids = userList.getOpenids();
 			List<String> batchList = new ArrayList<>();
+			List<MpUser> users;
 			for(int i=0;i<openids.size();i++) {
 				batchList.add(openids.get(i));
 				if(i!=0 && ((i+1)%100==0 || i==openids.size()-1)) {
 					users = new ArrayList<>();
 					for(WxMpUser wxMpUser : wxMpService.getUserService().userInfoList(batchList)) {
-						User params = new User();
-						params.setOpenid(wxMpUser.getOpenId());
+						MpUser params = new MpUser();
+						params.setOpenId(wxMpUser.getOpenId());
 						params.setCountry(wxMpUser.getCountry());
 						params.setProvince(wxMpUser.getProvince());
 						params.setCity(wxMpUser.getCity());
 						params.setSex(wxMpUser.getSex());
 						params.setNickname(wxMpUser.getNickname());
-						params.setSubscribe(wxAppId);
-						if(StringUtils.isNotEmpty(wxMpUser.getHeadImgUrl())) {
-							String filename = DateUtil.getDateString() + "_" + wxMpUser.getOpenId() + ".jpg";
-							String filePath = SpringContextHolder.getProperty("jia.file.path", String.class);
-							File pathFile = new File(filePath + "/avatar");
-							//noinspection ResultOfMethodCallIgnored
-							pathFile.mkdirs();
-							FileOutputStream fos = new FileOutputStream(filePath + "/avatar/" + filename);
-							byte[] b = ImgUtil.fromURL(wxMpUser.getHeadImgUrl());
-							IOUtils.write(b, fos);
-							fos.close();
-
-							//保存文件信息
-							IspFile cf = new IspFile();
-							cf.setClientId(EsSecurityHandler.clientId());
-							cf.setExtension(FileUtil.getExtension(filename));
-							cf.setName(wxMpUser.getOpenId() + ".jpg");
-							cf.setSize((long) b.length);
-							cf.setType(EsConstants.FILE_TYPE_AVATAR);
-							cf.setUri("avatar/" + filename);
-							fileService.create(cf);
-
-							params.setAvatar("avatar/" + filename);
-						}
+						params.setSubscribe(true);
+						params.setHeadImgUrl(wxMpUser.getHeadImgUrl());
 						users.add(params);
 					}
-					
-					userService.sync(users);
+					mpUserService.sync(users);
 					batchList = new ArrayList<>();
 				}
 			}
