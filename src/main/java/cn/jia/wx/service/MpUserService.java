@@ -12,6 +12,8 @@ public interface MpUserService {
 	MpUser find(Integer id) throws Exception;
 
 	MpUser findByOpenId(String openId);
+
+	MpUser findByJiacn(String jiacn);
 	
 	Page<MpUser> list(MpUser example, int pageNo, int pageSize);
 

@@ -3,7 +3,7 @@ package cn.jia.wx.schedule;
 import cn.jia.base.entity.DelayObj;
 import cn.jia.core.service.DictService;
 import cn.jia.core.util.DateUtil;
-import cn.jia.core.util.StringUtils;
+import cn.jia.core.util.JSONUtil;
 import cn.jia.core.util.thread.ThreadRequest;
 import cn.jia.core.util.thread.ThreadRequestContent;
 import cn.jia.material.entity.Phrase;
@@ -12,9 +12,9 @@ import cn.jia.material.entity.VoteQuestion;
 import cn.jia.material.service.PhraseService;
 import cn.jia.material.service.VoteService;
 import cn.jia.user.common.Constants;
-import cn.jia.user.entity.User;
-import cn.jia.user.service.UserService;
+import cn.jia.wx.entity.MpUser;
 import cn.jia.wx.service.MpInfoService;
+import cn.jia.wx.service.MpUserService;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.api.WxConsts;
 import me.chanjar.weixin.mp.bean.kefu.WxMpKefuMessage;
@@ -34,7 +34,7 @@ import java.util.concurrent.TimeUnit;
 public class WxSchedule {
 
 	@Autowired
-	private UserService userService;
+	private MpUserService mpUserService;
 	@Autowired
 	private VoteService voteService;
 	@Autowired
@@ -51,20 +51,17 @@ public class WxSchedule {
 	 */
 	@Scheduled(cron = "0 30 7 * * ?")
 	public void sendVote() {
-		List<User> phraseUserList = new ArrayList<>();
-		List<User> userList = userService.list(null, 1, Integer.MAX_VALUE);
+		List<MpUser> phraseUserList = new ArrayList<>();
+		List<MpUser> userList = mpUserService.list(null, 1, Integer.MAX_VALUE);
 		long twoDay = DateUtil.genTime(new Date()) - 2 * 24 * 60 * 60;
-		String wxAppId = dictService.selectByDictTypeAndDictValue(cn.jia.task.common.Constants.DICT_TYPE_TASK_CONFIG, cn.jia.task.common.Constants.TASK_CONFIG_WX_APP_ID).getName();
-		for(User user : userList) {
-			if(StringUtils.isNotEmpty(user.getSubscribe()) && StringUtils.isNotEmpty(user.getOpenid())
-					&& Arrays.asList(user.getSubscribe().split(",")).contains(Constants.SUBSCRIBE_VOTE)
-					&& Arrays.asList(user.getSubscribe().split(",")).contains(wxAppId)) {
+		for(MpUser user : userList) {
+			if(user.getSubscribe() && Arrays.asList(user.getSubscribeItems().split(",")).contains(Constants.SUBSCRIBE_VOTE)) {
 				VoteQuestion question = voteService.findOneQuestion(user.getJiacn());
 
 				if (user.getUpdateTime() > twoDay) {
 					try {
 						WxMpKefuMessage kfmessage = new WxMpKefuMessage();
-						kfmessage.setToUser(user.getOpenid());
+						kfmessage.setToUser(user.getOpenId());
 						kfmessage.setMsgType(WxConsts.KefuMsgType.TEXT);
 						StringBuilder content = new StringBuilder();
 						content.append("每天答题时间(两小时有效)").append("\n");
@@ -74,8 +71,8 @@ public class WxSchedule {
 						}
 						content.append("\n").append("请回复正确答案，退订回复TD");
 						kfmessage.setContent(content.toString());
-						mpInfoService.findWxMpService(wxAppId).getKefuService().sendKefuMessage(kfmessage);
-						redisTemplate.opsForValue().set("vote_" + user.getOpenid(), question.getId(), 2, TimeUnit.HOURS);
+						mpInfoService.findWxMpService(user.getAppid()).getKefuService().sendKefuMessage(kfmessage);
+						redisTemplate.opsForValue().set("vote_" + user.getOpenId(), question.getId(), 2, TimeUnit.HOURS);
 						phraseUserList.add(user);
 						continue;
 					} catch (Exception e) {
@@ -110,14 +107,14 @@ public class WxSchedule {
 					data.add(remark);
 
 					WxMpTemplateMessage message = new WxMpTemplateMessage();
-					message.setToUser(user.getOpenid());
+					message.setToUser(user.getOpenId());
 					String templateId = dictService.selectByDictTypeAndDictValue(cn.jia.task.common.Constants.DICT_TYPE_TASK_CONFIG, cn.jia.task.common.Constants.TASK_CONFIG_WX_MSG_TEMPLATE_ID).getName();
 					message.setTemplateId(templateId);
 					message.setData(data);
 					String baseUrl = dictService.selectByDictTypeAndDictValue(cn.jia.task.common.Constants.DICT_TYPE_TASK_CONFIG, cn.jia.task.common.Constants.TASK_CONFIG_NOTIFY_URL).getName();
 					message.setUrl(baseUrl + "/vote");
-					mpInfoService.findWxMpService(wxAppId).getTemplateMsgService().sendTemplateMsg(message);
-					redisTemplate.opsForValue().set("vote_" + user.getOpenid(), question.getId(), 2, TimeUnit.HOURS);
+					mpInfoService.findWxMpService(user.getAppid()).getTemplateMsgService().sendTemplateMsg(message);
+					redisTemplate.opsForValue().set("vote_" + user.getOpenId(), question.getId(), 2, TimeUnit.HOURS);
 				} catch (Exception e) {
 					log.error("sendVote.WxMpTemplateMessage", e);
 				}
@@ -126,12 +123,12 @@ public class WxSchedule {
 
 		//随机发送每日一句
 		DelayQueue<DelayObj> delayQueue = new DelayQueue<>();
-		for(User user : phraseUserList) {
+		for(MpUser user : phraseUserList) {
 			int max = (int)(DateUtil.todayEnd().getTime() / 1000);
 			int min = (int)(new Date().getTime() / 1000);
 			Random random = new Random();
 			long i = random.nextInt(max) % (max - min + 1) * 1000;
-			delayQueue.offer(new DelayObj(i, user.getOpenid()));
+			delayQueue.offer(new DelayObj(i, JSONUtil.toJson(user)));
 		}
 		final int size = phraseUserList.size();
 		new ThreadRequest(new ThreadRequestContent() {
@@ -140,11 +137,12 @@ public class WxSchedule {
 					try {
 						DelayObj delayObj = delayQueue.take();
 						Phrase phrase = phraseService.findRandom(null);
+						MpUser user = JSONUtil.fromJson(delayObj.getData(), MpUser.class);
 						WxMpKefuMessage kfmessage = new WxMpKefuMessage();
-						kfmessage.setToUser(delayObj.getData());
+						kfmessage.setToUser(user.getOpenId());
 						kfmessage.setMsgType(WxConsts.KefuMsgType.TEXT);
 						kfmessage.setContent(phrase.getContent());
-						mpInfoService.findWxMpService(wxAppId).getKefuService().sendKefuMessage(kfmessage);
+						mpInfoService.findWxMpService(user.getAppid()).getKefuService().sendKefuMessage(kfmessage);
 					} catch (Exception e) {
 						log.error("WxSchedule.sendPhrase", e);
 					}

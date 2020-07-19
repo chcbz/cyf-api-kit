@@ -64,6 +64,11 @@ public class MpUserServiceImpl implements MpUserService {
 	}
 
 	@Override
+	public MpUser findByJiacn(String jiacn) {
+		return mpUserMapper.selectByJiacn(jiacn);
+	}
+
+	@Override
 	public Page<MpUser> list(MpUser example, int pageNo, int pageSize) {
 		PageHelper.startPage(pageNo, pageSize);
 		return mpUserMapper.selectByExample(example);

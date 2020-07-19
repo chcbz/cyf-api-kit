@@ -143,6 +143,8 @@ public class WxMpController {
 			//初始化用户信息
 			WxMpUser wxMpUser = wxMpService.getUserService().userInfoList(Collections.singletonList(message.getFromUser())).get(0);
 			MpUser params = new MpUser();
+			params.setAppid(appid);
+			params.setClientId(mpInfo.getClientId());
 			params.setOpenId(wxMpUser.getOpenId());
 			params.setCountry(wxMpUser.getCountry());
 			params.setProvince(wxMpUser.getProvince());
@@ -545,6 +547,8 @@ public class WxMpController {
 					users = new ArrayList<>();
 					for(WxMpUser wxMpUser : wxMpService.getUserService().userInfoList(batchList)) {
 						MpUser params = new MpUser();
+						params.setAppid(wxAppId);
+						params.setClientId(clientId);
 						params.setOpenId(wxMpUser.getOpenId());
 						params.setCountry(wxMpUser.getCountry());
 						params.setProvince(wxMpUser.getProvince());
