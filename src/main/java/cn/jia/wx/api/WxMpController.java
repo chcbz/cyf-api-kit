@@ -134,17 +134,14 @@ public class WxMpController {
 		WxMpService wxMpService = mpInfoService.findWxMpService(original);
 		String appid = wxMpService.getWxMpConfigStorage().getAppId();
 		MpInfo mpInfo = mpInfoService.findByKey(appid);
-		//关注
-		if(WxConsts.XmlMsgType.EVENT.equals(message.getMsgType()) && WxConsts.EventType.SUBSCRIBE.equals(message.getEvent())) {
-			WxMpXmlOutTextMessage outMessage = new WxMpXmlOutTextMessage();
-			outMessage.setCreateTime(message.getCreateTime());
-			outMessage.setFromUserName(message.getToUser());
-			outMessage.setToUserName(message.getFromUser());
+		String clientId = mpInfo.getClientId();
+		MpUser mpUser = mpUserService.findByOpenId(message.getFromUser());
+		if (mpUser == null) {
 			//初始化用户信息
 			WxMpUser wxMpUser = wxMpService.getUserService().userInfoList(Collections.singletonList(message.getFromUser())).get(0);
 			MpUser params = new MpUser();
 			params.setAppid(appid);
-			params.setClientId(mpInfo.getClientId());
+			params.setClientId(clientId);
 			params.setOpenId(wxMpUser.getOpenId());
 			params.setCountry(wxMpUser.getCountry());
 			params.setProvince(wxMpUser.getProvince());
@@ -153,17 +150,22 @@ public class WxMpController {
 			params.setNickname(wxMpUser.getNickname());
 			params.setSubscribe(true);
 			params.setHeadImgUrl(wxMpUser.getHeadImgUrl());
-			List<MpUser> uList = new ArrayList<>();
-			uList.add(params);
-			mpUserService.sync(uList);
+			mpUser = mpUserService.create(params);
+		}
+		//关注
+		if(WxConsts.XmlMsgType.EVENT.equals(message.getMsgType()) && WxConsts.EventType.SUBSCRIBE.equals(message.getEvent())) {
+			WxMpXmlOutTextMessage outMessage = new WxMpXmlOutTextMessage();
+			outMessage.setCreateTime(message.getCreateTime());
+			outMessage.setFromUserName(message.getToUser());
+			outMessage.setToUserName(message.getFromUser());
 
-			User user = userService.findByOpenid(message.getFromUser());
+			User user = userService.findByJiacn(mpUser.getJiacn());
 			if(user.getPoint() == 0){
 				//初始化积分
 				Record record = new Record();
 				record.setJiacn(user.getJiacn());
 				Record pointResult = pointService.init(record);
-				outMessage.setContent(EsHandler.getMessage(request, "init.success", new String[]{wxMpUser.getNickname(),String.valueOf(pointResult.getChange())}));
+				outMessage.setContent(EsHandler.getMessage(request, "init.success", new String[]{mpUser.getNickname(),String.valueOf(pointResult.getChange())}));
 				//如果是推荐进来的用户，则增加推荐人的积分
 				if(user.getReferrer() != null) {
 					//增加推荐人的积分
@@ -189,7 +191,7 @@ public class WxMpController {
 		}
 		//退订
 		if(WxConsts.XmlMsgType.EVENT.equals(message.getMsgType()) && WxConsts.EventType.UNSUBSCRIBE.equals(message.getEvent())) {
-			User user = userService.findByOpenid(message.getFromUser());
+			User user = userService.findByJiacn(mpUser.getJiacn());
 			List<String> subscribe = new ArrayList<>(Arrays.asList(user.getSubscribe().split(",")));
 			if(subscribe.remove(appid)) {
 				User upUser = new User();
@@ -204,7 +206,7 @@ public class WxMpController {
 			outMessage.setCreateTime(message.getCreateTime());
 			outMessage.setFromUserName(message.getToUser());
 			outMessage.setToUserName(message.getFromUser());
-			User user = userService.findByOpenid(message.getFromUser());
+			User user = userService.findByJiacn(mpUser.getJiacn());
 			if(user == null) {
 				outMessage.setContent(ErrorConstants.USER_NOT_EXIST);
 				return outMessage.toXml();
@@ -229,7 +231,7 @@ public class WxMpController {
 			outMessage.setToUserName(message.getFromUser());
 			//查看积分
 			if(Constants.EVENKEY_POINT_MINE.equals(message.getEventKey())) {
-				User user = userService.findByOpenid(message.getFromUser());
+				User user = userService.findByJiacn(mpUser.getJiacn());
 				if(user == null) {
 					outMessage.setContent(ErrorConstants.USER_NOT_EXIST);
 					return outMessage.toXml();
@@ -238,7 +240,7 @@ public class WxMpController {
 			}
 			//签到
 			if(Constants.EVENKEY_POINT_SIGN.equals(message.getEventKey())) {
-				User user = userService.findByOpenid(message.getFromUser());
+				User user = userService.findByJiacn(mpUser.getJiacn());
 				if(user == null) {
 					outMessage.setContent(ErrorConstants.USER_NOT_EXIST);
 					return outMessage.toXml();
@@ -256,7 +258,7 @@ public class WxMpController {
 			}
 			//赌积分
 			else if(Constants.EVENKEY_POINT_LUCK.equals(message.getEventKey())) {
-				User user = userService.findByOpenid(message.getFromUser());
+				User user = userService.findByJiacn(mpUser.getJiacn());
 				if(user == null) {
 					outMessage.setContent(ErrorConstants.USER_NOT_EXIST);
 					return outMessage.toXml();
@@ -324,7 +326,7 @@ public class WxMpController {
 				shareHandlerUrl = HttpUtil.addUrlValue(shareHandlerUrl, "referrer", message.getFromUser());
 				String shareUrl = "https://open.weixin.qq.com/connect/oauth2/authorize?appid="+appid+"&redirect_uri="+URLEncoder.encode(shareHandlerUrl, "utf-8")+"&response_type=code&scope=snsapi_userinfo&state=wx_snsapi_userinfo&connect_redirect=1#wechat_redirect";
 				File qrFile = File.createTempFile("wx-qrcode", ".jpg");
-				User user = userService.findByOpenid(message.getFromUser());
+				User user = userService.findByJiacn(mpUser.getJiacn());
 				String dwzServerUrl = dictService.selectByDictTypeAndDictValue(Constants.DICT_TYPE_WX_CONFIG, Constants.WX_CONFIG_DWZ_SERVER_URL).getName();
 				QRCodeUtil.encode(qrFile.getParent(), qrFile.getName(), dwzServerUrl + "/" + dwzService.gen(user.getJiacn(), shareUrl, null), 200, 200);
 				String logoUrl = dictService.selectByDictTypeAndDictValue(Constants.DICT_TYPE_WX_CONFIG, Constants.WX_CONFIG_MP_LOGO_URL).getName();
@@ -346,7 +348,7 @@ public class WxMpController {
 			outMessage.setFromUserName(message.getToUser());
 			outMessage.setToUserName(message.getFromUser());
 
-			User user = userService.findByOpenid(message.getFromUser());
+			User user = userService.findByJiacn(mpUser.getJiacn());
 			if("TD".equalsIgnoreCase(message.getContent())) {
 				List<String> subscribe = new ArrayList<>(Arrays.asList(user.getSubscribe().split(",")));
 				subscribe.remove(cn.jia.user.common.Constants.SUBSCRIBE_VOTE);
@@ -407,7 +409,7 @@ public class WxMpController {
 			outMessage.setFromUserName(message.getToUser());
 			outMessage.setToUserName(message.getFromUser());
 
-			User user = userService.findByOpenid(message.getFromUser());
+			User user = userService.findByJiacn(mpUser.getJiacn());
 			VoteQuestion question = voteService.findOneQuestion(user.getJiacn());
 			if(question == null) {
 				outMessage.setContent("你超级厉害，所有题都被你做完了！");
@@ -427,7 +429,7 @@ public class WxMpController {
 			outMessage.setFromUserName(message.getToUser());
 			outMessage.setToUserName(message.getFromUser());
 
-			User user = userService.findByOpenid(message.getFromUser());
+			User user = userService.findByJiacn(mpUser.getJiacn());
 			if(user == null) {
 				outMessage.setContent(ErrorConstants.USER_NOT_EXIST);
 				return outMessage.toXml();

@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface MpUserService {
 	
-	MpUser create(MpUser mpUser);
+	MpUser create(MpUser mpUser) throws Exception;
 
 	MpUser find(Integer id) throws Exception;
 
