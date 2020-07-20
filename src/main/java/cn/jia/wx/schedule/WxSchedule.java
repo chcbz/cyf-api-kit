@@ -55,7 +55,7 @@ public class WxSchedule {
 		List<MpUser> userList = mpUserService.list(null, 1, Integer.MAX_VALUE);
 		long twoDay = DateUtil.genTime(new Date()) - 2 * 24 * 60 * 60;
 		for(MpUser user : userList) {
-			if(user.getSubscribe() && Arrays.asList(user.getSubscribeItems().split(",")).contains(Constants.SUBSCRIBE_VOTE)) {
+			if(user.getSubscribeItems() != null && Arrays.asList(user.getSubscribeItems().split(",")).contains(Constants.SUBSCRIBE_VOTE)) {
 				VoteQuestion question = voteService.findOneQuestion(user.getJiacn());
 
 				if (user.getUpdateTime() > twoDay) {
