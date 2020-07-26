@@ -191,14 +191,10 @@ public class WxMpController {
 		}
 		//退订
 		if(WxConsts.XmlMsgType.EVENT.equals(message.getMsgType()) && WxConsts.EventType.UNSUBSCRIBE.equals(message.getEvent())) {
-			User user = userService.findByJiacn(mpUser.getJiacn());
-			List<String> subscribe = new ArrayList<>(Arrays.asList(user.getSubscribe().split(",")));
-			if(subscribe.remove(appid)) {
-				User upUser = new User();
-				upUser.setId(user.getId());
-				upUser.setSubscribe(Joiner.on(",").join(subscribe));
-				userService.update(upUser);
-			}
+			MpUser upUser = new MpUser();
+			upUser.setId(mpUser.getId());
+			upUser.setSubscribe(false);
+			mpUserService.update(upUser);
 		}
 		//签到
 		if(WxConsts.XmlMsgType.EVENT.equals(message.getMsgType()) && WxConsts.EventType.LOCATION.equals(message.getEvent())) {
@@ -206,13 +202,8 @@ public class WxMpController {
 			outMessage.setCreateTime(message.getCreateTime());
 			outMessage.setFromUserName(message.getToUser());
 			outMessage.setToUserName(message.getFromUser());
-			User user = userService.findByJiacn(mpUser.getJiacn());
-			if(user == null) {
-				outMessage.setContent(ErrorConstants.USER_NOT_EXIST);
-				return outMessage.toXml();
-			}
 			Sign params = new Sign();
-			params.setJiacn(user.getJiacn());
+			params.setJiacn(mpUser.getJiacn());
 			params.setLatitude(String.valueOf(message.getLatitude()));
 			params.setLongitude(String.valueOf(message.getLongitude()));
 			try {
@@ -240,13 +231,8 @@ public class WxMpController {
 			}
 			//签到
 			if(Constants.EVENKEY_POINT_SIGN.equals(message.getEventKey())) {
-				User user = userService.findByJiacn(mpUser.getJiacn());
-				if(user == null) {
-					outMessage.setContent(ErrorConstants.USER_NOT_EXIST);
-					return outMessage.toXml();
-				}
 				Sign params = new Sign();
-				params.setJiacn(user.getJiacn());
+				params.setJiacn(mpUser.getJiacn());
 				params.setLatitude(String.valueOf(message.getLatitude()));
 				params.setLongitude(String.valueOf(message.getLongitude()));
 				try {
@@ -258,13 +244,8 @@ public class WxMpController {
 			}
 			//赌积分
 			else if(Constants.EVENKEY_POINT_LUCK.equals(message.getEventKey())) {
-				User user = userService.findByJiacn(mpUser.getJiacn());
-				if(user == null) {
-					outMessage.setContent(ErrorConstants.USER_NOT_EXIST);
-					return outMessage.toXml();
-				}
 				Record params = new Record();
-				params.setJiacn(user.getJiacn());
+				params.setJiacn(mpUser.getJiacn());
 				params.setChange(2);
 				Record pointResult = pointService.luck(params);
 				Integer point = pointResult.getChange();
@@ -326,9 +307,8 @@ public class WxMpController {
 				shareHandlerUrl = HttpUtil.addUrlValue(shareHandlerUrl, "referrer", message.getFromUser());
 				String shareUrl = "https://open.weixin.qq.com/connect/oauth2/authorize?appid="+appid+"&redirect_uri="+URLEncoder.encode(shareHandlerUrl, "utf-8")+"&response_type=code&scope=snsapi_userinfo&state=wx_snsapi_userinfo&connect_redirect=1#wechat_redirect";
 				File qrFile = File.createTempFile("wx-qrcode", ".jpg");
-				User user = userService.findByJiacn(mpUser.getJiacn());
 				String dwzServerUrl = dictService.selectByDictTypeAndDictValue(Constants.DICT_TYPE_WX_CONFIG, Constants.WX_CONFIG_DWZ_SERVER_URL).getName();
-				QRCodeUtil.encode(qrFile.getParent(), qrFile.getName(), dwzServerUrl + "/" + dwzService.gen(user.getJiacn(), shareUrl, null), 200, 200);
+				QRCodeUtil.encode(qrFile.getParent(), qrFile.getName(), dwzServerUrl + "/" + dwzService.gen(mpUser.getJiacn(), shareUrl, null), 200, 200);
 				String logoUrl = dictService.selectByDictTypeAndDictValue(Constants.DICT_TYPE_WX_CONFIG, Constants.WX_CONFIG_MP_LOGO_URL).getName();
 				File logoFile = File.createTempFile("wx-logo", ".jpg");
 				IOUtils.write(ImgUtil.fromURL(logoUrl), new FileOutputStream(logoFile));
@@ -348,14 +328,13 @@ public class WxMpController {
 			outMessage.setFromUserName(message.getToUser());
 			outMessage.setToUserName(message.getFromUser());
 
-			User user = userService.findByJiacn(mpUser.getJiacn());
 			if("TD".equalsIgnoreCase(message.getContent())) {
-				List<String> subscribe = new ArrayList<>(Arrays.asList(user.getSubscribe().split(",")));
+				List<String> subscribe = new ArrayList<>(Arrays.asList(mpUser.getSubscribeItems().split(",")));
 				subscribe.remove(cn.jia.user.common.Constants.SUBSCRIBE_VOTE);
-				User upUser = new User();
-				upUser.setId(user.getId());
-				upUser.setSubscribe(Joiner.on(",").join(subscribe));
-				userService.update(upUser);
+				MpUser upUser = new MpUser();
+				upUser.setId(mpUser.getId());
+				upUser.setSubscribeItems(Joiner.on(",").join(subscribe));
+				mpUserService.update(upUser);
 				outMessage.setContent("退订成功咯！哼！！");
 			} else {
 				Integer questionId = (Integer)obj;
@@ -363,11 +342,11 @@ public class WxMpController {
 				VoteTick voteTick = new VoteTick();
 				voteTick.setQuestionId(questionId);
 				voteTick.setOpt(message.getContent());
-				voteTick.setJiacn(user.getJiacn());
+				voteTick.setJiacn(mpUser.getJiacn());
 				boolean tick = voteService.tick(voteTick);
 				if(tick) {
 					outMessage.setContent("恭喜你，答案正确，增加" + voteQuestion.getPoint() + "积分！");
-					pointService.add(user.getJiacn(), voteQuestion.getPoint(), cn.jia.point.common.Constants.POINT_TYPE_VOTE);
+					pointService.add(mpUser.getJiacn(), voteQuestion.getPoint(), cn.jia.point.common.Constants.POINT_TYPE_VOTE);
 					//随机发放红包
 					WxPaySendRedpackRequest sendRedpack = new WxPaySendRedpackRequest();
 					sendRedpack.setMchBillNo(String.valueOf(DateUtil.genTime(new Date())));
@@ -409,8 +388,7 @@ public class WxMpController {
 			outMessage.setFromUserName(message.getToUser());
 			outMessage.setToUserName(message.getFromUser());
 
-			User user = userService.findByJiacn(mpUser.getJiacn());
-			VoteQuestion question = voteService.findOneQuestion(user.getJiacn());
+			VoteQuestion question = voteService.findOneQuestion(mpUser.getJiacn());
 			if(question == null) {
 				outMessage.setContent("你超级厉害，所有题都被你做完了！");
 			} else {
