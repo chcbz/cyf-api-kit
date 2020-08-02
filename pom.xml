@@ -33,7 +33,7 @@
 		<dependency>
 			<groupId>cn.jia</groupId>
 			<artifactId>jia-api-core</artifactId>
-			<version>1.0.8-SNAPSHOT</version>
+			<version>1.0.8</version>
 		</dependency>
 		<dependency>
 			<groupId>cn.jia</groupId>
