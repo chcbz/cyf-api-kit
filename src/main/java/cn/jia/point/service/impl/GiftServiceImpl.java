@@ -18,6 +18,7 @@ import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 
@@ -75,6 +76,7 @@ public class GiftServiceImpl implements GiftService {
 	 * @throws Exception 异常信息
 	 */
 	@Override
+	@Transactional
 	public void usage(GiftUsage record) throws Exception {
 		Gift gift = giftMapper.selectByPrimaryKey(record.getGiftId());
 		if (gift == null) {
@@ -112,6 +114,46 @@ public class GiftServiceImpl implements GiftService {
 		}
 		record.setTime(now);
 		giftUsageMapper.insertSelective(record);
+	}
+
+	@Override
+	@Transactional
+	public void usageCancel(Integer giftUsageId) throws Exception {
+		GiftUsage giftUsage = giftUsageMapper.selectByPrimaryKey(giftUsageId);
+		if (giftUsage == null) {
+			throw new EsRuntimeException(ErrorConstants.DATA_NOT_FOUND);
+		}
+		if (!Constants.GIFT_USAGE_STATUS_PAYED.equals(giftUsage.getStatus())) {
+			throw new EsRuntimeException(ErrorConstants.GIFT_CANNOT_CANCEL);
+		}
+		// 退回积分
+		if (giftUsage.getPoint() != null && giftUsage.getPoint() != 0) {
+			User user = userService.findByJiacn(giftUsage.getJiacn());
+			if (user == null) {
+				throw new EsRuntimeException(ErrorConstants.USER_NOT_EXIST);
+			}
+			User upUser = new User();
+			upUser.setId(user.getId());
+			upUser.setPoint(user.getPoint() + giftUsage.getPoint());
+			userService.update(upUser);
+		}
+		// 修改状态
+		GiftUsage upUsage = new GiftUsage();
+		upUsage.setId(giftUsage.getId());
+		upUsage.setStatus(Constants.GIFT_USAGE_STATUS_CANCEL);
+		giftUsageMapper.updateByPrimaryKeySelective(upUsage);
+	}
+
+	@Override
+	public void usageDelete(Integer giftUsageId) throws Exception {
+		GiftUsage giftUsage = giftUsageMapper.selectByPrimaryKey(giftUsageId);
+		if (giftUsage == null) {
+			throw new EsRuntimeException(ErrorConstants.DATA_NOT_FOUND);
+		}
+		if (!Constants.GIFT_USAGE_STATUS_DRAFT.equals(giftUsage.getStatus())) {
+			throw new EsRuntimeException(ErrorConstants.GIFT_CANNOT_CANCEL);
+		}
+		giftUsageMapper.deleteByPrimaryKey(giftUsageId);
 	}
 
 	/**

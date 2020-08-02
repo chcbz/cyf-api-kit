@@ -18,6 +18,10 @@ public interface GiftService {
 	Page<Gift> list(int pageNo, int pageSize, GiftExample example);
 	
 	void usage(GiftUsage record) throws Exception;
+
+	void usageCancel(Integer giftUsageId) throws Exception;
+
+	void usageDelete(Integer giftUsageId) throws Exception;
 	
 	Page<GiftUsage> usageListByGift(int pageNum, int pageSize, Integer giftId);
 	

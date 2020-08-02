@@ -17,6 +17,8 @@ public class ErrorConstants extends EsErrorConstants {
 	public static final String SIGN_NO_THE_TIME = "EPOINT003";
 	/** 用户已经被推荐 */
 	public static final String REFERRAL_EXISTS = "EPOINT004";
+	/** 已支付状态才能取消 */
+	public static final String GIFT_CANNOT_CANCEL = "EPOINT005";
 	
 	/** 用户不存在 */
 	public static final String USER_NOT_EXIST = "EUSER002";

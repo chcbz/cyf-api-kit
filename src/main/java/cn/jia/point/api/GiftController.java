@@ -1,5 +1,6 @@
 package cn.jia.point.api;
 
+import cn.jia.core.common.EsSecurityHandler;
 import cn.jia.core.entity.JSONRequestPage;
 import cn.jia.core.entity.JSONResult;
 import cn.jia.core.entity.JSONResultPage;
@@ -91,9 +92,34 @@ public class GiftController {
 	 */
 //	@PreAuthorize("hasAuthority('gift-usage_add')")
 	@RequestMapping(value = "/usage/add", method = RequestMethod.POST)
-	public Object usage(@RequestBody GiftUsage giftUsage, HttpServletRequest request) throws Exception {
+	public Object usageAdd(@RequestBody GiftUsage giftUsage, HttpServletRequest request) throws Exception {
+		giftUsage.setClientId(EsSecurityHandler.clientId());
 		giftService.usage(giftUsage);
 		return JSONResult.success(giftUsage);
+	}
+
+	/**
+	 * 取消礼品兑换
+	 * @param giftUsageId 订单ID
+	 * @return 结果
+	 * @throws Exception 异常
+	 */
+	@RequestMapping(value = "/usage/cancel/{giftUsageId}", method = RequestMethod.POST)
+	public Object usageCancel(@PathVariable Integer giftUsageId) throws Exception {
+		giftService.usageCancel(giftUsageId);
+		return JSONResult.success(giftUsageId);
+	}
+
+	/**
+	 * 删除订单
+	 * @param giftUsageId 订单ID
+	 * @return 处理结果
+	 * @throws Exception 异常
+	 */
+	@RequestMapping(value = "/usage/delete/{giftUsageId}", method = RequestMethod.POST)
+	public Object usageDelete(@PathVariable Integer giftUsageId) throws Exception {
+		giftService.usageDelete(giftUsageId);
+		return JSONResult.success(giftUsageId);
 	}
 	
 	/**
