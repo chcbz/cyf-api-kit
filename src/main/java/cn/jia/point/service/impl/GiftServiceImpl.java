@@ -150,7 +150,8 @@ public class GiftServiceImpl implements GiftService {
 		if (giftUsage == null) {
 			throw new EsRuntimeException(ErrorConstants.DATA_NOT_FOUND);
 		}
-		if (!Constants.GIFT_USAGE_STATUS_DRAFT.equals(giftUsage.getStatus())) {
+		if (!Constants.GIFT_USAGE_STATUS_DRAFT.equals(giftUsage.getStatus()) &&
+				!Constants.GIFT_USAGE_STATUS_CANCEL.equals(giftUsage.getStatus())) {
 			throw new EsRuntimeException(ErrorConstants.GIFT_CANNOT_CANCEL);
 		}
 		giftUsageMapper.deleteByPrimaryKey(giftUsageId);
