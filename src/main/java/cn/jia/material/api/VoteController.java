@@ -82,8 +82,7 @@ public class VoteController {
 	public Object list(@RequestBody JSONRequestPage<String> page) {
 		Vote example = JSONUtil.fromJson(page.getSearch(), Vote.class);
 		Page<Vote> voteList = voteService.list(page.getPageNum(), page.getPageSize(), example);
-		@SuppressWarnings({ "rawtypes", "unchecked" })
-		JSONResultPage<Object> result = new JSONResultPage(voteList);
+		JSONResultPage<Vote> result = new JSONResultPage<>(voteList);
 		result.setPageNum(voteList.getPageNum());
 		result.setTotal(voteList.getTotal());
 		return result;

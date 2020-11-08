@@ -27,5 +27,5 @@ public interface VoteService {
 
 	VoteQuestion findQuestion(Integer id);
 
-	void batchImport(String filePath, String answerFilePath) throws Exception;
+	void batchImport(String voteName, String txt, String answer) throws Exception;
 }

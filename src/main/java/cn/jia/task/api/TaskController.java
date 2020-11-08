@@ -1,5 +1,6 @@
 package cn.jia.task.api;
 
+import cn.jia.core.common.EsSecurityHandler;
 import cn.jia.core.entity.JSONRequestPage;
 import cn.jia.core.entity.JSONResult;
 import cn.jia.core.entity.JSONResultPage;
@@ -40,6 +41,7 @@ public class TaskController {
 	/*@PreAuthorize("hasAuthority('task-create')")*/
 	@RequestMapping(value = "/create", method = RequestMethod.POST)
 	public Object create(@RequestBody TaskPlan task) {
+		task.setClientId(EsSecurityHandler.clientId());
 		taskService.create(task);
 		return JSONResult.success();
 	}
@@ -88,9 +90,9 @@ public class TaskController {
 	@RequestMapping(value = "/search", method = RequestMethod.POST)
 	public Object search(@RequestBody JSONRequestPage<String> page) {
 		TaskPlanExample plan = JSONUtil.fromJson(page.getSearch(), TaskPlanExample.class);
+		plan.setClientId(EsSecurityHandler.clientId());
 		Page<TaskPlan> taskList = taskService.search(plan, page.getPageNum(), page.getPageSize());
-		@SuppressWarnings({ "unchecked", "rawtypes" })
-		JSONResultPage<Object> result = new JSONResultPage(taskList.getResult());
+		JSONResultPage<TaskPlan> result = new JSONResultPage<>(taskList.getResult());
 		result.setPageNum(taskList.getPageNum());
 		result.setTotal(taskList.getTotal());
 		return result;
@@ -98,14 +100,13 @@ public class TaskController {
 	
 	/**
 	 * 获取所有任务信息
-	 * @return
+	 * @return 任务明细列表
 	 */
 	@RequestMapping(value = "/item/search", method = RequestMethod.POST)
 	public Object searchItem(@RequestBody JSONRequestPage<String> page) {
-		TaskItemVOExample plan = JSONUtil.fromJson(page.getSearch(), TaskItemVOExample.class);
-		Page<TaskItemVO> taskList = taskService.findItems(plan, page.getPageNum(), page.getPageSize());
-		@SuppressWarnings({ "unchecked", "rawtypes" })
-		JSONResultPage<Object> result = new JSONResultPage(taskList.getResult());
+		TaskItemVOExample item = JSONUtil.fromJson(page.getSearch(), TaskItemVOExample.class);
+		Page<TaskItemVO> taskList = taskService.findItems(item, page.getPageNum(), page.getPageSize());
+		JSONResultPage<TaskItemVO> result = new JSONResultPage<>(taskList.getResult());
 		result.setPageNum(taskList.getPageNum());
 		result.setTotal(taskList.getTotal());
 		return result;

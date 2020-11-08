@@ -124,8 +124,7 @@ public class DwzController {
 	@ResponseBody
 	public Object list(@RequestBody JSONRequestPage<DwzRecord> page) {
 		Page<DwzRecord> list = dwzService.list(page.getSearch(), page.getPageNum(), page.getPageSize());
-		@SuppressWarnings({ "unchecked", "rawtypes" })
-		JSONResultPage<Object> result = new JSONResultPage(list.getResult());
+		JSONResultPage<DwzRecord> result = new JSONResultPage<>(list.getResult());
 		result.setPageNum(list.getPageNum());
 		result.setTotal(list.getTotal());
 		return result;

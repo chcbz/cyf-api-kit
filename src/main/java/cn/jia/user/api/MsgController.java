@@ -127,8 +127,7 @@ public class MsgController {
 	public Object list(@RequestBody JSONRequestPage<String> page) {
 		Msg example = JSONUtil.fromJson(page.getSearch(), Msg.class);
 		Page<Msg> msgList = msgService.list(example, page.getPageNum(), page.getPageSize());
-		@SuppressWarnings({ "unchecked", "rawtypes" })
-		JSONResultPage<Object> result = new JSONResultPage(msgList.getResult());
+		JSONResultPage<Msg> result = new JSONResultPage<>(msgList.getResult());
 		result.setPageNum(msgList.getPageNum());
 		result.setTotal(msgList.getTotal());
 		return result;

@@ -55,7 +55,7 @@ public class KefuController {
 		}
 		example.setClientId(EsSecurityHandler.clientId());
 		Page<KefuFAQ> list = kefuService.listFAQ(example, page.getPageNum(), page.getPageSize());
-		JSONResultPage<Object> result = new JSONResultPage<>(list.getResult());
+		JSONResultPage<KefuFAQ> result = new JSONResultPage<>(list.getResult());
 		result.setPageNum(list.getPageNum());
 		result.setTotal(list.getTotal());
 		return result;
@@ -131,7 +131,7 @@ public class KefuController {
 		}
 		example.setClientId(EsSecurityHandler.clientId());
 		Page<KefuMessage> list = kefuService.listMessage(example, page.getPageNum(), page.getPageSize());
-		JSONResultPage<Object> result = new JSONResultPage<>(list.getResult());
+		JSONResultPage<KefuMessage> result = new JSONResultPage<>(list.getResult());
 		result.setPageNum(list.getPageNum());
 		result.setTotal(list.getTotal());
 		return result;

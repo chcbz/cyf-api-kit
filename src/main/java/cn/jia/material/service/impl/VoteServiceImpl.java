@@ -3,7 +3,6 @@ package cn.jia.material.service.impl;
 import cn.jia.core.common.EsSecurityHandler;
 import cn.jia.core.exception.EsRuntimeException;
 import cn.jia.core.util.DateUtil;
-import cn.jia.core.util.StreamUtil;
 import cn.jia.material.common.Constants;
 import cn.jia.material.common.ErrorConstants;
 import cn.jia.material.dao.VoteItemMapper;
@@ -20,9 +19,6 @@ import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -160,65 +156,57 @@ public class VoteServiceImpl implements VoteService {
 	}
 
 	@Override
-	public void batchImport(String filePath, String answerFilePath) throws Exception {
-		File file = new File(filePath);
-		try (FileInputStream is = new FileInputStream(file)) {
-			String txt = StreamUtil.readText(is);
-			txt = txt.replaceAll("([ABCDEFGH]|\\d+)[.．]", "$1、")
-					.replaceAll("[ 　]+\r\n", "\r\n")
-					.replaceAll("、[ 　]+", "、");
-			long now = DateUtil.genTime(new Date());
-			Vote vote = new Vote();
-			vote.setClientId(EsSecurityHandler.clientId());
-			vote.setStartTime(now);
-			vote.setCloseTime(now + 365 * 24 * 60 * 60);
-			vote.setName(file.getName().substring(0, file.getName().indexOf(".")));
-			voteMapper.insertSelective(vote);
+	public void batchImport(String voteName, String txt, String answer) {
+		txt = txt.replaceAll("([ABCDEFGH]|\\d+)[.．]", "$1、")
+				.replaceAll("[ 　]+\r\n", "\r\n")
+				.replaceAll("、[ 　]+", "、");
+		long now = DateUtil.genTime(new Date());
+		Vote vote = new Vote();
+		vote.setClientId(EsSecurityHandler.clientId());
+		vote.setStartTime(now);
+		vote.setCloseTime(now + 365 * 24 * 60 * 60);
+		vote.setName(voteName);
+		voteMapper.insertSelective(vote);
 
-			FileInputStream ais = new FileInputStream(answerFilePath);
-			String answer = " " + StreamUtil.readText(ais);
-			answer = answer.replaceAll("([ABCDEFGH]|\\d+)[.．]", "$1、")
-					.replaceAll("、[ 　]+", "、");
+		answer = answer.replaceAll("([ABCDEFGH]|\\d+)[.．]", "$1、")
+				.replaceAll("、[ 　]+", "、");
 
-			int i = 0;
-			while (txt.contains((++i) + "、")) {
-				String seq = i + "、";
-				txt = txt.substring(txt.indexOf(seq));
-				VoteQuestion question = new VoteQuestion();
-				question.setVoteId(vote.getId());
-				question.setPoint(1);
-				question.setTitle(txt.substring(seq.length(), txt.indexOf("\n")));
-				txt = txt.substring(txt.indexOf("\n") + 1);
-				Pattern pattern = Pattern.compile("[^\\d]" + i + "、([ABCDEFGH])");
-				Matcher m = pattern.matcher(answer);
-				String opt = "";
-				if (m.find()) {
-					opt = m.group(1);
-				}
-				question.setOpt(opt);
-				voteQuestionMapper.insertSelective(question);
-
-				String[] abcd = {"A", "B", "C", "D", "E", "F", "G", "H"};
-				for (String s : abcd) {
-					VoteItem item = new VoteItem();
-					item.setQuestionId(question.getId());
-					item.setOpt(s);
-					if(s.equalsIgnoreCase(opt)) {
-						item.setTick(Constants.COMMON_YES);
-					}
-					if(!txt.contains(s + "、") || txt.indexOf(s + "、") > Math.abs(txt.indexOf("\n"))) {
-						break;
-					}
-					txt = txt.substring(txt.indexOf(s + "、"));
-					int endIndex = Math.min(txt.indexOf(" "), txt.indexOf("\n"));
-					endIndex = endIndex == -1 ? Math.max(txt.indexOf(" "), txt.indexOf("\n")) : endIndex;
-					item.setContent(txt.substring(2, endIndex == -1 ? txt.length() : endIndex));
-					txt = txt.substring(endIndex == -1 ? 0 : endIndex + 1);
-					voteItemMapper.insertSelective(item);
-				}
+		int i = 0;
+		while (txt.contains((++i) + "、")) {
+			String seq = i + "、";
+			txt = txt.substring(txt.indexOf(seq));
+			VoteQuestion voteQuestion = new VoteQuestion();
+			voteQuestion.setVoteId(vote.getId());
+			voteQuestion.setPoint(1);
+			voteQuestion.setTitle(txt.substring(seq.length(), txt.indexOf("\n")));
+			txt = txt.substring(txt.indexOf("\n") + 1);
+			Pattern pattern = Pattern.compile("[^\\d]" + i + "、([ABCDEFGH])");
+			Matcher m = pattern.matcher(answer);
+			String opt = "";
+			if (m.find()) {
+				opt = m.group(1);
 			}
-		} catch (IOException e) {
-			throw new EsRuntimeException(e.getMessage(), e);
+			voteQuestion.setOpt(opt);
+			voteQuestionMapper.insertSelective(voteQuestion);
+
+			String[] abcd = {"A", "B", "C", "D", "E", "F", "G", "H"};
+			for (String s : abcd) {
+				VoteItem item = new VoteItem();
+				item.setQuestionId(voteQuestion.getId());
+				item.setOpt(s);
+				if(s.equalsIgnoreCase(opt)) {
+					item.setTick(Constants.COMMON_YES);
+				}
+				if(!txt.contains(s + "、") || txt.indexOf(s + "、") > Math.abs(txt.indexOf("\n"))) {
+					break;
+				}
+				txt = txt.substring(txt.indexOf(s + "、"));
+				int endIndex = Math.min(txt.indexOf(" "), txt.indexOf("\n"));
+				endIndex = endIndex == -1 ? Math.max(txt.indexOf(" "), txt.indexOf("\n")) : endIndex;
+				item.setContent(txt.substring(2, endIndex == -1 ? txt.length() : endIndex));
+				txt = txt.substring(endIndex == -1 ? 0 : endIndex + 1);
+				voteItemMapper.insertSelective(item);
+			}
 		}
 	}
 }

@@ -131,8 +131,7 @@ public class NewsController {
 //			news.setBodyurl(material_url +"/"+news.getBodyurl());
 //			return news;
 //		}).collect(Collectors.toList());
-		@SuppressWarnings({ "rawtypes", "unchecked" })
-		JSONResultPage<Object> result = new JSONResultPage(newsList.getResult());
+		JSONResultPage<News> result = new JSONResultPage<>(newsList.getResult());
 		result.setPageNum(newsList.getPageNum());
 		result.setTotal(newsList.getTotal());
 		return result;

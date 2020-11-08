@@ -5,7 +5,7 @@ import cn.jia.core.util.thread.ThreadRequest;
 import cn.jia.core.util.thread.ThreadRequestContent;
 import cn.jia.user.entity.User;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -16,7 +16,8 @@ import java.util.concurrent.DelayQueue;
 @Slf4j
 public class DelayObjTest {
 
-    public static void main(String[] args) {
+    @Test
+    void delayObj() {
         DelayQueue<DelayObj> delayQueue = new DelayQueue<>();
         List<User> phraseUserList = new ArrayList<>();
         User u = new User();

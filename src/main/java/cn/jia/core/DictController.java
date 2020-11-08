@@ -69,7 +69,7 @@ public class DictController {
 	public Object list(@RequestBody JSONRequestPage<String> page) {
 		Dict dict = JSONUtil.fromJson(page.getSearch(), Dict.class);
 		Page<Dict> dictList = dictService.findByExamplePage(dict, page.getPageNum(), page.getPageSize());
-		JSONResultPage<Object> result = new JSONResultPage<>(dictList.getResult());
+		JSONResultPage<Dict> result = new JSONResultPage<>(dictList.getResult());
 		result.setPageNum(dictList.getPageNum());
 		result.setTotal(dictList.getTotal());
 		return result;

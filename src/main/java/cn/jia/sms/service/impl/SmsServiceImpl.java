@@ -3,6 +3,7 @@ package cn.jia.sms.service.impl;
 import cn.jia.core.exception.EsRuntimeException;
 import cn.jia.core.util.DataUtil;
 import cn.jia.core.util.DateUtil;
+import cn.jia.core.util.StringUtils;
 import cn.jia.sms.common.Constants;
 import cn.jia.sms.common.ErrorConstants;
 import cn.jia.sms.dao.*;
@@ -243,7 +244,9 @@ public class SmsServiceImpl implements SmsService {
 	@Override
 	public SmsTemplate createTemplate(SmsTemplate sms) {
 		long now = DateUtil.genTime(new Date());
-		sms.setTemplateId(DataUtil.getRandom(false, 32));
+		if (StringUtils.isBlank(sms.getTemplateId())) {
+			sms.setTemplateId(DataUtil.getRandom(false, 32));
+		}
 		sms.setCreateTime(now);
 		sms.setUpdateTime(now);
 		smsTemplateMapper.insertSelective(sms);

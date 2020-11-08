@@ -40,7 +40,7 @@ public class PhraseServiceImpl implements PhraseService {
 	@Autowired
 	private RestHighLevelClient restHighLevelClient;
 
-	private static String INDEX_NAME = "phrase";
+	private static final String INDEX_NAME = "phrase";
 	
 	@Override
 	public Phrase create(Phrase phrase) throws Exception {

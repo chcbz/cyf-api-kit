@@ -50,8 +50,7 @@ public class GroupController {
 	public Object findUsers(@RequestBody JSONRequestPage<String> page) {
 		Group group = JSONUtil.fromJson(page.getSearch(), Group.class);
 		Page<User> userList = userService.listByGroupId(group.getId(), page.getPageNum(), page.getPageSize());
-		@SuppressWarnings({"unchecked", "rawtypes"})
-		JSONResultPage<Object> result = new JSONResultPage(userList.getResult());
+		JSONResultPage<User> result = new JSONResultPage<>(userList.getResult());
 		result.setPageNum(userList.getPageNum());
 		result.setTotal(userList.getTotal());
 		return result;
@@ -67,8 +66,7 @@ public class GroupController {
 	public Object findRoles(@RequestBody JSONRequestPage<String> page) {
 		Group group = JSONUtil.fromJson(page.getSearch(), Group.class);
 		Page<Role> roleList = roleService.listByGroupId(group.getId(), EsSecurityHandler.clientId(), page.getPageNum(), page.getPageSize());
-		@SuppressWarnings({ "unchecked", "rawtypes" })
-		JSONResultPage<Object> result = new JSONResultPage(roleList.getResult());
+		JSONResultPage<Role> result = new JSONResultPage<>(roleList.getResult());
 		result.setPageNum(roleList.getPageNum());
 		result.setTotal(roleList.getTotal());
 		return result;
@@ -119,8 +117,7 @@ public class GroupController {
 	public Object list(@RequestBody JSONRequestPage<String> page) {
 		Group example = JSONUtil.fromJson(page.getSearch(), Group.class);
 		Page<Group> groupList = groupService.list(example, page.getPageNum(), page.getPageSize());
-		@SuppressWarnings({ "unchecked", "rawtypes" })
-		JSONResultPage<Object> result = new JSONResultPage(groupList.getResult());
+		JSONResultPage<Group> result = new JSONResultPage<>(groupList.getResult());
 		result.setPageNum(groupList.getPageNum());
 		result.setTotal(groupList.getTotal());
 		return result;

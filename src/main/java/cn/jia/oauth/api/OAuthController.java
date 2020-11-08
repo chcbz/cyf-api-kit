@@ -137,7 +137,7 @@ public class OAuthController {
 	public Object list(@RequestBody JSONRequestPage<String> page) {
 		Resource example = JSONUtil.fromJson(page.getSearch(), Resource.class);
 		Page<Resource> resourceList = resourceService.list(example, page.getPageNum(), page.getPageSize());
-		JSONResultPage<Object> result = new JSONResultPage<>(resourceList.getResult());
+		JSONResultPage<Resource> result = new JSONResultPage<>(resourceList.getResult());
 		result.setPageNum(resourceList.getPageNum());
 		result.setTotal(resourceList.getTotal());
 		return result;

@@ -107,8 +107,7 @@ public class OrgController {
 	public Object findUsers(@RequestBody JSONRequestPage<String> page) {
 		UserExample example = JSONUtil.fromJson(page.getSearch(), UserExample.class);
 		Page<User> userList = userService.listByOrgId(example, page.getPageNum(), page.getPageSize());
-		@SuppressWarnings({ "unchecked", "rawtypes" })
-		JSONResultPage<Object> result = new JSONResultPage(userList.getResult());
+		JSONResultPage<User> result = new JSONResultPage<>(userList.getResult());
 		result.setPageNum(userList.getPageNum());
 		result.setTotal(userList.getTotal());
 		return result;
@@ -158,8 +157,7 @@ public class OrgController {
 	@RequestMapping(value = "/list", method = RequestMethod.POST)
 	public Object list(@RequestBody JSONRequestPage<String> page) {
 		Page<Org> orgList = orgService.list(page.getPageNum(), page.getPageSize());
-		@SuppressWarnings({ "unchecked", "rawtypes" })
-		JSONResultPage<Object> result = new JSONResultPage(orgList.getResult());
+		JSONResultPage<Org> result = new JSONResultPage<>(orgList.getResult());
 		result.setPageNum(orgList.getPageNum());
 		result.setTotal(orgList.getTotal());
 		return result;
@@ -175,8 +173,7 @@ public class OrgController {
 	public Object listSub(@RequestBody JSONRequestPage<String> page) {
 		Org org = JSONUtil.fromJson(page.getSearch(), Org.class);
 		Page<Org> orgList = orgService.listSub(org.getId(), page.getPageNum(), page.getPageSize());
-		@SuppressWarnings({ "unchecked", "rawtypes" })
-		JSONResultPage<Object> result = new JSONResultPage(orgList.getResult());
+		JSONResultPage<Org> result = new JSONResultPage<>(orgList.getResult());
 		result.setPageNum(orgList.getPageNum());
 		result.setTotal(orgList.getTotal());
 		return result;

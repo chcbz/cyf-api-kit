@@ -737,8 +737,7 @@ public class WxPayController {
 		}
 		example.setClientId(EsSecurityHandler.clientId());
 		Page<PayInfo> list = payInfoService.list(example, page.getPageNum(), page.getPageSize());
-		@SuppressWarnings({ "unchecked", "rawtypes" })
-		JSONResultPage<Object> result = new JSONResultPage(list.getResult());
+		JSONResultPage<PayInfo> result = new JSONResultPage<>(list.getResult());
 		result.setPageNum(list.getPageNum());
 		result.setTotal(list.getTotal());
 		return result;

@@ -78,8 +78,7 @@ public class TipController {
 	@PostMapping(value = "/list")
 	public Object list(@RequestBody JSONRequestPage<Tip> page) {
 		Page<Tip> list = tipService.list(page.getPageNum(), page.getPageSize(), page.getSearch());
-		@SuppressWarnings({ "rawtypes", "unchecked" })
-		JSONResultPage<Object> result = new JSONResultPage(list);
+		JSONResultPage<Tip> result = new JSONResultPage<>(list);
 		result.setPageNum(list.getPageNum());
 		result.setTotal(list.getTotal());
 		return result;

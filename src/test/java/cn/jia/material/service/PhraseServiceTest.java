@@ -1,28 +1,26 @@
 package cn.jia.material.service;
 
+import cn.jia.BaseTest;
 import cn.jia.core.util.DateUtil;
 import cn.jia.core.util.HttpUtil;
 import cn.jia.core.util.StreamUtil;
 import cn.jia.material.entity.Phrase;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.Date;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-public class PhraseServiceTest {
+public class PhraseServiceTest extends BaseTest {
 
     @Autowired
     private PhraseService phraseService;
 
     @Test
-    public void create() throws Exception {
+    @Disabled
+    void create() throws Exception {
         File file = new File("C:\\Users\\Think\\Desktop\\毒鸡汤.txt");
         FileInputStream is = new FileInputStream(file);
         String txt = StreamUtil.readText(is);
@@ -48,7 +46,8 @@ public class PhraseServiceTest {
     }
 
     @Test
-    public void th() throws Exception {
+    @Disabled
+    void th() throws Exception {
         String baseUrl = "https://8zt.cc";
         String link = "/soup/a1dd6.html";
         long now = DateUtil.genTime(new Date());

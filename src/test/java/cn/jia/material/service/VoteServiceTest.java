@@ -1,20 +1,25 @@
 package cn.jia.material.service;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import cn.jia.BaseTest;
+import cn.jia.core.util.StreamUtil;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-public class VoteServiceTest {
+public class VoteServiceTest extends BaseTest {
 
     @Autowired
     private VoteService voteService;
+    @Value("classpath:testObject/material/question.txt")
+    private Resource questionResource;
+    @Value("classpath:testObject/material/answer.txt")
+    private Resource answerResource;
 
     @Test
-    public void batchImport() throws Exception {
-        voteService.batchImport("C:\\Users\\Think\\Desktop\\个人代理销售人员资格考试题库.txt", "C:\\Users\\Think\\Desktop\\个人代理销售人员资格考试题库答案.txt");
+    void batchImport() throws Exception {
+        String question = StreamUtil.readText(questionResource.getInputStream());
+        String answer = StreamUtil.readText(answerResource.getInputStream());
+        voteService.batchImport("题目", question, answer);
     }
 }

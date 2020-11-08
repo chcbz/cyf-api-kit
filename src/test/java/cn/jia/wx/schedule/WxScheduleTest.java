@@ -1,5 +1,6 @@
 package cn.jia.wx.schedule;
 
+import cn.jia.BaseTest;
 import cn.jia.core.service.DictService;
 import cn.jia.material.entity.VoteItem;
 import cn.jia.material.entity.VoteQuestion;
@@ -9,18 +10,14 @@ import cn.jia.user.service.UserService;
 import cn.jia.wx.service.MpInfoService;
 import me.chanjar.weixin.mp.bean.template.WxMpTemplateData;
 import me.chanjar.weixin.mp.bean.template.WxMpTemplateMessage;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-public class WxScheduleTest {
+public class WxScheduleTest extends BaseTest {
 
     @Autowired
     private WxSchedule wxSchedule;
@@ -34,12 +31,14 @@ public class WxScheduleTest {
     private DictService dictService;
 
     @Test
-    public void sendVote() {
+    @Disabled
+    void sendVote() {
         wxSchedule.sendVote();
     }
 
     @Test
-    public void sendTemplateMessage() throws Exception {
+    @Disabled
+    void sendTemplateMessage() throws Exception {
         User user = userService.findByJiacn("oH2zD1PUPvspicVak69uB4wDaFLg");
         String wxAppId = dictService.selectByDictTypeAndDictValue(cn.jia.task.common.Constants.DICT_TYPE_TASK_CONFIG, cn.jia.task.common.Constants.TASK_CONFIG_WX_APP_ID).getName();
         VoteQuestion question = voteService.findOneQuestion(user.getJiacn());

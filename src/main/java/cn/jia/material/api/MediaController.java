@@ -116,8 +116,7 @@ public class MediaController {
 		Media example = JSONUtil.fromJson(page.getSearch(), Media.class);
 		Page<Media> mediaList = mediaService.list(page.getPageNum(), page.getPageSize(), example);
 		List<Media> medias = mediaList.getResult().stream().peek(media -> media.setLink(dictService.selectByDictTypeAndDictValue(Constants.DICT_TYPE_MODULE_URL, Constants.MODULE_URL_MATERIAL).getName() +"/"+media.getUrl())).collect(Collectors.toList());
-		@SuppressWarnings({ "rawtypes", "unchecked" })
-		JSONResultPage<Object> result = new JSONResultPage(medias);
+		JSONResultPage<Media> result = new JSONResultPage<>(medias);
 		result.setPageNum(mediaList.getPageNum());
 		result.setTotal(mediaList.getTotal());
 		return result;

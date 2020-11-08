@@ -46,7 +46,7 @@ public class RoleController {
 	public Object findUsers(@RequestBody JSONRequestPage<String> page) {
 		Role role = JSONUtil.fromJson(page.getSearch(), Role.class);
 		Page<User> userList = userService.listByRoleId(role.getId(), page.getPageNum(), page.getPageSize());
-		JSONResultPage<Object> result = new JSONResultPage<>(userList.getResult());
+		JSONResultPage<User> result = new JSONResultPage<>(userList.getResult());
 		result.setPageNum(userList.getPageNum());
 		result.setTotal(userList.getTotal());
 		return result;
@@ -62,7 +62,7 @@ public class RoleController {
 	public Object findPerms(@RequestBody JSONRequestPage<String> page) {
 		Role role = JSONUtil.fromJson(page.getSearch(), Role.class);
 		Page<Action> permsList = roleService.listPerms(role.getId(), page.getPageNum(), page.getPageSize());
-		JSONResultPage<Object> result = new JSONResultPage<>(permsList.getResult());
+		JSONResultPage<Action> result = new JSONResultPage<>(permsList.getResult());
 		result.setPageNum(permsList.getPageNum());
 		result.setTotal(permsList.getTotal());
 		return result;
@@ -113,8 +113,7 @@ public class RoleController {
 	public Object list(@RequestBody JSONRequestPage<String> page) {
 		Role example = JSONUtil.fromJson(page.getSearch(), Role.class);
 		Page<Role> roleList = roleService.list(example, page.getPageNum(), page.getPageSize());
-		@SuppressWarnings({ "unchecked", "rawtypes" })
-		JSONResultPage<Object> result = new JSONResultPage(roleList.getResult());
+		JSONResultPage<Role> result = new JSONResultPage<>(roleList.getResult());
 		result.setPageNum(roleList.getPageNum());
 		result.setTotal(roleList.getTotal());
 		return result;

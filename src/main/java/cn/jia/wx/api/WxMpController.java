@@ -826,8 +826,7 @@ public class WxMpController {
 		}
 		example.setClientId(EsSecurityHandler.clientId());
 		Page<MpInfo> list = mpInfoService.list(example, page.getPageNum(), page.getPageSize());
-		@SuppressWarnings({"unchecked", "rawtypes"})
-		JSONResultPage<Object> result = new JSONResultPage(list.getResult());
+		JSONResultPage<MpInfo> result = new JSONResultPage<>(list.getResult());
 		result.setPageNum(list.getPageNum());
 		result.setTotal(list.getTotal());
 		return result;

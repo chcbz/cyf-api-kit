@@ -1,7 +1,5 @@
 package cn.jia.task.schedule;
 
-import cn.jia.base.config.security.SecurityConfiguration;
-import cn.jia.core.entity.JSONResult;
 import cn.jia.core.service.DictService;
 import cn.jia.core.util.DateUtil;
 import cn.jia.core.util.JSONUtil;
@@ -19,19 +17,14 @@ import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.mp.bean.template.WxMpTemplateData;
 import me.chanjar.weixin.mp.bean.template.WxMpTemplateMessage;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -55,8 +48,6 @@ public class TaskSchedule {
 	 */
 	@Scheduled(cron = "0 0/10 * * * ?")
 	public void taskAlert() {
-		List<String> phoneList = new ArrayList<>();
-//		List<String> emailList = new ArrayList<>();
 		List<String> openidList = new ArrayList<>();
 		String wxAppId = dictService.selectByDictTypeAndDictValue(Constants.DICT_TYPE_TASK_CONFIG, Constants.TASK_CONFIG_WX_APP_ID).getName();
         String url = dictService.selectByDictTypeAndDictValue(Constants.DICT_TYPE_TASK_CONFIG, Constants.TASK_CONFIG_NOTIFY_URL).getName();
@@ -72,15 +63,7 @@ public class TaskSchedule {
 			User user = userService.findByJiacn(vo.getJiacn());
 			if(user != null) {
 				String msgType = user.getMsgType();
-				String phone = user.getPhone();
-//				String email = user.getEmail();
 				String openid = user.getOpenid();
-				if(containMsgType(msgType, Constants.MESSAGE_TYPE_SMS) && StringUtils.isNotEmpty(phone)) {
-					phoneList.add(phone);
-				}
-//				if(containMsgType(msgType, Constants.MESSAGE_TYPE_EMAIL) && StringUtils.isNotEmpty(email)) {
-//					emailList.add(email);
-//				}
 				if(containMsgType(msgType, Constants.MESSAGE_TYPE_WX) && StringUtils.isNotEmpty(openid)
 						&& StringUtils.isNotEmpty(user.getSubscribe())
 						&& Arrays.asList(user.getSubscribe().split(",")).contains(wxAppId)) {
@@ -90,42 +73,7 @@ public class TaskSchedule {
 				String content = dictService.selectByDictTypeAndDictValue(Constants.DICT_TYPE_TASK_CONFIG, Constants.SMS_CONTENT_NOTIFY_MSG, "zh_CN").getName();
 				content = content.replace("{0}", user.getNickname());
 				
-				if(phoneList.size() > 0) {
-					phoneList = phoneList.stream().distinct().collect(Collectors.toList()); //去重
-					HttpHeaders headers = new HttpHeaders();
-					headers.set("Authorization", "Bearer " + SecurityConfiguration.jiaToken());
-					MultiValueMap<String, String> variables = new LinkedMultiValueMap<>();
-					variables.add("mobile", org.apache.commons.lang3.StringUtils.join(phoneList, ","));
-					variables.add("content", content);
-					HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(variables, headers);
-					String jiaUrl = dictService.selectByDictTypeAndDictValue(cn.jia.user.common.Constants.DICT_TYPE_USER_CONFIG, cn.jia.user.common.Constants.USER_CONFIG_JIA_SERVER_URL).getName();
-					restTemplate.postForObject(jiaUrl + "/sms/sendBatch", requestEntity, JSONResult.class);
 
-                    Msg msg = new Msg();
-                    msg.setType(Constants.MESSAGE_TYPE_WX);
-                    msg.setUpdateTime(now);
-                    msg.setCreateTime(now);
-                    msg.setUserId(user.getId());
-                    msg.setTitle("");
-                    msg.setContent(content);
-                    msg.setUrl(url);
-                    msgService.create(msg);
-				}
-				
-				/*if(emailList.size() > 0) {
-					emailList = emailList.stream().distinct().collect(Collectors.toList()); //去重
-					Map<String, Object> msg = new HashMap<>();
-					msg.put("sender", "hy-api-oa");
-					msg.put("receiver", String.join(";", emailList));
-					msg.put("content", content);
-					String url = dictService.selectByDictTypeAndDictValue(Constants.DICT_TYPE_TASK_CONFIG, Constants.TASK_CONFIG_NOTIFY_URL).getName();
-					msg.put("url", url);
-					msg.put("msgType", Constants.MESSAGE_TYPE_EMAIL);
-					String sendMsg = JSONUtil.toJson(msg);
-					log.info("ReleaseSchedule -> Send Email Message: " + sendMsg);
-					rabbitTemplate.convertAndSend("jia.sms", sendMsg);
-				}*/
-				
 				if(openidList.size() > 0) {
 					List<WxMpTemplateData> data = new ArrayList<>();
 					WxMpTemplateData keyword0 = new WxMpTemplateData();
@@ -174,17 +122,6 @@ public class TaskSchedule {
 					msg.setUrl(url);
 					msgService.create(msg);
 				}
-
-				if(StringUtils.isNotEmpty(vo.getRemindPhone())) {
-					HttpHeaders headers = new HttpHeaders();
-					headers.set("Authorization", "Bearer " + SecurityConfiguration.jiaToken());
-					MultiValueMap<String, String> variables = new LinkedMultiValueMap<>();
-                    variables.add("mobile", vo.getRemindPhone());
-                    variables.add("content", vo.getRemindMsg());
-					HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(variables, headers);
-                    String jiaUrl = dictService.selectByDictTypeAndDictValue(cn.jia.user.common.Constants.DICT_TYPE_USER_CONFIG, cn.jia.user.common.Constants.USER_CONFIG_JIA_SERVER_URL).getName();
-                    restTemplate.postForObject(jiaUrl + "/sms/sendBatch", requestEntity, JSONResult.class);
-                }
 			}
 		}
 	}

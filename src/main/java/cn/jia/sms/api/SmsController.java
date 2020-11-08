@@ -14,6 +14,7 @@ import cn.jia.sms.service.SmsPayOrderParse;
 import cn.jia.sms.service.SmsService;
 import com.github.pagehelper.Page;
 import lombok.extern.slf4j.Slf4j;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -27,7 +28,6 @@ import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -39,32 +39,29 @@ public class SmsController {
 	@Autowired
 	private DictService dictService;
 
-	private RestTemplate restTemplate = new RestTemplate();
+	private final RestTemplate restTemplate = new RestTemplate();
 	
-	private static String sendSmsURL = "http://api.zthysms.com/sendSms.do";
-	private static String sendSmsBatchURL = "http://api.zthysms.com/sendSmsBatch.do";
-	private static String sendSmsBatchIdentityURL = "http://api.zthysms.com/sendSmsBatchIdentity.do";
-	private static String balanceURL = "http://api.zthysms.com/balance.do";
-	
+	private static final String smsURL = "http://106.ihuyi.com/webservice/sms.php";
+
 	/**
 	 * 获取短信验证码信息
-	 * @param id
-	 * @return
+	 * @param id id
+	 * @return 验证码
 	 */
 	@PreAuthorize("hasAuthority('sms-get')")
 	@RequestMapping(value = "/get", method = RequestMethod.GET)
-	public Object findById(@RequestParam(name = "id", required = true) Integer id) throws Exception {
+	public Object findById(@RequestParam(name = "id") Integer id) throws Exception {
 		SmsCode sms = smsService.find(id);
 		return JSONResult.success(sms);
 	}
 
 	/**
 	 * 验证码已经被使用
-	 * @param phone
-	 * @param smsType
-	 * @param smsCode
-	 * @return
-	 * @throws Exception
+	 * @param phone 手机号码
+	 * @param smsType 验证码类型
+	 * @param smsCode 验证码
+	 * @return 结果
+	 * @throws Exception 异常
 	 */
 	@RequestMapping(value = "/validate", method = RequestMethod.GET)
 	public Object validateSmsCode(@RequestParam String phone, @RequestParam Integer smsType, @RequestParam String smsCode) throws Exception {
@@ -78,12 +75,11 @@ public class SmsController {
 
 	/**
 	 * 提取并使用验证码
-	 * @param phone
-	 * @param smsType
-	 * @return
-	 * @throws Exception
+	 * @param phone 手机号码
+	 * @param smsType 短信类型
+	 * @return 验证码
+	 * @throws Exception 异常
 	 */
-	@PreAuthorize("hasAuthority('sms-use')")
 	@RequestMapping(value = "/use", method = RequestMethod.GET)
 	public Object useSmsCode(@RequestParam String phone, @RequestParam Integer smsType) throws Exception {
 		SmsCode code = smsService.selectSmsCodeNoUsed(phone, smsType, EsSecurityHandler.clientId());
@@ -99,7 +95,7 @@ public class SmsController {
 	 * @param phone 电话号码
 	 * @param smsType 验证码类型
 	 * @return 最新验证码
-	 * @throws Exception
+	 * @throws Exception 异常
 	 */
 	@RequestMapping(value = "/gen", method = RequestMethod.GET)
 	public Object gen(@RequestParam String phone, @RequestParam Integer smsType, @RequestParam(value="templateId", required=false) String templateId) throws Exception{
@@ -118,26 +114,25 @@ public class SmsController {
 		}
 		String content = "【" + config.getShortName() + "】" + smsService.findTemplate(templateId).getContent();
 		content = content.replace("{0}", smsCode);
-		String tkey = DateUtil.getDate("yyyyMMddHHmmss");
 		String smsUsername = dictService.selectByDictTypeAndDictValue(Constants.DICT_TYPE_SMS_CONFIG, Constants.SMS_CONFIG_USERNAME).getName();
 		String smsPassword = dictService.selectByDictTypeAndDictValue(Constants.DICT_TYPE_SMS_CONFIG, Constants.SMS_CONFIG_PASSWORD).getName();
-		String passwd = MD5Util.str2Base32MD5(MD5Util.str2Base32MD5(smsPassword) + tkey);
-		
+
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
 		MultiValueMap<String, String> map= new LinkedMultiValueMap<>();
-		map.add("username", smsUsername);
-		map.add("tkey", tkey);
-		map.add("password", passwd);
+		map.add("method", "Submit");
+		map.add("account", smsUsername);
+		map.add("format", "json");
+		map.add("password", smsPassword);
 		map.add("mobile", phone);
 		map.add("content", content);
 
 		HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
 
-		ResponseEntity<String> response = restTemplate.postForEntity(sendSmsURL, request , String.class);
+		ResponseEntity<String> response = restTemplate.postForEntity(smsURL, request , String.class);
 		//将发送记录保存到系统里
-		if("1".equals(response.getBody().split(",")[0])){
+		if("1".equals(Objects.requireNonNull(response.getBody()).split(",")[0])){
 			SmsSend smsSend = new SmsSend();
 			smsSend.setContent(content);
 			smsSend.setMobile(phone);
@@ -157,9 +152,8 @@ public class SmsController {
 	 * @param mobile 手机号码
 	 * @param content 短信内容
 	 * @param xh 扩展的小号
-	 * @return
+	 * @return 结果
 	 */
-	@PreAuthorize("hasAuthority('sms-send')")
 	@RequestMapping(value = "/send", method = RequestMethod.POST)
 	public Object sendSms(@RequestParam String mobile, @RequestParam String content, @RequestParam(required=false) String xh) throws Exception {
 		//检查是否还有额度
@@ -168,46 +162,48 @@ public class SmsController {
 			throw new EsRuntimeException(ErrorConstants.SMS_NOT_ENOUGH);
 		}
 		
-		String tkey = DateUtil.getDate("yyyyMMddHHmmss");
 		String smsUsername = dictService.selectByDictTypeAndDictValue(Constants.DICT_TYPE_SMS_CONFIG, Constants.SMS_CONFIG_USERNAME).getName();
 		String smsPassword = dictService.selectByDictTypeAndDictValue(Constants.DICT_TYPE_SMS_CONFIG, Constants.SMS_CONFIG_PASSWORD).getName();
-		String passwd = MD5Util.str2Base32MD5(MD5Util.str2Base32MD5(smsPassword) + tkey);
-		
+
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
 		MultiValueMap<String, String> map= new LinkedMultiValueMap<>();
-		map.add("username", smsUsername);
-		map.add("tkey", tkey);
-		map.add("password", passwd);
+		map.add("method", "Submit");
+		map.add("account", smsUsername);
+		map.add("format", "json");
+		map.add("password", smsPassword);
 		map.add("mobile", mobile);
 		map.add("content", "【" + config.getShortName() + "】" + content);
 
 		HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
 
-		ResponseEntity<String> response = restTemplate.postForEntity(sendSmsURL, request , String.class);
+		JSONObject response = restTemplate.postForObject(smsURL, request , JSONObject.class);
+		if (response == null) {
+			return JSONResult.failure("E999", "sms service fail");
+		}
 		//将发送记录保存到系统里
-		if("1".equals(response.getBody().split(",")[0])){
+		if("2".equals(response.optString("code"))){
 			SmsSend smsSend = new SmsSend();
 			smsSend.setContent(content);
 			smsSend.setMobile(mobile);
-			smsSend.setMsgid(response.getBody().split(",")[1]);
+			smsSend.setMsgid(response.optString("smsid"));
 			smsSend.setTime(DateUtil.genTime(new Date()));
 			smsSend.setXh(xh);
 			String clientId = EsSecurityHandler.clientId();
 			smsSend.setClientId(clientId);
 			smsService.send(smsSend);
-			return JSONResult.success(response.getBody());
+			return JSONResult.success(response);
 		}else {
-			return JSONResult.failure("E999", response.getBody());
+			return JSONResult.failure("E999", response.optString("msg"));
 		}
 	}
 	
 	/**
 	 * 短信发送列表
-	 * @param page
-	 * @param request
-	 * @return
+	 * @param page 查询条件
+	 * @param request 请求信息
+	 * @return 发送列表
 	 */
 	@PreAuthorize("hasAuthority('sms-send_list')")
 	@RequestMapping(value = "/send/list", method = RequestMethod.POST)
@@ -218,7 +214,7 @@ public class SmsController {
 		}
 		example.setClientId(EsSecurityHandler.clientId());
 		Page<SmsSend> list = smsService.listSend(example, page.getPageNum(), page.getPageSize());
-		JSONResultPage<Object> result = new JSONResultPage<>(list.getResult());
+		JSONResultPage<SmsSend> result = new JSONResultPage<>(list.getResult());
 		result.setPageNum(list.getPageNum());
 		result.setTotal(list.getTotal());
 		return result;
@@ -241,184 +237,74 @@ public class SmsController {
 	}
 	
 	/**
-	 * 批量发送短信
-	 * @param mobile 手机号码
-	 * @param content 短信内容
-	 * @param xh 扩展的小号
-	 * @return
-	 */
-	@PreAuthorize("hasAuthority('sms-sendBatch')")
-	@RequestMapping(value = "/sendBatch", method = RequestMethod.POST)
-	public Object sendSmsBatch(@RequestParam String mobile, @RequestParam String content, @RequestParam(required=false) String xh) throws Exception {
-		//检查是否还有额度
-		SmsConfig config = smsService.selectConfig(EsSecurityHandler.clientId());
-		if(config == null || config.getRemain() < mobile.split(",").length) {
-			throw new EsRuntimeException(ErrorConstants.SMS_NOT_ENOUGH);
-		}
-		String tkey = DateUtil.getDate("yyyyMMddHHmmss");
-		String smsUsername = dictService.selectByDictTypeAndDictValue(Constants.DICT_TYPE_SMS_CONFIG, Constants.SMS_CONFIG_USERNAME).getName();
-		String smsPassword = dictService.selectByDictTypeAndDictValue(Constants.DICT_TYPE_SMS_CONFIG, Constants.SMS_CONFIG_PASSWORD).getName();
-		String passwd = MD5Util.str2Base32MD5(MD5Util.str2Base32MD5(smsPassword) + tkey);
-		
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-
-		MultiValueMap<String, String> map= new LinkedMultiValueMap<>();
-		map.add("username", smsUsername);
-		map.add("tkey", tkey);
-		map.add("password", passwd);
-		map.add("mobile", mobile);
-		map.add("content", "【" + config.getShortName() + "】" + content);
-
-		HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
-
-		ResponseEntity<String> response = restTemplate.postForEntity(sendSmsBatchURL, request , String.class);
-		
-		if("1".equals(response.getBody().split(",")[0])){
-		    String[] mobiles = mobile.split(",");
-			for(int i=0;i<mobiles.length;i++) {
-                String m = mobiles[i];
-				SmsSend smsSend = new SmsSend();
-				smsSend.setContent(content);
-				smsSend.setMobile(m);
-				smsSend.setMsgid(response.getBody().split(",")[1] + "-" + (i + 1));
-				smsSend.setTime(DateUtil.genTime(new Date()));
-				smsSend.setXh(xh);
-				String clientId = EsSecurityHandler.clientId();
-				smsSend.setClientId(clientId);
-				smsService.send(smsSend);
-			}
-			return JSONResult.success(response.getBody());
-		}else {
-			return JSONResult.failure("E999", response.getBody());
-		}
-	}
-	
-	/**
-	 * 批量个性化短信
-	 * @param mobile 手机号码
-	 * @param content 短信内容
-	 * @param xh 扩展的小号
-	 * @return
-	 */
-	@PreAuthorize("hasAuthority('sms-sendSmsBatchIdentity')")
-	@RequestMapping(value = "/sendSmsBatchIdentity", method = RequestMethod.POST)
-	public Object sendSmsBatchIdentity(@RequestParam String mobile, @RequestParam String content, @RequestParam(required=false) String xh) throws Exception {
-		//检查是否还有额度
-		SmsConfig config = smsService.selectConfig(EsSecurityHandler.clientId());
-		if(config == null || config.getRemain() < mobile.split(",").length) {
-			throw new EsRuntimeException(ErrorConstants.SMS_NOT_ENOUGH);
-		}
-		String tkey = DateUtil.getDate("yyyyMMddHHmmss");
-		String smsUsername = dictService.selectByDictTypeAndDictValue(Constants.DICT_TYPE_SMS_CONFIG, Constants.SMS_CONFIG_USERNAME).getName();
-		String smsPassword = dictService.selectByDictTypeAndDictValue(Constants.DICT_TYPE_SMS_CONFIG, Constants.SMS_CONFIG_PASSWORD).getName();
-		String passwd = MD5Util.str2Base32MD5(MD5Util.str2Base32MD5(smsPassword) + tkey);
-		
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-
-		MultiValueMap<String, String> map= new LinkedMultiValueMap<>();
-		map.add("username", smsUsername);
-		map.add("tkey", tkey);
-		map.add("password", passwd);
-		map.add("mobile", mobile);
-		map.add("content", Arrays.stream(content.split("※")).map(c -> "【" + config.getShortName() + "】" + c).collect(Collectors.joining("※")));
-
-		HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
-
-		ResponseEntity<String> response = restTemplate.postForEntity(sendSmsBatchIdentityURL, request , String.class);
-		
-		if("1".equals(response.getBody().split(",")[0])){
-			String[] mobiles = mobile.split(",");
-			for(int i=0;i<mobiles.length;i++) {
-				SmsSend smsSend = new SmsSend();
-				smsSend.setContent(content.split("※")[i]);
-				smsSend.setMobile(mobiles[i]);
-				smsSend.setMsgid(response.getBody().split(",")[1] + "-" + (i + 1));
-				smsSend.setTime(DateUtil.genTime(new Date()));
-				smsSend.setXh(xh);
-				String clientId = EsSecurityHandler.clientId();
-				smsSend.setClientId(clientId);
-				smsService.send(smsSend);
-			}
-			return JSONResult.success(response.getBody());
-		}else {
-			return JSONResult.failure("E999", response.getBody());
-		}
-	}
-	
-	/**
 	 * 短信剩余条数查询
-	 * @return
+	 * @return 短信剩余条数
 	 */
 	@PreAuthorize("hasAuthority('sms-balance')")
 	@RequestMapping(value = "/balance", method = RequestMethod.GET)
 	public Object balance() {
-		String tkey = DateUtil.getDate("yyyyMMddHHmmss");
 		String smsUsername = dictService.selectByDictTypeAndDictValue(Constants.DICT_TYPE_SMS_CONFIG, Constants.SMS_CONFIG_USERNAME).getName();
 		String smsPassword = dictService.selectByDictTypeAndDictValue(Constants.DICT_TYPE_SMS_CONFIG, Constants.SMS_CONFIG_PASSWORD).getName();
-		String passwd = MD5Util.str2Base32MD5(MD5Util.str2Base32MD5(smsPassword) + tkey);
-		
+
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
 		MultiValueMap<String, String> map= new LinkedMultiValueMap<>();
-		map.add("username", smsUsername);
-		map.add("tkey", tkey);
-		map.add("password", passwd);
+		map.add("method", "GetNum");
+		map.add("account", smsUsername);
+		map.add("format", "json");
+		map.add("password", smsPassword);
 
-		HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(map, headers);
+		HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
 
-		ResponseEntity<String> response = restTemplate.postForEntity(balanceURL, request , String.class);
+		ResponseEntity<String> response = restTemplate.postForEntity(smsURL, request , String.class);
 		
 		return JSONResult.success(response.getBody());
 	}
 	
 	/**
 	 * 接收短信回复
-	 * @return
+	 * @return 结果
 	 */
-	@PreAuthorize("hasAuthority('sms-receive')")
 	@RequestMapping(value = "/receive", method = RequestMethod.GET)
-	public Object receive(@RequestParam String mobile, @RequestParam String content, @RequestParam String msgid, @RequestParam(required=false) String xh) {
+	public Object receive(@RequestParam String mobilephone, @RequestParam String content, @RequestParam String smsid, @RequestParam String reply_time) {
 		SmsReply smsReply = new SmsReply();
 		smsReply.setContent(content);
-		smsReply.setMobile(mobile);
-		smsReply.setMsgid(msgid);
-		smsReply.setTime(DateUtil.genTime(new Date()));
-		smsReply.setXh(xh);
+		smsReply.setMobile(mobilephone);
+		smsReply.setMsgid(smsid);
+		smsReply.setTime(DateUtil.genTime(DateUtil.parseDate(reply_time)));
 		smsService.reply(smsReply);
 		
-		SmsSend send = smsService.selectSend(msgid);
+		SmsSend send = smsService.selectSend(smsid);
 		SmsConfig config = smsService.selectConfig(send.getClientId());
 		if(config != null && StringUtils.isNotEmpty(config.getReplyUrl())) {
 			String replyUrl = config.getReplyUrl();
-			replyUrl = HttpUtil.addUrlValue(replyUrl, "mobile", mobile);
+			replyUrl = HttpUtil.addUrlValue(replyUrl, "mobilephone", mobilephone);
 			replyUrl = HttpUtil.addUrlValue(replyUrl, "content", content);
-			replyUrl = HttpUtil.addUrlValue(replyUrl, "msgid", msgid);
-			replyUrl = HttpUtil.addUrlValue(replyUrl, "xh", xh);
-			
+			replyUrl = HttpUtil.addUrlValue(replyUrl, "smsid", smsid);
+			replyUrl = HttpUtil.addUrlValue(replyUrl, "reply_time", reply_time);
+
 			String response = restTemplate.getForObject(replyUrl, String.class);
 			log.info("sms reply success: " + response);
 		} else {
 			log.warn("sms reply no replyUrl");
 		}
 		
-		return JSONResult.success();
+		return "success";
 	}
 	
 	/**
 	 * 短信回复列表
-	 * @param page
-	 * @param request
-	 * @return
+	 * @param page 查询条件
+	 * @param request 请求信息
+	 * @return 结果
 	 */
 	@PreAuthorize("hasAuthority('sms-reply_list')")
 	@RequestMapping(value = "/reply/list", method = RequestMethod.POST)
 	public Object listReply(@RequestBody JSONRequestPage<String> page, HttpServletRequest request) {
 		SmsReply example = JSONUtil.fromJson(page.getSearch(), SmsReply.class);
 		Page<SmsReply> list = smsService.listReply(example, page.getPageNum(), page.getPageSize());
-		JSONResultPage<Object> result = new JSONResultPage<>(list.getResult());
+		JSONResultPage<SmsReply> result = new JSONResultPage<>(list.getResult());
 		result.setPageNum(list.getPageNum());
 		result.setTotal(list.getTotal());
 		return result;
@@ -426,20 +312,19 @@ public class SmsController {
 	
 	/**
 	 * 获取短信配置信息
-	 * @return
-	 * @throws Exception
+	 * @return 结果
 	 */
 	@PreAuthorize("hasAuthority('sms-config_get')")
 	@RequestMapping(value = "/config/get", method = RequestMethod.GET)
-	public Object findConfig() throws Exception {
+	public Object findConfig() {
 		SmsConfig config = smsService.selectConfig(EsSecurityHandler.clientId());
 		return JSONResult.success(config);
 	}
 	
 	/**
 	 * 更新短信配置信息
-	 * @param config
-	 * @return
+	 * @param config 配置信息
+	 * @return 结果
 	 */
 	@PreAuthorize("hasAuthority('sms-config_update')")
 	@RequestMapping(value = "/config/update", method = RequestMethod.POST)
@@ -451,7 +336,7 @@ public class SmsController {
 	
 	/**
 	 * 注册短信服务
-	 * @return
+	 * @return 结果
 	 */
 	@RequestMapping(value = "/register", method = RequestMethod.POST)
 	public Object register(@RequestBody SmsConfig config) {
@@ -468,12 +353,12 @@ public class SmsController {
 	
 	/**
 	 * 获取短信模板信息
-	 * @param templateId
-	 * @return
+	 * @param templateId 模板ID
+	 * @return 模板信息
 	 */
 	@PreAuthorize("hasAuthority('sms-template_get')")
 	@RequestMapping(value = "/template/get", method = RequestMethod.GET)
-	public Object findTemplateById(@RequestParam(name = "templateId", required = true) String templateId) throws Exception {
+	public Object findTemplateById(@RequestParam(name = "templateId") String templateId) throws Exception {
 		SmsTemplate sms = smsService.findTemplate(templateId);
 		if(sms == null) {
 			throw new EsRuntimeException(ErrorConstants.DATA_NOT_FOUND);
@@ -483,21 +368,65 @@ public class SmsController {
 
 	/**
 	 * 创建短信模板
-	 * @param sms
-	 * @return
+	 * @param sms 短信模板
+	 * @return 结果
 	 */
-	@PreAuthorize("hasAuthority('sms-template_create')")
 	@RequestMapping(value = "/template/create", method = RequestMethod.POST)
 	public Object createTemplate(@RequestBody SmsTemplate sms) {
 		sms.setClientId(EsSecurityHandler.clientId());
-		smsService.createTemplate(sms);
-		return JSONResult.success(sms);
+		String smsUsername = dictService.selectByDictTypeAndDictValue(Constants.DICT_TYPE_SMS_CONFIG, Constants.SMS_CONFIG_USERNAME).getName();
+		String smsPassword = dictService.selectByDictTypeAndDictValue(Constants.DICT_TYPE_SMS_CONFIG, Constants.SMS_CONFIG_PASSWORD).getName();
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+		MultiValueMap<String, String> map= new LinkedMultiValueMap<>();
+		map.add("method", "AddTemplate");
+		map.add("account", smsUsername);
+		map.add("format", "json");
+		map.add("password", smsPassword);
+		map.add("content", sms.getContent());
+
+		HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
+
+		JSONObject response = restTemplate.postForObject(smsURL, request , JSONObject.class);
+		if (response == null) {
+			return JSONResult.failure("E999", "sms service fail");
+		}
+		//将发送记录保存到系统里
+		if("2".equals(response.optString("code"))){
+			sms.setTemplateId(response.optString("templateid"));
+			smsService.createTemplate(sms);
+			return JSONResult.success(response);
+		}else {
+			return JSONResult.failure("E999", response.optString("msg"));
+		}
+	}
+
+	/**
+	 * 接收短信回复
+	 * @return 结果
+	 */
+	@RequestMapping(value = "/template/receive", method = RequestMethod.GET)
+	public Object receiveTemplate(@RequestParam String code, @RequestParam String msg, @RequestParam String templateid) throws Exception {
+		SmsTemplate smsTemplate = smsService.findTemplate(templateid);
+		if (smsTemplate == null) {
+			return "failure";
+		}
+		if ("2".equals(code)) {
+			smsTemplate.setStatus(1);
+		} else {
+			smsTemplate.setStatus(2);
+		}
+		smsService.updateTemplate(smsTemplate);
+
+		return "success";
 	}
 
 	/**
 	 * 更新短信模板信息
-	 * @param sms
-	 * @return
+	 * @param sms 模板信息
+	 * @return 结果
 	 */
 	@PreAuthorize("hasAuthority('sms-template_update')")
 	@RequestMapping(value = "/template/update", method = RequestMethod.POST)
@@ -508,8 +437,8 @@ public class SmsController {
 
 	/**
 	 * 删除短信模板
-	 * @param templateId
-	 * @return
+	 * @param templateId 模板ID
+	 * @return 结果
 	 */
 	@PreAuthorize("hasAuthority('sms-template_delete')")
 	@RequestMapping(value = "/template/delete", method = RequestMethod.GET)
@@ -520,9 +449,9 @@ public class SmsController {
 	
 	/**
 	 * 短信模板列表
-	 * @param page
-	 * @param request
-	 * @return
+	 * @param page 查询条件
+	 * @param request 请求信息
+	 * @return 结果
 	 */
 	@PreAuthorize("hasAuthority('sms-template_list')")
 	@RequestMapping(value = "/template/list", method = RequestMethod.POST)
@@ -533,7 +462,7 @@ public class SmsController {
 		}
 		example.setClientId(EsSecurityHandler.clientId());
 		Page<SmsTemplate> list = smsService.listTemplate(example, page.getPageNum(), page.getPageSize());
-		JSONResultPage<Object> result = new JSONResultPage<>(list.getResult());
+		JSONResultPage<SmsTemplate> result = new JSONResultPage<>(list.getResult());
 		result.setPageNum(list.getPageNum());
 		result.setTotal(list.getTotal());
 		return result;
@@ -541,9 +470,9 @@ public class SmsController {
 
 	/**
 	 * 购买短信套餐
-	 * @param packageId
-	 * @return
-	 * @throws Exception
+	 * @param packageId 套餐ID
+	 * @return 结果
+	 * @throws Exception 异常
 	 */
 	@PreAuthorize("hasAuthority('sms-buy_create')")
 	@RequestMapping(value = "/buy/create", method = RequestMethod.GET)
@@ -557,8 +486,8 @@ public class SmsController {
 
 	/**
 	 * 获取短信套餐购买情况
-	 * @param id
-	 * @return
+	 * @param id 套餐ID
+	 * @return 套餐购买情况
 	 */
 	@PreAuthorize("hasAuthority('sms-buy_get')")
 	@RequestMapping(value = "/buy/get", method = RequestMethod.GET)
@@ -568,8 +497,8 @@ public class SmsController {
 
 	/**
 	 * 获取商品ID
-	 * @param id
-	 * @return
+	 * @param id 商品ID
+	 * @return 结果
 	 */
 	@PreAuthorize("hasAuthority('sms-buy_pay')")
 	@RequestMapping(value = "/buy/pay", method = RequestMethod.GET)
@@ -586,9 +515,9 @@ public class SmsController {
 
 	/**
 	 * 短信购买列表
-	 * @param page
-	 * @param request
-	 * @return
+	 * @param page 查询条件
+	 * @param request 请求信息
+	 * @return 结果
 	 */
 	@PreAuthorize("hasAuthority('sms-buy_list')")
 	@RequestMapping(value = "/buy/list", method = RequestMethod.POST)
@@ -599,7 +528,7 @@ public class SmsController {
 		}
 		example.setClientId(EsSecurityHandler.clientId());
 		Page<SmsBuy> list = smsService.listBuy(example, page.getPageNum(), page.getPageSize());
-		JSONResultPage<Object> result = new JSONResultPage<>(list.getResult());
+		JSONResultPage<SmsBuy> result = new JSONResultPage<>(list.getResult());
 		result.setPageNum(list.getPageNum());
 		result.setTotal(list.getTotal());
 		return result;
@@ -607,16 +536,16 @@ public class SmsController {
 
 	/**
 	 * 短信套餐列表
-	 * @param page
-	 * @param request
-	 * @return
+	 * @param page 查询条件
+	 * @param request 请求信息
+	 * @return 结果
 	 */
 	@PreAuthorize("hasAuthority('sms-package_list')")
 	@RequestMapping(value = "/package/list", method = RequestMethod.POST)
 	public Object listPackage(@RequestBody JSONRequestPage<String> page, HttpServletRequest request) {
 		SmsPackage example = JSONUtil.fromJson(page.getSearch(), SmsPackage.class);
 		Page<SmsPackage> list = smsService.listPackage(example, page.getPageNum(), page.getPageSize());
-		JSONResultPage<Object> result = new JSONResultPage<>(list.getResult());
+		JSONResultPage<SmsPackage> result = new JSONResultPage<>(list.getResult());
 		result.setPageNum(list.getPageNum());
 		result.setTotal(list.getTotal());
 		return result;

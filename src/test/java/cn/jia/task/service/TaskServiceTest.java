@@ -1,26 +1,21 @@
 package cn.jia.task.service;
 
+import cn.jia.BaseTest;
 import cn.jia.core.util.DateUtil;
 import cn.jia.task.common.Constants;
 import cn.jia.task.entity.TaskPlan;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Calendar;
-import java.util.Date;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-public class TaskServiceTest {
+public class TaskServiceTest extends BaseTest {
 
     @Autowired
     private TaskService taskService;
 
     @Test
-    public void create() {
+    void create() {
         String[] names = "丁威,付春花,龚祖尧,胡家乐,蒋红霞,廖慧,晋改平,金可华,黎龙,林命才,李琼,刘小明,罗俏英,彭宗乙,危春红,吴玉凤,吴智情,肖冬琦,肖冬燕,叶卫青,叶亚银,袁琪,张康群,邹梅清,邹文晴,邹志甫".split(",");
         String[] sexs = "先生,女士,先生,先生,女士,女士,女士,先生,先生,先生,女士,女士,女士,先生,女士,女士,先生,女士,女士,先生,先生,女士,女士,女士,先生,先生".split(",");
         String[] ages = "36,50,46,5,46,31,36,43,31,52,58,51,50,23,43,47,43,27,29,47,77,63,33,44,30,52".split(",");
@@ -33,10 +28,10 @@ public class TaskServiceTest {
             task.setDescription("手机号码是" + phones[i] + "，请送上诚挚的问候。");
             task.setRemind(Constants.TASK_REMIND_YES);
             task.setRemindPhone(phones[i]);
-            task.setRemindMsg("友谊不问名利但求诚心，朋友不问距离但求相应。人的一生消逝的是时间，收获的是朋友，祝您生日快乐！--中国人寿客户经理陈惠超18666460519");
+            task.setRemindMsg("友谊不问名利但求诚心，朋友不问距离但求相应。人的一生消逝的是时间，收获的是朋友，祝您生日快乐！");
             task.setType(Constants.TASK_TYPE_NOTIFY);
             Calendar calendar = Calendar.getInstance();
-            calendar.setTime(new Date(births[i]));
+            calendar.setTime(DateUtil.parseDate(births[i], "yyyy/MM/dd"));
             task.setStartTime(DateUtil.genTime(calendar.getTime()));
             calendar.add(Calendar.YEAR, Integer.parseInt(ages[i]) + 10);
             task.setEndTime(DateUtil.genTime(calendar.getTime()));

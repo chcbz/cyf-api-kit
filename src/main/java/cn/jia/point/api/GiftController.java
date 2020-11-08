@@ -78,7 +78,7 @@ public class GiftController {
 	@RequestMapping(value = "/list", method = RequestMethod.POST)
 	public Object list(@RequestBody JSONRequestPage<GiftExample> page) {
 		Page<Gift> giftList = giftService.list(page.getPageNum(), page.getPageSize(), page.getSearch());
-		JSONResultPage<Object> result = new JSONResultPage<>(giftList.getResult());
+		JSONResultPage<Gift> result = new JSONResultPage<>(giftList.getResult());
 		result.setPageNum(giftList.getPageNum());
 		result.setTotal(giftList.getTotal());
 		return result;
@@ -95,6 +95,8 @@ public class GiftController {
 	public Object usageAdd(@RequestBody GiftUsage giftUsage, HttpServletRequest request) throws Exception {
 		giftUsage.setClientId(EsSecurityHandler.clientId());
 		giftService.usage(giftUsage);
+		// 通知管理员
+
 		return JSONResult.success(giftUsage);
 	}
 
@@ -132,7 +134,7 @@ public class GiftController {
 	@RequestMapping(value = "/usage/list/gift/{giftId}", method = RequestMethod.POST)
 	public Object usageListByGift(@RequestBody JSONRequestPage<String> page, @PathVariable Integer giftId) {
 		Page<GiftUsage> usageList = giftService.usageListByGift(page.getPageNum(), page.getPageSize(), giftId);
-		JSONResultPage<Object> result = new JSONResultPage<>(usageList.getResult());
+		JSONResultPage<GiftUsage> result = new JSONResultPage<>(usageList.getResult());
 		result.setPageNum(usageList.getPageNum());
 		result.setTotal(usageList.getTotal());
 		return result;
@@ -146,9 +148,9 @@ public class GiftController {
 	 */
 //	@PreAuthorize("hasAuthority('gift-usage_list_user')")
 	@RequestMapping(value = "/usage/list/user/{user}", method = RequestMethod.POST)
-	public Object usageListByUser(@RequestBody JSONRequestPage page, @PathVariable String user) {
+	public Object usageListByUser(@RequestBody JSONRequestPage<GiftUsage> page, @PathVariable String user) {
 		Page<GiftUsage> usageList = giftService.usageListByUser(page.getPageNum(), page.getPageSize(), user);
-		JSONResultPage<Object> result = new JSONResultPage<>(usageList.getResult());
+		JSONResultPage<GiftUsage> result = new JSONResultPage<>(usageList.getResult());
 		result.setPageNum(usageList.getPageNum());
 		result.setTotal(usageList.getTotal());
 		return result;

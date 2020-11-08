@@ -121,8 +121,7 @@ public class UserController {
 	public Object findRoles(@RequestBody JSONRequestPage<String> page) {
 		User user = JSONUtil.fromJson(page.getSearch(), User.class);
 		Page<Role> roleList = roleService.listByUserId(user.getId(), EsSecurityHandler.clientId(), page.getPageNum(), page.getPageSize());
-		@SuppressWarnings({ "unchecked", "rawtypes" })
-		JSONResultPage<Object> result = new JSONResultPage(roleList.getResult());
+		JSONResultPage<Role> result = new JSONResultPage<>(roleList.getResult());
 		result.setPageNum(roleList.getPageNum());
 		result.setTotal(roleList.getTotal());
 		return result;
@@ -226,8 +225,7 @@ public class UserController {
 			u.setGroupIds(userService.findGroupIds(u.getId()));
 			u.setPassword("******");
 		}
-		@SuppressWarnings({ "unchecked", "rawtypes" })
-		JSONResultPage<Object> result = new JSONResultPage(userList.getResult());
+		JSONResultPage<User> result = new JSONResultPage<>(userList.getResult());
 		result.setPageNum(userList.getPageNum());
 		result.setTotal(userList.getTotal());
 		return result;
@@ -247,8 +245,7 @@ public class UserController {
 		for(User u : userList.getResult()) {
 			u.setPassword("******");
 		}
-		@SuppressWarnings({ "unchecked", "rawtypes" })
-		JSONResultPage<Object> result = new JSONResultPage(userList.getResult());
+		JSONResultPage<User> result = new JSONResultPage<>(userList.getResult());
 		result.setPageNum(userList.getPageNum());
 		result.setTotal(userList.getTotal());
 		return result;

@@ -113,6 +113,9 @@ public class GiftServiceImpl implements GiftService {
 			record.setPoint(totalPoint);
 		}
 		record.setTime(now);
+		record.setName(gift.getName());
+		record.setDescription(gift.getDescription());
+		record.setPicUrl(gift.getPicUrl());
 		giftUsageMapper.insertSelective(record);
 	}
 
