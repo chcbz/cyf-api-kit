@@ -106,7 +106,7 @@ public class OrgController {
 	@RequestMapping(value = "/get/users", method = RequestMethod.POST)
 	public Object findUsers(@RequestBody JSONRequestPage<String> page) {
 		UserExample example = JSONUtil.fromJson(page.getSearch(), UserExample.class);
-		Page<User> userList = userService.listByOrgId(example, page.getPageNum(), page.getPageSize());
+		Page<User> userList = userService.listByOrgId(example.getOrgId(), page.getPageNum(), page.getPageSize());
 		JSONResultPage<User> result = new JSONResultPage<>(userList.getResult());
 		result.setPageNum(userList.getPageNum());
 		result.setTotal(userList.getTotal());

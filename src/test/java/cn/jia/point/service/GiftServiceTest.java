@@ -1,12 +1,13 @@
 package cn.jia.point.service;
 
-import cn.jia.BaseTest;
-import cn.jia.DbUnitHelper;
-import cn.jia.point.entity.Gift;
-import com.github.pagehelper.Page;
+import cn.jia.point.entity.PointGift;
+import cn.jia.test.BaseTest;
+import cn.jia.test.DbUnitHelper;
+import com.github.pagehelper.PageInfo;
 import com.github.springtestdbunit.annotation.DatabaseOperation;
 import com.github.springtestdbunit.annotation.DatabaseSetup;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,7 +28,7 @@ class GiftServiceTest extends BaseTest {
 
     @Test
     void create() {
-        Gift gift = DbUnitHelper.readJsonEntity(resource, Gift.class);
+        PointGift gift = DbUnitHelper.readJsonEntity(resource, PointGift.class);
         gift = giftService.create(gift);
         assertNotNull(gift);
     }
@@ -35,13 +36,13 @@ class GiftServiceTest extends BaseTest {
     @Test
     @DatabaseSetup(value = "classpath:testObject/point/point_gift_init.xml", type = DatabaseOperation.CLEAN_INSERT)
     void find() throws Exception {
-        Gift gift = giftService.find(1);
+        PointGift gift = giftService.find(1);
         assertNotNull(gift);
     }
 
     @Test
     void update() {
-        Gift gift = new Gift();
+        PointGift gift = new PointGift();
         gift.setId(1);
         gift.setName("testName");
         giftService.update(gift);
@@ -57,8 +58,8 @@ class GiftServiceTest extends BaseTest {
     @Test
     @DatabaseSetup(value = "classpath:testObject/point/point_gift_init.xml", type = DatabaseOperation.CLEAN_INSERT)
     void list() {
-        Page<Gift> giftPage = giftService.list(1, 10, null);
-        assertNotEquals(giftPage.size(), 0);
+        PageInfo<PointGift> giftPage = giftService.list(1, 10, null);
+        assertNotEquals(giftPage.getList().size(), 0);
     }
 
     @Test
@@ -82,6 +83,7 @@ class GiftServiceTest extends BaseTest {
     }
 
     @Test
+    @Disabled
     void printDataSet() {
         log.info(DbUnitHelper.printDataSet(dataSource, "point_gift", "select * from point_gift where id = 1"));
     }

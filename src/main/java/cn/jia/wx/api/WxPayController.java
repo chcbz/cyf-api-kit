@@ -5,6 +5,7 @@ import cn.jia.core.entity.JSONRequestPage;
 import cn.jia.core.entity.JSONResult;
 import cn.jia.core.entity.JSONResultPage;
 import cn.jia.core.exception.EsRuntimeException;
+import cn.jia.core.util.FileUtil;
 import cn.jia.core.util.HttpUtil;
 import cn.jia.core.util.JSONUtil;
 import cn.jia.wx.common.ErrorConstants;
@@ -31,7 +32,7 @@ import com.github.binarywang.wxpay.constant.WxPayConstants;
 import com.github.binarywang.wxpay.exception.WxPayException;
 import com.github.binarywang.wxpay.service.WxPayService;
 import com.github.binarywang.wxpay.util.SignUtils;
-import com.github.pagehelper.Page;
+import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -74,7 +75,7 @@ public class WxPayController {
 	 *            微信订单号
 	 * @param outTradeNo
 	 *            商户系统内部的订单号，当没提供transactionId时需要传这个。
-	 * @throws Exception
+	 * @throws Exception 异常
 	 */
 	@GetMapping("/queryOrder")
 	public WxPayOrderQueryResult queryOrder(@RequestParam(required = false) String transactionId,
@@ -96,13 +97,12 @@ public class WxPayController {
 	 *
 	 * @param outTradeNo
 	 *            商户系统内部的订单号
-	 * @throws Exception
+	 * @throws Exception 异常
 	 */
 	@GetMapping("/closeOrder/{outTradeNo}")
 	public WxPayOrderCloseResult closeOrder(@PathVariable String outTradeNo, HttpServletRequest request) throws Exception {
 		try {
-			WxPayOrderCloseResult orderCloseResult = payInfoService.findWxPayService(request).closeOrder(outTradeNo);
-			return orderCloseResult;
+			return payInfoService.findWxPayService(request).closeOrder(outTradeNo);
 		} catch (WxPayException e) {
 			e.printStackTrace();
 			throw new RuntimeException(e);
@@ -244,7 +244,7 @@ public class WxPayController {
 	 *
 	 * @param request
 	 *            请求对象，注意一些参数如appid、mchid等不用设置，方法内会自动从配置对象中获取到（前提是对应配置中已经设置）
-	 * @throws Exception
+	 * @throws Exception 异常
 	 */
 	@PostMapping("/unifiedOrder")
 	public WxPayUnifiedOrderResult unifiedOrder(@RequestBody WxPayUnifiedOrderRequest request, HttpServletRequest req) throws Exception {
@@ -299,7 +299,7 @@ public class WxPayController {
 	 * @param request
 	 *            请求对象
 	 * @return 退款操作结果
-	 * @throws Exception
+	 * @throws Exception 异常
 	 */
 	@PostMapping("/refund")
 	public WxPayRefundResult refund(@RequestBody WxPayRefundRequest request, HttpServletRequest req) throws Exception {
@@ -327,7 +327,7 @@ public class WxPayController {
 	 * @param refundId
 	 *            微信退款单号
 	 * @return 退款信息
-	 * @throws Exception
+	 * @throws Exception 异常
 	 */
 	@GetMapping("/refundQuery")
 	public WxPayRefundQueryResult refundQuery(@RequestParam(required = false) String transactionId,
@@ -338,8 +338,8 @@ public class WxPayController {
 
 	/**
 	 * 支付完成回调方法，完成订单
-	 * @param xmlData
-	 * @return
+	 * @param xmlData 回调参数
+	 * @return 处理结果
 	 */
 	@PostMapping("/parseOrderNotifyResult")
 	public Object parseOrderNotifyResult(@RequestBody String xmlData) throws Exception {
@@ -350,7 +350,7 @@ public class WxPayController {
 			PayOrder payOrder = new PayOrder();
 			String outTradeNo = result.getOutTradeNo();
 			payOrder.setOutTradeNo(outTradeNo);
-			List<PayOrder> payOrderList = payOrderService.list(payOrder, 1, 1);
+			List<PayOrder> payOrderList = payOrderService.list(payOrder);
 			if(payOrderList != null && !payOrderList.isEmpty()){
 				payOrder.setId(payOrderList.get(0).getId());
 				payOrder.setTransactionId(result.getTransactionId());
@@ -367,7 +367,7 @@ public class WxPayController {
 	/**
 	 * TODO
 	 * 此方法需要改造，根据实际需要返回com.github.binarywang.wxpay.bean.notify.WxPayNotifyResponse对象
-	 * @throws Exception
+	 * @throws Exception 异常
 	 */
 	@PostMapping("/parseRefundNotifyResult")
 	public WxPayRefundNotifyResult parseRefundNotifyResult(@RequestBody String xmlData, HttpServletRequest request) throws Exception {
@@ -376,10 +376,10 @@ public class WxPayController {
 
 	/**
 	 * 扫码支付回调方法，获取预支付ID
-	 * @param xmlData
-	 * @param request
-	 * @return
-	 * @throws Exception
+	 * @param xmlData 回调参数
+	 * @param request Http请求
+	 * @return 预支付ID
+	 * @throws Exception 异常
 	 */
 	@PostMapping("/parseScanPayNotifyResult")
 	public Object parseScanPayNotifyResult(@RequestBody String xmlData, HttpServletRequest request) throws Exception {
@@ -425,7 +425,7 @@ public class WxPayController {
 	 *
 	 * @param request
 	 *            请求对象
-	 * @throws Exception
+	 * @throws Exception 异常
 	 */
 	@PostMapping("/sendRedpack")
 	public WxPaySendRedpackResult sendRedpack(@RequestBody WxPaySendRedpackRequest request, HttpServletRequest req) throws Exception {
@@ -443,7 +443,7 @@ public class WxPayController {
 	 *
 	 * @param mchBillNo
 	 *            商户发放红包的商户订单号，比如10000098201411111234567890
-	 * @throws Exception
+	 * @throws Exception 异常
 	 */
 	@GetMapping("/queryRedpack/{mchBillNo}")
 	public WxPayRedpackQueryResult queryRedpack(@PathVariable String mchBillNo, HttpServletRequest request) throws Exception {
@@ -462,7 +462,7 @@ public class WxPayController {
 	 *
 	 * @param request
 	 *            请求对象
-	 * @throws Exception
+	 * @throws Exception 异常
 	 */
 	@PostMapping("/entPay")
 	public EntPayResult entPay(@RequestBody EntPayRequest request, HttpServletRequest req) throws Exception {
@@ -479,7 +479,7 @@ public class WxPayController {
 	 *
 	 * @param partnerTradeNo
 	 *            商户订单号
-	 * @throws Exception
+	 * @throws Exception 异常
 	 */
 	@GetMapping("/queryEntPay/{partnerTradeNo}")
 	public EntPayQueryResult queryEntPay(@PathVariable String partnerTradeNo, HttpServletRequest request) throws Exception {
@@ -502,16 +502,13 @@ public class WxPayController {
 	 * @param sideLength
 	 *            要生成的二维码的边长，如果为空，则取默认值400
 	 * @return 生成的二维码的字节数组
-	 * @throws Exception
+	 * @throws Exception 异常
 	 */
 	@PostMapping("/scanPay/qrcode")
 	public ResponseEntity<byte[]> createScanPayQrcodeMode1(@RequestParam String productId, @RequestPart(required = false) MultipartFile logoFile,
 														   @RequestParam(required = false) Integer sideLength,    HttpServletRequest request) throws Exception {
 		String filePath = request.getServletContext().getRealPath("/")+"tmp/";
-		File pathFile = new File(filePath);
-		if(!pathFile.exists()) {
-			pathFile.mkdirs();
-		}
+		FileUtil.mkdirs(filePath);
 		File tmpFile = new File(filePath+logoFile.getOriginalFilename());
 		logoFile.transferTo(tmpFile);
 		byte[] bfile = payInfoService.findWxPayService(request).createScanPayQrcodeMode1(productId, tmpFile, sideLength);
@@ -519,7 +516,7 @@ public class WxPayController {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
 		headers.setContentDispositionFormData("attachment", "wxpay_qrcode.jpg");
-		return new ResponseEntity<byte[]>(bfile, headers, HttpStatus.OK);
+		return new ResponseEntity<>(bfile, headers, HttpStatus.OK);
 	}
 
 	/**
@@ -555,7 +552,7 @@ public class WxPayController {
 	 * @param sideLength
 	 *            要生成的二维码的边长，如果为空，则取默认值400
 	 * @return 生成的二维码的字节数组
-	 * @throws Exception
+	 * @throws Exception 异常
 	 */
 	public byte[] createScanPayQrcodeMode2(String codeUrl, File logoFile, Integer sideLength, HttpServletRequest request) throws Exception {
 		return payInfoService.findWxPayService(request).createScanPayQrcodeMode2(codeUrl, logoFile, sideLength);
@@ -572,8 +569,8 @@ public class WxPayController {
 	 * 是否需要证书：不需要
 	 * </pre>
 	 *
-	 * @param request
-	 * @throws Exception
+	 * @param request Http请求
+	 * @throws Exception 异常
 	 */
 	@PostMapping("/report")
 	public void report(@RequestBody WxPayReportRequest request, HttpServletRequest req) throws Exception {
@@ -604,7 +601,7 @@ public class WxPayController {
 	 * @param deviceInfo
 	 *            设备号 device_info 非必传参数，终端设备号
 	 * @return 保存到本地的临时文件
-	 * @throws Exception
+	 * @throws Exception 异常
 	 */
 	@GetMapping("/downloadBill")
 	public WxPayBillResult downloadBill(@RequestParam String billDate, @RequestParam String billType,
@@ -623,7 +620,7 @@ public class WxPayController {
 	 * 接口地址：   https://api.mch.weixin.qq.com/pay/micropay
 	 * 是否需要证书：不需要。
 	 * </pre>
-	 * @throws Exception
+	 * @throws Exception 异常
 	 */
 	@PostMapping("/micropay")
 	public WxPayMicropayResult micropay(@RequestBody WxPayMicropayRequest request, HttpServletRequest req) throws Exception {
@@ -641,7 +638,7 @@ public class WxPayController {
 	 *  接口链接 ：https://api.mch.weixin.qq.com/secapi/pay/reverse
 	 *  是否需要证书：请求需要双向证书。
 	 * </pre>
-	 * @throws Exception
+	 * @throws Exception 异常
 	 */
 	@PostMapping("/reverseOrder")
 	public WxPayOrderReverseResult reverseOrder(@RequestBody WxPayOrderReverseRequest request, HttpServletRequest req) throws Exception {
@@ -671,17 +668,17 @@ public class WxPayController {
 	}
 
 	@PostMapping("/queryComment")
-	public String queryComment(Date beginDate, Date endDate, Integer offset, Integer limit) throws WxPayException {
+	public String queryComment(Date beginDate, Date endDate, Integer offset, Integer limit) {
 		return this.queryComment(beginDate, endDate, offset, limit);
 	}
 
 	/**
 	 * 获取支付平台信息
-	 * @param id
-	 * @return
+	 * @param id 支付ID
+	 * @return 支付信息
 	 */
 	@RequestMapping(value = "/info/get", method = RequestMethod.GET)
-	public Object findPayInfoById(@RequestParam(name = "id", required = true) Integer id) throws Exception {
+	public Object findPayInfoById(@RequestParam(name = "id") Integer id) throws Exception {
 		PayInfo info = payInfoService.find(id);
 		if(info == null) {
 			throw new EsRuntimeException(ErrorConstants.DATA_NOT_FOUND);
@@ -691,8 +688,8 @@ public class WxPayController {
 
 	/**
 	 * 创建支付平台
-	 * @param info
-	 * @return
+	 * @param info 支付平台信息
+	 * @return 支付平台信息
 	 */
 	@RequestMapping(value = "/info/create", method = RequestMethod.POST)
 	public Object createPayInfo(@RequestBody PayInfo info) {
@@ -702,8 +699,8 @@ public class WxPayController {
 
 	/**
 	 * 更新支付平台信息
-	 * @param info
-	 * @return
+	 * @param info 支付平台信息
+	 * @return 修改后支付平台信息
 	 */
 	@RequestMapping(value = "/info/update", method = RequestMethod.POST)
 	public Object updatePayInfo(@RequestBody PayInfo info) {
@@ -713,8 +710,8 @@ public class WxPayController {
 
 	/**
 	 * 删除支付平台
-	 * @param id
-	 * @return
+	 * @param id 支付平台ID
+	 * @return 删除结果
 	 */
 	@RequestMapping(value = "/info/delete", method = RequestMethod.GET)
 	public Object deletePayInfo(@RequestParam(name = "id") Integer id) {
@@ -724,20 +721,19 @@ public class WxPayController {
 
 	/**
 	 * 支付平台列表
-	 * @param page
-	 * @param request
-	 * @return
-	 * @throws Exception
+	 * @param page 分页信息
+	 * @param request Http请求
+	 * @return 支付平台列表
 	 */
 	@RequestMapping(value = "/info/list", method = RequestMethod.POST)
-	public Object listPayInfo(@RequestBody JSONRequestPage<String> page, HttpServletRequest request) throws Exception {
+	public Object listPayInfo(@RequestBody JSONRequestPage<String> page, HttpServletRequest request) {
 		PayInfo example = JSONUtil.fromJson(page.getSearch(), PayInfo.class);
 		if(example == null) {
 			example = new PayInfo();
 		}
 		example.setClientId(EsSecurityHandler.clientId());
-		Page<PayInfo> list = payInfoService.list(example, page.getPageNum(), page.getPageSize());
-		JSONResultPage<PayInfo> result = new JSONResultPage<>(list.getResult());
+		PageInfo<PayInfo> list = payInfoService.list(example, page.getPageNum(), page.getPageSize());
+		JSONResultPage<PayInfo> result = new JSONResultPage<>(list.getList());
 		result.setPageNum(list.getPageNum());
 		result.setTotal(list.getTotal());
 		return result;

@@ -1,10 +1,10 @@
 package cn.jia.material.service;
 
-import cn.jia.BaseTest;
 import cn.jia.core.util.DateUtil;
 import cn.jia.core.util.HttpUtil;
 import cn.jia.core.util.StreamUtil;
 import cn.jia.material.entity.Phrase;
+import cn.jia.test.BaseTest;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

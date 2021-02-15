@@ -14,10 +14,7 @@ import cn.jia.sms.entity.SmsCode;
 import cn.jia.sms.service.SmsService;
 import cn.jia.user.common.Constants;
 import cn.jia.user.common.ErrorConstants;
-import cn.jia.user.entity.Org;
-import cn.jia.user.entity.Role;
-import cn.jia.user.entity.User;
-import cn.jia.user.entity.UserImport;
+import cn.jia.user.entity.*;
 import cn.jia.user.service.OrgService;
 import cn.jia.user.service.RoleService;
 import cn.jia.user.service.UserService;
@@ -216,7 +213,7 @@ public class UserController {
 	@PreAuthorize("hasAuthority('user-list')")
 	@RequestMapping(value = "/list", method = RequestMethod.POST)
 	public Object list(@RequestBody JSONRequestPage<String> page) {
-		User example = JSONUtil.fromJson(page.getSearch(), User.class);
+		UserExample example = JSONUtil.fromJson(page.getSearch(), UserExample.class);
 		Page<User> userList = userService.list(example, page.getPageNum(), page.getPageSize());
 		//隐藏密码
 		for(User u : userList.getResult()) {

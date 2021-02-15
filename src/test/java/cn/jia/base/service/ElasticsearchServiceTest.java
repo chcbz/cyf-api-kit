@@ -1,8 +1,8 @@
 package cn.jia.base.service;
 
-import cn.jia.BaseTest;
 import cn.jia.core.util.JSONUtil;
 import cn.jia.material.model.PhraseModel;
+import cn.jia.test.BaseTest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.index.query.MatchQueryBuilder;

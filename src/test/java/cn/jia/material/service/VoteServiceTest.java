@@ -1,7 +1,7 @@
 package cn.jia.material.service;
 
-import cn.jia.BaseTest;
 import cn.jia.core.util.StreamUtil;
+import cn.jia.test.BaseTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

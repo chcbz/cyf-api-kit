@@ -13,11 +13,11 @@ import cn.jia.core.util.FileUtil;
 import cn.jia.isp.common.Constants;
 import cn.jia.isp.entity.IspFile;
 import cn.jia.isp.service.FileService;
-import cn.jia.kefu.entity.KefuFAQ;
+import cn.jia.kefu.entity.KefuFaq;
 import cn.jia.kefu.entity.KefuMessage;
 import cn.jia.kefu.service.KefuService;
 import cn.jia.user.common.ErrorConstants;
-import com.github.pagehelper.Page;
+import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -48,14 +48,14 @@ public class KefuController {
 	 */
 	@PreAuthorize("hasAuthority('kefu-faq_list')")
 	@RequestMapping(value = "/faq/list", method = RequestMethod.POST)
-	public Object listFAQ(@RequestBody JSONRequestPage<KefuFAQ> page) {
-		KefuFAQ example = page.getSearch();
+	public Object listFAQ(@RequestBody JSONRequestPage<KefuFaq> page) {
+		KefuFaq example = page.getSearch();
 		if(example == null) {
-			example = new KefuFAQ();
+			example = new KefuFaq();
 		}
 		example.setClientId(EsSecurityHandler.clientId());
-		Page<KefuFAQ> list = kefuService.listFAQ(example, page.getPageNum(), page.getPageSize());
-		JSONResultPage<KefuFAQ> result = new JSONResultPage<>(list.getResult());
+		PageInfo<KefuFaq> list = kefuService.listFAQ(example, page.getPageNum(), page.getPageSize());
+		JSONResultPage<KefuFaq> result = new JSONResultPage<>(list.getList());
 		result.setPageNum(list.getPageNum());
 		result.setTotal(list.getTotal());
 		return result;
@@ -69,7 +69,7 @@ public class KefuController {
 	@PreAuthorize("hasAuthority('kefu-faq_get')")
 	@RequestMapping(value = "/faq/get", method = RequestMethod.GET)
 	public Object findFAQById(@RequestParam(name = "id") Integer id) throws Exception {
-		KefuFAQ record = kefuService.findFAQ(id);
+		KefuFaq record = kefuService.findFAQ(id);
 		if(record == null) {
 			throw new EsRuntimeException(ErrorConstants.DATA_NOT_FOUND);
 		}
@@ -83,7 +83,7 @@ public class KefuController {
 	 */
 	@PreAuthorize("hasAuthority('kefu-faq_create')")
 	@RequestMapping(value = "/faq/create", method = RequestMethod.POST)
-	public Object createFAQ(@RequestBody KefuFAQ record) {
+	public Object createFAQ(@RequestBody KefuFaq record) {
 		record.setClientId(EsSecurityHandler.clientId());
 		kefuService.createFAQ(record);
 		return JSONResult.success(record);
@@ -96,7 +96,7 @@ public class KefuController {
 	 */
 	@PreAuthorize("hasAuthority('kefu-faq_update')")
 	@RequestMapping(value = "/faq/update", method = RequestMethod.POST)
-	public Object updateFAQ(@RequestBody KefuFAQ record) {
+	public Object updateFAQ(@RequestBody KefuFaq record) {
 		kefuService.updateFAQ(record);
 		return JSONResult.success(record);
 	}
@@ -109,7 +109,7 @@ public class KefuController {
 	@PreAuthorize("hasAuthority('kefu-faq_delete')")
 	@RequestMapping(value = "/faq/delete", method = RequestMethod.GET)
 	public Object deleteFAQ(@RequestParam(name = "id") Integer id) throws Exception {
-		KefuFAQ record = kefuService.findFAQ(id);
+		KefuFaq record = kefuService.findFAQ(id);
 		if(record == null || !Objects.equals(EsSecurityHandler.clientId(), record.getClientId())) {
 			throw new EsRuntimeException(ErrorConstants.DATA_NOT_FOUND);
 		}
@@ -130,8 +130,8 @@ public class KefuController {
 			example = new KefuMessage();
 		}
 		example.setClientId(EsSecurityHandler.clientId());
-		Page<KefuMessage> list = kefuService.listMessage(example, page.getPageNum(), page.getPageSize());
-		JSONResultPage<KefuMessage> result = new JSONResultPage<>(list.getResult());
+		PageInfo<KefuMessage> list = kefuService.listMessage(example, page.getPageNum(), page.getPageSize());
+		JSONResultPage<KefuMessage> result = new JSONResultPage<>(list.getList());
 		result.setPageNum(list.getPageNum());
 		result.setTotal(list.getTotal());
 		return result;

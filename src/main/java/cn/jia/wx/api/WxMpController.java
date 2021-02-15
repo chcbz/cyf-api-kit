@@ -22,13 +22,14 @@ import cn.jia.user.service.UserService;
 import cn.jia.wx.common.Constants;
 import cn.jia.wx.common.ErrorConstants;
 import cn.jia.wx.entity.MpInfo;
+import cn.jia.wx.entity.MpInfoExample;
 import cn.jia.wx.entity.MpUser;
 import cn.jia.wx.service.MpInfoService;
 import cn.jia.wx.service.MpUserService;
 import cn.jia.wx.service.PayInfoService;
 import com.github.binarywang.wxpay.bean.request.WxPaySendRedpackRequest;
 import com.github.binarywang.wxpay.bean.result.WxPaySendRedpackResult;
-import com.github.pagehelper.Page;
+import com.github.pagehelper.PageInfo;
 import com.google.common.base.Joiner;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.api.WxConsts;
@@ -64,7 +65,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * 微信公众号接口
  * @author chc
- * @date 2018年1月14日 下午4:53:24
+ * @since 2018年1月14日 下午4:53:24
  */
 @Slf4j
 @RestController
@@ -148,7 +149,7 @@ public class WxMpController {
 			params.setCity(wxMpUser.getCity());
 			params.setSex(wxMpUser.getSex());
 			params.setNickname(wxMpUser.getNickname());
-			params.setSubscribe(true);
+			params.setSubscribe(1);
 			params.setHeadImgUrl(wxMpUser.getHeadImgUrl());
 			mpUser = mpUserService.create(params);
 		}
@@ -162,17 +163,17 @@ public class WxMpController {
 			User user = userService.findByJiacn(mpUser.getJiacn());
 			if(user.getPoint() == 0){
 				//初始化积分
-				Record record = new Record();
+				PointRecord record = new PointRecord();
 				record.setJiacn(user.getJiacn());
-				Record pointResult = pointService.init(record);
-				outMessage.setContent(EsHandler.getMessage(request, "init.success", new String[]{mpUser.getNickname(),String.valueOf(pointResult.getChange())}));
+				PointRecord pointResult = pointService.init(record);
+				outMessage.setContent(EsHandler.getMessage(request, "init.success", new String[]{mpUser.getNickname(),String.valueOf(pointResult.getChg())}));
 				//如果是推荐进来的用户，则增加推荐人的积分
 				if(user.getReferrer() != null) {
 					//增加推荐人的积分
-					Referral referral = new Referral();
+					PointReferral referral = new PointReferral();
 					referral.setReferrer(user.getReferrer());
 					referral.setReferral(user.getJiacn());
-					Record referralResult = pointService.referral(referral);
+					PointRecord referralResult = pointService.referral(referral);
 					//获取推荐人openid
 					User referrer = userService.findByJiacn(user.getReferrer());
 					if(referrer != null && referrer.getOpenid() != null) {
@@ -180,7 +181,7 @@ public class WxMpController {
 						WxMpKefuMessage kfmessage = new WxMpKefuMessage();
 						kfmessage.setToUser(referrer.getOpenid());
 						kfmessage.setMsgType(WxConsts.KefuMsgType.TEXT);
-						kfmessage.setContent(EsHandler.getMessage(request, "referral.success", new String[] {user.getNickname(), String.valueOf(referralResult.getChange())}));
+						kfmessage.setContent(EsHandler.getMessage(request, "referral.success", new String[] {user.getNickname(), String.valueOf(referralResult.getChg())}));
 						wxMpService.getKefuService().sendKefuMessage(kfmessage);
 					}
 				}
@@ -193,7 +194,7 @@ public class WxMpController {
 		if(WxConsts.XmlMsgType.EVENT.equals(message.getMsgType()) && WxConsts.EventType.UNSUBSCRIBE.equals(message.getEvent())) {
 			MpUser upUser = new MpUser();
 			upUser.setId(mpUser.getId());
-			upUser.setSubscribe(false);
+			upUser.setSubscribe(0);
 			mpUserService.update(upUser);
 		}
 		//签到
@@ -202,13 +203,13 @@ public class WxMpController {
 			outMessage.setCreateTime(message.getCreateTime());
 			outMessage.setFromUserName(message.getToUser());
 			outMessage.setToUserName(message.getFromUser());
-			Sign params = new Sign();
+			PointSign params = new PointSign();
 			params.setJiacn(mpUser.getJiacn());
 			params.setLatitude(String.valueOf(message.getLatitude()));
 			params.setLongitude(String.valueOf(message.getLongitude()));
 			try {
-				Record pointResult = pointService.sign(params);
-				outMessage.setContent(EsHandler.getMessage(request, "sign.success", new String[]{String.valueOf(pointResult.getChange())}));
+				PointRecord pointResult = pointService.sign(params);
+				outMessage.setContent(EsHandler.getMessage(request, "sign.success", new String[]{String.valueOf(pointResult.getChg())}));
 			} catch (Exception ignored) {
 				outMessage.setContent("");
 			}
@@ -231,24 +232,24 @@ public class WxMpController {
 			}
 			//签到
 			if(Constants.EVENKEY_POINT_SIGN.equals(message.getEventKey())) {
-				Sign params = new Sign();
+				PointSign params = new PointSign();
 				params.setJiacn(mpUser.getJiacn());
 				params.setLatitude(String.valueOf(message.getLatitude()));
 				params.setLongitude(String.valueOf(message.getLongitude()));
 				try {
-					Record pointResult = pointService.sign(params);
-					outMessage.setContent(EsHandler.getMessage(request, "sign.success", new String[]{String.valueOf(pointResult.getChange())}));
+					PointRecord pointResult = pointService.sign(params);
+					outMessage.setContent(EsHandler.getMessage(request, "sign.success", new String[]{String.valueOf(pointResult.getChg())}));
 				} catch (Exception ignored) {
 					outMessage.setContent("");
 				}
 			}
 			//赌积分
 			else if(Constants.EVENKEY_POINT_LUCK.equals(message.getEventKey())) {
-				Record params = new Record();
+				PointRecord params = new PointRecord();
 				params.setJiacn(mpUser.getJiacn());
-				params.setChange(2);
-				Record pointResult = pointService.luck(params);
-				Integer point = pointResult.getChange();
+				params.setChg(2);
+				PointRecord pointResult = pointService.luck(params);
+				Integer point = pointResult.getChg();
 				if(point == null || point <= 0) {
 					//当赚不了积分，进行红包补偿
 					WxPaySendRedpackRequest sendRedpack = new WxPaySendRedpackRequest();
@@ -283,8 +284,8 @@ public class WxMpController {
 				newsMessage.setToUserName(message.getFromUser());
 				GiftExample example = new GiftExample();
 				example.setStatus(Constants.COMMON_ENABLE);
-				Page<Gift> pointResult = giftService.list(1, 8, example);
-				for(Gift gift : pointResult) {
+				PageInfo<PointGift> pointResult = giftService.list(1, 8, example);
+				for(PointGift gift : pointResult.getList()) {
 					WxMpXmlOutNewsMessage.Item item = new WxMpXmlOutNewsMessage.Item();
 					item.setDescription(String.valueOf(gift.getDescription()));
 					item.setPicUrl(String.valueOf(gift.getPicUrl()));
@@ -535,7 +536,7 @@ public class WxMpController {
 						params.setCity(wxMpUser.getCity());
 						params.setSex(wxMpUser.getSex());
 						params.setNickname(wxMpUser.getNickname());
-						params.setSubscribe(true);
+						params.setSubscribe(1);
 						params.setHeadImgUrl(wxMpUser.getHeadImgUrl());
 						users.add(params);
 					}
@@ -786,6 +787,7 @@ public class WxMpController {
 	 */
 	@RequestMapping(value = "/info/create", method = RequestMethod.POST)
 	public Object createMpInfo(@RequestBody MpInfo info) {
+		info.setClientId(EsSecurityHandler.clientId());
 		mpInfoService.create(info);
 		return JSONResult.success(info);
 	}
@@ -820,13 +822,13 @@ public class WxMpController {
 	 */
 	@RequestMapping(value = "/info/list", method = RequestMethod.POST)
 	public Object listMpInfo(@RequestBody JSONRequestPage<String> page, HttpServletRequest request) {
-		MpInfo example = JSONUtil.fromJson(page.getSearch(), MpInfo.class);
+		MpInfoExample example = JSONUtil.fromJson(page.getSearch(), MpInfoExample.class);
 		if (example == null) {
-			example = new MpInfo();
+			example = new MpInfoExample();
 		}
 		example.setClientId(EsSecurityHandler.clientId());
-		Page<MpInfo> list = mpInfoService.list(example, page.getPageNum(), page.getPageSize());
-		JSONResultPage<MpInfo> result = new JSONResultPage<>(list.getResult());
+		PageInfo<MpInfo> list = mpInfoService.list(example, page.getPageNum(), page.getPageSize());
+		JSONResultPage<MpInfo> result = new JSONResultPage<>(list.getList());
 		result.setPageNum(list.getPageNum());
 		result.setTotal(list.getTotal());
 		return result;

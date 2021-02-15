@@ -28,7 +28,7 @@ public interface UserService {
 
 	void delete(Integer id);
 	
-	Page<User> list(User example, int pageNo, int pageSize);
+	Page<User> list(UserExample example, int pageNo, int pageSize);
 	
 	void changePoint(String jiacn, int add) throws Exception;
 	
@@ -42,7 +42,7 @@ public interface UserService {
 	
 	Page<User> listByGroupId(Integer groupId, int pageNo, int pageSize);
 	
-	Page<User> listByOrgId(UserExample example, int pageNo, int pageSize);
+	Page<User> listByOrgId(Integer orgId, int pageNo, int pageSize);
 	
 	List<Integer> findRoleIds(Integer userId);
 	
@@ -56,8 +56,10 @@ public interface UserService {
 	
 	/**
 	 * 更新用户默认职位
-	 * @param userId
+	 * @param userId 用户ID
 	 */
 	void setDefaultOrg(Integer userId);
+
+	List<User> list(UserExample example);
 	
 }

@@ -10,8 +10,11 @@ import cn.jia.task.entity.TaskItemVOExample;
 import cn.jia.task.service.TaskService;
 import cn.jia.user.entity.Msg;
 import cn.jia.user.entity.User;
+import cn.jia.user.entity.UserExample;
 import cn.jia.user.service.MsgService;
 import cn.jia.user.service.UserService;
+import cn.jia.wx.entity.MpInfo;
+import cn.jia.wx.entity.MpInfoExample;
 import cn.jia.wx.service.MpInfoService;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.mp.bean.template.WxMpTemplateData;
@@ -21,10 +24,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -49,7 +50,6 @@ public class TaskSchedule {
 	@Scheduled(cron = "0 0/10 * * * ?")
 	public void taskAlert() {
 		List<String> openidList = new ArrayList<>();
-		String wxAppId = dictService.selectByDictTypeAndDictValue(Constants.DICT_TYPE_TASK_CONFIG, Constants.TASK_CONFIG_WX_APP_ID).getName();
         String url = dictService.selectByDictTypeAndDictValue(Constants.DICT_TYPE_TASK_CONFIG, Constants.TASK_CONFIG_NOTIFY_URL).getName();
 
 		TaskItemVOExample example = new TaskItemVOExample();
@@ -59,14 +59,25 @@ public class TaskSchedule {
 		example.setTimeStart(now);
 		example.setTimeEnd(now + 10 * 60 - 1);
 		List<TaskItemVO> taskList = taskService.findItems(example, 1, Integer.MAX_VALUE);
+		List<String> jiacns = taskList.stream().map(TaskItemVO::getJiacn).distinct().collect(Collectors.toList());
+		UserExample userExample = new UserExample();
+		userExample.setJiacnList(jiacns);
+		List<User> userList = userService.list(userExample);
+		Map<String, User> userJiacnMap = userList.stream().collect(Collectors.toMap(User::getJiacn, ee -> ee));
+		MpInfoExample mpInfoExample = new MpInfoExample();
+		List<String> clientIds = taskList.stream().map(TaskItemVO::getClientId).distinct().collect(Collectors.toList());
+		mpInfoExample.setClientIdList(clientIds);
+		List<MpInfo> mpInfoList = mpInfoService.list(mpInfoExample);
+		Map<String, String> appIdMap = mpInfoList.stream().collect(Collectors.toMap(MpInfo::getClientId, MpInfo::getAppid));
+
 		for(TaskItemVO vo : taskList) {
-			User user = userService.findByJiacn(vo.getJiacn());
+			User user = userJiacnMap.get(vo.getJiacn());
 			if(user != null) {
 				String msgType = user.getMsgType();
 				String openid = user.getOpenid();
 				if(containMsgType(msgType, Constants.MESSAGE_TYPE_WX) && StringUtils.isNotEmpty(openid)
 						&& StringUtils.isNotEmpty(user.getSubscribe())
-						&& Arrays.asList(user.getSubscribe().split(",")).contains(wxAppId)) {
+						&& Arrays.asList(user.getSubscribe().split(",")).contains("wxAppId")) {
 					openidList.add(openid);
 				}
 				
@@ -107,7 +118,7 @@ public class TaskSchedule {
 					log.info(JSONUtil.toJson(message));
 
                     try {
-                        mpInfoService.findWxMpService(wxAppId).getTemplateMsgService().sendTemplateMsg(message);
+                        mpInfoService.findWxMpService(appIdMap.get(vo.getClientId())).getTemplateMsgService().sendTemplateMsg(message);
                     } catch (Exception e) {
                         log.error("TaskSchedule.taskAlert", e);
                     }

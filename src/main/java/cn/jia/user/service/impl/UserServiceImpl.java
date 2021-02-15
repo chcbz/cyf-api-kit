@@ -122,7 +122,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public Page<User> list(User example, int pageNo, int pageSize) {
+	public Page<User> list(UserExample example, int pageNo, int pageSize) {
 		PageHelper.startPage(pageNo, pageSize);
 		return userMapper.selectByExample(example);
 	}
@@ -241,9 +241,9 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public Page<User> listByOrgId(UserExample example, int pageNo, int pageSize) {
+	public Page<User> listByOrgId(Integer orgId, int pageNo, int pageSize) {
 		PageHelper.startPage(pageNo, pageSize);
-		return userMapper.selectByOrg(example);
+		return userMapper.selectByOrg(orgId);
 	}
 
 	@Override
@@ -439,5 +439,11 @@ public class UserServiceImpl implements UserService {
 				}
 			}
 		}
+	}
+
+	@Override
+	public List<User> list(UserExample example) {
+		PageHelper.startPage(1, Integer.MAX_VALUE);
+		return userMapper.selectByExample(example);
 	}
 }

@@ -1,10 +1,10 @@
 package cn.jia.wx.schedule;
 
-import cn.jia.BaseTest;
 import cn.jia.core.service.DictService;
 import cn.jia.material.entity.VoteItem;
 import cn.jia.material.entity.VoteQuestion;
 import cn.jia.material.service.VoteService;
+import cn.jia.test.BaseTest;
 import cn.jia.user.entity.User;
 import cn.jia.user.service.UserService;
 import cn.jia.wx.service.MpInfoService;

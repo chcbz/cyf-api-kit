@@ -299,21 +299,21 @@ CREATE TABLE oauth_client  (
 -- Table structure for point_gift
 -- ----------------------------
 DROP TABLE IF EXISTS point_gift;
-CREATE TABLE point_gift  (
-  id int NOT NULL AUTO_INCREMENT,
-  client_id varchar(50) NULL DEFAULT NULL,
-  name varchar(100) NULL DEFAULT NULL,
-  description varchar(1000) NULL DEFAULT NULL,
-  pic_url varchar(200) NULL DEFAULT NULL,
-  point int NULL DEFAULT NULL,
-  price int NULL DEFAULT NULL,
-  quantity int NULL DEFAULT NULL,
-  virtual int NULL DEFAULT 0,
-  status int NULL DEFAULT 1,
-  create_time bigint NULL DEFAULT NULL,
-  update_time bigint NULL DEFAULT NULL,
+CREATE TABLE point_gift (
+  id int NOT NULL AUTO_INCREMENT COMMENT '礼品ID',
+  client_id varchar(50) DEFAULT NULL COMMENT '应用标识码',
+  name varchar(100) DEFAULT NULL COMMENT '礼品名称',
+  description varchar(1000) DEFAULT NULL COMMENT '礼品描述',
+  pic_url varchar(200) DEFAULT NULL COMMENT '礼品图片地址',
+  point int DEFAULT NULL COMMENT '礼品所需积分',
+  price int DEFAULT NULL COMMENT '价格（单位：分）',
+  quantity int DEFAULT NULL COMMENT '礼品数量',
+  virtual_flag int DEFAULT '0' COMMENT '是否虚拟物品 0否 1是',
+  status int DEFAULT '1' COMMENT '状态 1上架 0下架',
+  create_time bigint DEFAULT NULL COMMENT '创建时间',
+  update_time bigint DEFAULT NULL COMMENT '最后更新时间',
   PRIMARY KEY (id)
-);
+) COMMENT='礼品信息';
 
 -- ----------------------------
 -- Table structure for point_gift_usage

@@ -1,11 +1,15 @@
 package cn.jia.wx.schedule;
 
 import cn.jia.base.entity.DelayObj;
+import cn.jia.core.exception.EsRuntimeException;
 import cn.jia.core.service.DictService;
 import cn.jia.core.util.DateUtil;
 import cn.jia.core.util.JSONUtil;
 import cn.jia.core.util.thread.ThreadRequest;
 import cn.jia.core.util.thread.ThreadRequestContent;
+import cn.jia.kefu.entity.KefuMsgTypeCode;
+import cn.jia.kefu.entity.KefuMsgType;
+import cn.jia.kefu.service.KefuService;
 import cn.jia.material.entity.Phrase;
 import cn.jia.material.entity.VoteItem;
 import cn.jia.material.entity.VoteQuestion;
@@ -14,6 +18,7 @@ import cn.jia.material.service.VoteService;
 import cn.jia.user.common.Constants;
 import cn.jia.wx.entity.MpUser;
 import cn.jia.wx.service.MpInfoService;
+import cn.jia.wx.service.MpTemplateService;
 import cn.jia.wx.service.MpUserService;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.api.WxConsts;
@@ -45,6 +50,10 @@ public class WxSchedule {
 	private DictService dictService;
 	@Autowired
 	private PhraseService phraseService;
+	@Autowired
+	private MpTemplateService mpTemplateService;
+	@Autowired
+	private KefuService kefuService;
 
 	/**
 	 * 每天7:30发送提问信息，同时生成每日一句处理队列
@@ -52,7 +61,8 @@ public class WxSchedule {
 	@Scheduled(cron = "0 30 7 * * ?")
 	public void sendVote() {
 		List<MpUser> phraseUserList = new ArrayList<>();
-		List<MpUser> userList = mpUserService.list(null, 1, Integer.MAX_VALUE);
+		List<MpUser> userList = mpUserService.list();
+		List<KefuMsgType> kefuMsgTypeList = kefuService.listMsgType();
 		long twoDay = DateUtil.genTime(new Date()) - 2 * 24 * 60 * 60;
 		for(MpUser user : userList) {
 			if(user.getSubscribeItems() != null && Arrays.asList(user.getSubscribeItems().split(",")).contains(Constants.SUBSCRIBE_VOTE)) {
@@ -92,7 +102,7 @@ public class WxSchedule {
 					data.add(keyword0);
 					WxMpTemplateData keyword1 = new WxMpTemplateData();
 					keyword1.setName("keyword1");
-					keyword1.setValue("保险知识普及");
+					keyword1.setValue("知识普及");
 					keyword1.setColor("#173177");
 					data.add(keyword1);
 					WxMpTemplateData keyword2 = new WxMpTemplateData();
@@ -108,10 +118,15 @@ public class WxSchedule {
 
 					WxMpTemplateMessage message = new WxMpTemplateMessage();
 					message.setToUser(user.getOpenId());
-					String templateId = dictService.selectByDictTypeAndDictValue(cn.jia.task.common.Constants.DICT_TYPE_TASK_CONFIG, cn.jia.task.common.Constants.TASK_CONFIG_WX_MSG_TEMPLATE_ID).getName();
-					message.setTemplateId(templateId);
+					Optional<KefuMsgType> kefuMsgType = kefuMsgTypeList.stream().filter(item ->
+							user.getClientId().equals(item.getClientId()) &&
+									KefuMsgTypeCode.VOTE.getCode().equals(item.getTypeCode())).findFirst();
+					message.setTemplateId(kefuMsgType.orElseThrow(() ->
+							new EsRuntimeException("找不到模板")).getWxTemplateId());
 					message.setData(data);
-					String baseUrl = dictService.selectByDictTypeAndDictValue(cn.jia.task.common.Constants.DICT_TYPE_TASK_CONFIG, cn.jia.task.common.Constants.TASK_CONFIG_NOTIFY_URL).getName();
+					String baseUrl = dictService.selectByDictTypeAndDictValue(
+							cn.jia.task.common.Constants.DICT_TYPE_TASK_CONFIG,
+							cn.jia.task.common.Constants.TASK_CONFIG_NOTIFY_URL).getName();
 					message.setUrl(baseUrl + "/vote");
 					mpInfoService.findWxMpService(user.getAppid()).getTemplateMsgService().sendTemplateMsg(message);
 					redisTemplate.opsForValue().set("vote_" + user.getOpenId(), question.getId(), 2, TimeUnit.HOURS);
@@ -148,7 +163,6 @@ public class WxSchedule {
 					}
 				}
 			}
-			public void onSuccess() {}
 		}).start();
 	}
 }

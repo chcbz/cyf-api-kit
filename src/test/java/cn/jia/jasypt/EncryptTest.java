@@ -1,6 +1,6 @@
 package cn.jia.jasypt;
 
-import cn.jia.BaseTest;
+import cn.jia.test.BaseTest;
 import org.jasypt.encryption.StringEncryptor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

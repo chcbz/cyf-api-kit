@@ -4,11 +4,11 @@ import cn.jia.core.common.EsSecurityHandler;
 import cn.jia.core.entity.JSONRequestPage;
 import cn.jia.core.entity.JSONResult;
 import cn.jia.core.entity.JSONResultPage;
-import cn.jia.point.entity.Gift;
 import cn.jia.point.entity.GiftExample;
-import cn.jia.point.entity.GiftUsage;
+import cn.jia.point.entity.PointGift;
+import cn.jia.point.entity.PointGiftUsage;
 import cn.jia.point.service.GiftService;
-import com.github.pagehelper.Page;
+import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -30,7 +30,7 @@ public class GiftController {
 //	@PreAuthorize("hasAuthority('gift-get')")
 	@RequestMapping(value = "/get", method = RequestMethod.GET)
 	public Object findById(@RequestParam(name = "id") Integer id) throws Exception {
-		Gift gift = giftService.find(id);
+		PointGift gift = giftService.find(id);
 		return JSONResult.success(gift);
 	}
 
@@ -41,7 +41,7 @@ public class GiftController {
 	 */
 	@PreAuthorize("hasAuthority('gift-create')")
 	@RequestMapping(value = "/create", method = RequestMethod.POST)
-	public Object create(@RequestBody Gift gift) {
+	public Object create(@RequestBody PointGift gift) {
 		giftService.create(gift);
 		return JSONResult.success();
 	}
@@ -53,7 +53,7 @@ public class GiftController {
 	 */
 	@PreAuthorize("hasAuthority('gift-update')")
 	@RequestMapping(value = "/update", method = RequestMethod.POST)
-	public Object update(@RequestBody Gift gift) {
+	public Object update(@RequestBody PointGift gift) {
 		giftService.update(gift);
 		return JSONResult.success();
 	}
@@ -77,8 +77,8 @@ public class GiftController {
 //	@PreAuthorize("hasAuthority('gift-list')")
 	@RequestMapping(value = "/list", method = RequestMethod.POST)
 	public Object list(@RequestBody JSONRequestPage<GiftExample> page) {
-		Page<Gift> giftList = giftService.list(page.getPageNum(), page.getPageSize(), page.getSearch());
-		JSONResultPage<Gift> result = new JSONResultPage<>(giftList.getResult());
+		PageInfo<PointGift> giftList = giftService.list(page.getPageNum(), page.getPageSize(), page.getSearch());
+		JSONResultPage<PointGift> result = new JSONResultPage<>(giftList.getList());
 		result.setPageNum(giftList.getPageNum());
 		result.setTotal(giftList.getTotal());
 		return result;
@@ -92,7 +92,7 @@ public class GiftController {
 	 */
 //	@PreAuthorize("hasAuthority('gift-usage_add')")
 	@RequestMapping(value = "/usage/add", method = RequestMethod.POST)
-	public Object usageAdd(@RequestBody GiftUsage giftUsage, HttpServletRequest request) throws Exception {
+	public Object usageAdd(@RequestBody PointGiftUsage giftUsage, HttpServletRequest request) throws Exception {
 		giftUsage.setClientId(EsSecurityHandler.clientId());
 		giftService.usage(giftUsage);
 		// 通知管理员
@@ -133,8 +133,8 @@ public class GiftController {
 //	@PreAuthorize("hasAuthority('gift-usage_list_gift')")
 	@RequestMapping(value = "/usage/list/gift/{giftId}", method = RequestMethod.POST)
 	public Object usageListByGift(@RequestBody JSONRequestPage<String> page, @PathVariable Integer giftId) {
-		Page<GiftUsage> usageList = giftService.usageListByGift(page.getPageNum(), page.getPageSize(), giftId);
-		JSONResultPage<GiftUsage> result = new JSONResultPage<>(usageList.getResult());
+		PageInfo<PointGiftUsage> usageList = giftService.usageListByGift(page.getPageNum(), page.getPageSize(), giftId);
+		JSONResultPage<PointGiftUsage> result = new JSONResultPage<>(usageList.getList());
 		result.setPageNum(usageList.getPageNum());
 		result.setTotal(usageList.getTotal());
 		return result;
@@ -148,9 +148,9 @@ public class GiftController {
 	 */
 //	@PreAuthorize("hasAuthority('gift-usage_list_user')")
 	@RequestMapping(value = "/usage/list/user/{user}", method = RequestMethod.POST)
-	public Object usageListByUser(@RequestBody JSONRequestPage<GiftUsage> page, @PathVariable String user) {
-		Page<GiftUsage> usageList = giftService.usageListByUser(page.getPageNum(), page.getPageSize(), user);
-		JSONResultPage<GiftUsage> result = new JSONResultPage<>(usageList.getResult());
+	public Object usageListByUser(@RequestBody JSONRequestPage<PointGiftUsage> page, @PathVariable String user) {
+		PageInfo<PointGiftUsage> usageList = giftService.usageListByUser(page.getPageNum(), page.getPageSize(), user);
+		JSONResultPage<PointGiftUsage> result = new JSONResultPage<>(usageList.getList());
 		result.setPageNum(usageList.getPageNum());
 		result.setTotal(usageList.getTotal());
 		return result;
