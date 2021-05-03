@@ -5,7 +5,7 @@ import cn.jia.core.util.DateUtil;
 import cn.jia.oauth.dao.ResourceMapper;
 import cn.jia.oauth.entity.Resource;
 import cn.jia.oauth.service.ResourceService;
-import cn.jia.user.common.ErrorConstants;
+import cn.jia.user.common.UserErrorConstants;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +32,7 @@ public class ResourceServiceImpl implements ResourceService {
 	public Resource find(String resourceId) throws Exception {
 		Resource resource = resourceMapper.selectByPrimaryKey(resourceId);
 		if(resource == null) {
-			throw new EsRuntimeException(ErrorConstants.DATA_NOT_FOUND);
+			throw new EsRuntimeException(UserErrorConstants.DATA_NOT_FOUND);
 		}
 		return resource;
 	}

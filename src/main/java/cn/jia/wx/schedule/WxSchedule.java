@@ -15,7 +15,8 @@ import cn.jia.material.entity.VoteItem;
 import cn.jia.material.entity.VoteQuestion;
 import cn.jia.material.service.PhraseService;
 import cn.jia.material.service.VoteService;
-import cn.jia.user.common.Constants;
+import cn.jia.task.common.TaskConstants;
+import cn.jia.user.common.UserConstants;
 import cn.jia.wx.entity.MpUser;
 import cn.jia.wx.service.MpInfoService;
 import cn.jia.wx.service.MpTemplateService;
@@ -65,7 +66,7 @@ public class WxSchedule {
 		List<KefuMsgType> kefuMsgTypeList = kefuService.listMsgType();
 		long twoDay = DateUtil.genTime(new Date()) - 2 * 24 * 60 * 60;
 		for(MpUser user : userList) {
-			if(user.getSubscribeItems() != null && Arrays.asList(user.getSubscribeItems().split(",")).contains(Constants.SUBSCRIBE_VOTE)) {
+			if(user.getSubscribeItems() != null && Arrays.asList(user.getSubscribeItems().split(",")).contains(UserConstants.SUBSCRIBE_VOTE)) {
 				VoteQuestion question = voteService.findOneQuestion(user.getJiacn());
 
 				if (user.getUpdateTime() > twoDay) {
@@ -124,9 +125,7 @@ public class WxSchedule {
 					message.setTemplateId(kefuMsgType.orElseThrow(() ->
 							new EsRuntimeException("找不到模板")).getWxTemplateId());
 					message.setData(data);
-					String baseUrl = dictService.selectByDictTypeAndDictValue(
-							cn.jia.task.common.Constants.DICT_TYPE_TASK_CONFIG,
-							cn.jia.task.common.Constants.TASK_CONFIG_NOTIFY_URL).getName();
+					String baseUrl = dictService.getValue(TaskConstants.DICT_TYPE_TASK_CONFIG, TaskConstants.TASK_CONFIG_NOTIFY_URL);
 					message.setUrl(baseUrl + "/vote");
 					mpInfoService.findWxMpService(user.getAppid()).getTemplateMsgService().sendTemplateMsg(message);
 					redisTemplate.opsForValue().set("vote_" + user.getOpenId(), question.getId(), 2, TimeUnit.HOURS);

@@ -2,7 +2,7 @@ package cn.jia.task.common;
 
 import cn.jia.core.common.EsConstants;
 
-public class Constants extends EsConstants {
+public class TaskConstants extends EsConstants {
 
 	/** 任务周期-长期 */
 	public static final Integer TASK_PERIOD_ALLTIME = 0;

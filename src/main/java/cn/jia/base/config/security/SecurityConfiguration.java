@@ -6,8 +6,8 @@ import cn.jia.core.entity.Action;
 import cn.jia.core.entity.JSONResult;
 import cn.jia.core.service.DictService;
 import cn.jia.core.util.StringUtils;
-import cn.jia.user.common.Constants;
-import cn.jia.user.common.ErrorConstants;
+import cn.jia.user.common.UserConstants;
+import cn.jia.user.common.UserErrorConstants;
 import cn.jia.user.entity.Org;
 import cn.jia.user.entity.Role;
 import cn.jia.user.entity.User;
@@ -101,7 +101,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 					for (Role role : roleService.listByUserId(user.getId(), org.getClientId(), 1, Integer.MAX_VALUE)) {
 						List<Action> perms = roleService.listPerms(role.getId(), 1, Integer.MAX_VALUE);
 						for(Action p : perms) {
-							if(Constants.PERMS_STATUS_ENABLE.equals(p.getStatus())) {
+							if(UserConstants.PERMS_STATUS_ENABLE.equals(p.getStatus())) {
 								GrantedAuthority grantedAuthority = new SimpleGrantedAuthority(p.getModule()+"-"+p.getFunc());
 								grantedAuthorities.add(grantedAuthority);
 							}
@@ -117,8 +117,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 					password = "wxpwd";
 				}else if(username.startsWith("mb-")) {
 					@SuppressWarnings("unchecked")
-					JSONResult<String> sms = restTemplate.getForObject("http://jia-api-sms/sms/use?phone={phone}&smsType={smsType}&access_token={access_token}", JSONResult.class, username.substring(3), Constants.SMS_TYPE_CODE, EsSecurityHandler.jiaToken());
-					if(ErrorConstants.SUCCESS.equals(sms.getCode())) {
+					JSONResult<String> sms = restTemplate.getForObject("http://jia-api-sms/sms/use?phone={phone}&smsType={smsType}&access_token={access_token}", JSONResult.class, username.substring(3), UserConstants.SMS_TYPE_CODE, EsSecurityHandler.jiaToken());
+					if(UserErrorConstants.SUCCESS.equals(sms.getCode())) {
 						password = sms.getData();
 					}
 				}
@@ -180,9 +180,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 		if(token != null && !token.equals("null") && !token.equals("")) {
 			return token;
 		}
-		String username = dictService.selectByDictTypeAndDictValue(Constants.DICT_TYPE_USER_CONFIG, Constants.USER_CONFIG_JIA_CLIENT_ID).getName();
-		String password = dictService.selectByDictTypeAndDictValue(Constants.DICT_TYPE_USER_CONFIG, Constants.USER_CONFIG_JIA_CLIENT_SECRET).getName();
-		String jiaUrl = dictService.selectByDictTypeAndDictValue(Constants.DICT_TYPE_USER_CONFIG, Constants.USER_CONFIG_JIA_SERVER_URL).getName();
+		String username = dictService.getValue(UserConstants.DICT_TYPE_USER_CONFIG, UserConstants.USER_CONFIG_JIA_CLIENT_ID);
+		String password = dictService.getValue(UserConstants.DICT_TYPE_USER_CONFIG, UserConstants.USER_CONFIG_JIA_CLIENT_SECRET);
+		String jiaUrl = dictService.getValue(UserConstants.DICT_TYPE_USER_CONFIG, UserConstants.USER_CONFIG_JIA_SERVER_URL);
 		Map<String, String> tokenParam = new HashMap<>();
 		tokenParam.put("grant_type", "client_credentials");
 		tokenParam.put("client_id", username);

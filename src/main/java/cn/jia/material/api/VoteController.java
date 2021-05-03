@@ -32,7 +32,7 @@ public class VoteController {
 	@GetMapping(value = "/get")
 	public Object findById(@RequestParam(name = "id") Integer id) throws Exception{
 		Vote vote = voteService.find(id);
-//		String material_url = dictService.selectByDictTypeAndDictValue(Constants.DICT_TYPE_MODULE_URL, Constants.MODULE_URL_MATERIAL).getName();
+//		String material_url = dictService.getValue(Constants.DICT_TYPE_MODULE_URL, Constants.MODULE_URL_MATERIAL);
 //		for(VoteQuestion question : vote.getQuestions()) {
 //			for(VoteItem item : question.getItems()) {
 //				item.setPicLink(material_url + "/" + item.getPicUrl());

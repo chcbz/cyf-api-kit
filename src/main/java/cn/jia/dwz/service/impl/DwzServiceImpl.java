@@ -6,7 +6,7 @@ import cn.jia.core.util.DateUtil;
 import cn.jia.dwz.dao.DwzRecordMapper;
 import cn.jia.dwz.entity.DwzRecord;
 import cn.jia.dwz.service.DwzService;
-import cn.jia.user.common.ErrorConstants;
+import cn.jia.user.common.UserErrorConstants;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +24,7 @@ public class DwzServiceImpl implements DwzService {
     public DwzRecord view(String uri) throws Exception {
         DwzRecord record = dwzRecordMapper.selectByUri(uri);
         if(record == null) {
-            throw new EsRuntimeException(ErrorConstants.DATA_NOT_FOUND);
+            throw new EsRuntimeException(UserErrorConstants.DATA_NOT_FOUND);
         }
         long now = DateUtil.genTime(new Date());
         DwzRecord upRecord = new DwzRecord();

@@ -92,7 +92,12 @@ public class MpInfoService {
 		return mpInfoService.save(mpInfo);
 	}
 
+	private void ttm() {
+		System.out.println("ttm");
+	}
+
 	public MpInfo find(Integer id) {
+		ttm();
 		return mpInfoService.getById(id);
 	}
 	

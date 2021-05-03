@@ -4,6 +4,8 @@ import cn.jia.core.common.EsSecurityHandler;
 import cn.jia.core.entity.JSONRequestPage;
 import cn.jia.core.entity.JSONResult;
 import cn.jia.core.entity.JSONResultPage;
+import cn.jia.kefu.entity.KefuMsgTypeCode;
+import cn.jia.kefu.service.KefuService;
 import cn.jia.point.entity.GiftExample;
 import cn.jia.point.entity.PointGift;
 import cn.jia.point.entity.PointGiftUsage;
@@ -21,6 +23,8 @@ public class GiftController {
 	
 	@Autowired
 	private GiftService giftService;
+	@Autowired
+	private KefuService kefuService;
 	
 	/**
 	 * 获取礼品信息
@@ -93,10 +97,11 @@ public class GiftController {
 //	@PreAuthorize("hasAuthority('gift-usage_add')")
 	@RequestMapping(value = "/usage/add", method = RequestMethod.POST)
 	public Object usageAdd(@RequestBody PointGiftUsage giftUsage, HttpServletRequest request) throws Exception {
-		giftUsage.setClientId(EsSecurityHandler.clientId());
+		String clientId = EsSecurityHandler.clientId();
+		giftUsage.setClientId(clientId);
 		giftService.usage(giftUsage);
 		// 通知管理员
-
+		kefuService.sendMessage(KefuMsgTypeCode.GIFT_USAGE, clientId);
 		return JSONResult.success(giftUsage);
 	}
 

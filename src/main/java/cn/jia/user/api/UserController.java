@@ -12,8 +12,8 @@ import cn.jia.isp.entity.IspFile;
 import cn.jia.isp.service.FileService;
 import cn.jia.sms.entity.SmsCode;
 import cn.jia.sms.service.SmsService;
-import cn.jia.user.common.Constants;
-import cn.jia.user.common.ErrorConstants;
+import cn.jia.user.common.UserConstants;
+import cn.jia.user.common.UserErrorConstants;
 import cn.jia.user.entity.*;
 import cn.jia.user.service.OrgService;
 import cn.jia.user.service.RoleService;
@@ -83,7 +83,7 @@ public class UserController {
 		}
 		
 		if(user == null) {
-			throw new EsRuntimeException(ErrorConstants.USER_NOT_EXIST);
+			throw new EsRuntimeException(UserErrorConstants.USER_NOT_EXIST);
 		}
 		user.setRoleIds(userService.findRoleIds(user.getId()));
 		user.setOrgIds(userService.findOrgIds(user.getId()));
@@ -375,7 +375,7 @@ public class UserController {
 	public Object changePosition(@RequestParam(name = "position") Integer position) throws Exception {
 		User user = userService.findByUsername(EsSecurityHandler.username());
 		if(user == null) {
-			throw new EsRuntimeException(ErrorConstants.DATA_NOT_FOUND);
+			throw new EsRuntimeException(UserErrorConstants.DATA_NOT_FOUND);
 		}
 		// 得到当前的认证信息
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -387,7 +387,7 @@ public class UserController {
 			for (Role role : roleService.listByUserId(user.getId(), org.getClientId(), 1, Integer.MAX_VALUE)) {
 				List<Action> perms = roleService.listPerms(role.getId(), 1, Integer.MAX_VALUE);
 				for(Action p : perms) {
-					if(Constants.PERMS_STATUS_ENABLE.equals(p.getStatus())) {
+					if(UserConstants.PERMS_STATUS_ENABLE.equals(p.getStatus())) {
 						GrantedAuthority grantedAuthority = new SimpleGrantedAuthority(p.getModule()+"-"+p.getFunc());
 						updatedAuthorities.add(grantedAuthority);
 					}

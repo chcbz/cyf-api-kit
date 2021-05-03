@@ -1,7 +1,7 @@
 package cn.jia.task.service;
 
 import cn.jia.core.util.DateUtil;
-import cn.jia.task.common.Constants;
+import cn.jia.task.common.TaskConstants;
 import cn.jia.task.entity.TaskPlan;
 import cn.jia.test.BaseTest;
 import org.junit.jupiter.api.Test;
@@ -26,17 +26,17 @@ public class TaskServiceTest extends BaseTest {
             task.setJiacn("oH2zD1PUPvspicVak69uB4wDaFLg");
             task.setName(names[i] + sexs[i] + "生日");
             task.setDescription("手机号码是" + phones[i] + "，请送上诚挚的问候。");
-            task.setRemind(Constants.TASK_REMIND_YES);
+            task.setRemind(TaskConstants.TASK_REMIND_YES);
             task.setRemindPhone(phones[i]);
             task.setRemindMsg("友谊不问名利但求诚心，朋友不问距离但求相应。人的一生消逝的是时间，收获的是朋友，祝您生日快乐！");
-            task.setType(Constants.TASK_TYPE_NOTIFY);
+            task.setType(TaskConstants.TASK_TYPE_NOTIFY);
             Calendar calendar = Calendar.getInstance();
             calendar.setTime(DateUtil.parseDate(births[i], "yyyy/MM/dd"));
             task.setStartTime(DateUtil.genTime(calendar.getTime()));
             calendar.add(Calendar.YEAR, Integer.parseInt(ages[i]) + 10);
             task.setEndTime(DateUtil.genTime(calendar.getTime()));
-            task.setLunar(Constants.COMMON_ENABLE);
-            task.setPeriod(Constants.TASK_REMIND_YES);
+            task.setLunar(TaskConstants.COMMON_ENABLE);
+            task.setPeriod(TaskConstants.TASK_REMIND_YES);
             taskService.create(task);
         }
     }

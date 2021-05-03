@@ -5,9 +5,9 @@ import cn.jia.core.exception.EsErrorConstants;
 /**
  * 错误常量
  * @author chc
- * @date 2017年12月8日 下午2:47:56
+ * @since 2017年12月8日 下午2:47:56
  */
-public class ErrorConstants extends EsErrorConstants {
+public class UserErrorConstants extends EsErrorConstants {
 	
 	/** 用户积分不够 */
 	public static final String POINT_NO_ENOUGH = "EUSER001";

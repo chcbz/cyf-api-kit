@@ -4,6 +4,7 @@ import cn.jia.test.BaseTest;
 import cn.jia.test.DbUnitHelper;
 import cn.jia.wx.entity.MpInfo;
 import cn.jia.wx.entity.MpInfoExample;
+import com.alibaba.testable.core.annotation.MockMethod;
 import com.github.springtestdbunit.annotation.DatabaseOperation;
 import com.github.springtestdbunit.annotation.DatabaseSetup;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 
 import javax.sql.DataSource;
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -28,6 +30,13 @@ class MpInfoServiceTest extends BaseTest {
     private DataSource dataSource;
     @Value("classpath:testObject/wx/mp_info_init.json")
     private Resource mpInfoResource;
+
+    public static class Mock {
+        @MockMethod(targetClass = IMpInfoService.class)
+        private <T> T getById(Serializable id) {
+            return (T)new MpInfo();
+        }
+    }
 
     @Test
     @DatabaseSetup(value = "classpath:testObject/wx/mp_info_init.xml", type = DatabaseOperation.CLEAN_INSERT)

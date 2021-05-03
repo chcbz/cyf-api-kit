@@ -8,7 +8,7 @@ import cn.jia.isp.entity.IspFile;
 import cn.jia.isp.entity.LdapUser;
 import cn.jia.isp.service.FileService;
 import cn.jia.isp.service.LdapUserService;
-import cn.jia.user.common.Constants;
+import cn.jia.user.common.UserConstants;
 import cn.jia.user.dao.RoleRelMapper;
 import cn.jia.user.dao.UserMapper;
 import cn.jia.user.entity.RoleRel;
@@ -92,7 +92,7 @@ public class MpUserService {
 		userMapper.insertSelective(u);
 		//设置默认角色
 		RoleRel rel = new RoleRel();
-		rel.setRoleId(Constants.DEFAULT_ROLE_ID);
+		rel.setRoleId(UserConstants.DEFAULT_ROLE_ID);
 		rel.setUserId(user.getId());
 		rel.setCreateTime(now);
 		rel.setUpdateTime(now);
@@ -101,7 +101,7 @@ public class MpUserService {
 		user.setJiacn(params.getUid());
 		user.setCreateTime(now);
 		user.setUpdateTime(now);
-		user.setStatus(Constants.COMMON_ENABLE);
+		user.setStatus(UserConstants.COMMON_ENABLE);
 		mpUserService.save(user);
 		return user;
 	}
@@ -201,7 +201,7 @@ public class MpUserService {
 				userMapper.insertSelective(u);
 				//设置默认角色
 				RoleRel rel = new RoleRel();
-				rel.setRoleId(Constants.DEFAULT_ROLE_ID);
+				rel.setRoleId(UserConstants.DEFAULT_ROLE_ID);
 				rel.setUserId(user.getId());
 				rel.setCreateTime(now);
 				rel.setUpdateTime(now);
@@ -210,7 +210,7 @@ public class MpUserService {
 				user.setJiacn(params.getUid());
 				user.setCreateTime(now);
 				user.setUpdateTime(now);
-				user.setStatus(Constants.COMMON_ENABLE);
+				user.setStatus(UserConstants.COMMON_ENABLE);
 				mpUserService.save(user);
 			} else {
 				BeanUtil.copyPropertiesIgnoreEmpty(user, mpUser);

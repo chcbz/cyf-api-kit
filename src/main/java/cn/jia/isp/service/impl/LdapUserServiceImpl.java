@@ -4,7 +4,7 @@ import cn.jia.core.exception.EsRuntimeException;
 import cn.jia.core.util.DataUtil;
 import cn.jia.isp.entity.LdapUser;
 import cn.jia.isp.service.LdapUserService;
-import cn.jia.user.common.ErrorConstants;
+import cn.jia.user.common.UserErrorConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ldap.core.LdapTemplate;
 import org.springframework.ldap.query.ContainerCriteria;
@@ -32,7 +32,7 @@ public class LdapUserServiceImpl implements LdapUserService {
 		try {
 			return ldapTemplate.findOne(query().base("ou=users,dc=jia").where("uid").is(uid), LdapUser.class);
 		} catch (Exception e) {
-			throw new EsRuntimeException(ErrorConstants.USER_NOT_EXIST);
+			throw new EsRuntimeException(UserErrorConstants.USER_NOT_EXIST);
 		}
 	}
 	
@@ -70,7 +70,7 @@ public class LdapUserServiceImpl implements LdapUserService {
 			}
 			return ldapTemplate.findOne(criteria, LdapUser.class);
 		} catch (Exception e) {
-			throw new EsRuntimeException(ErrorConstants.USER_NOT_EXIST);
+			throw new EsRuntimeException(UserErrorConstants.USER_NOT_EXIST);
 		}
 	}
 
@@ -97,7 +97,7 @@ public class LdapUserServiceImpl implements LdapUserService {
 			criteria.and(subCriteria);
 			return ldapTemplate.find(criteria, LdapUser.class);
 		} catch (Exception e) {
-			throw new EsRuntimeException(ErrorConstants.USER_NOT_EXIST);
+			throw new EsRuntimeException(UserErrorConstants.USER_NOT_EXIST);
 		}
 	}
 

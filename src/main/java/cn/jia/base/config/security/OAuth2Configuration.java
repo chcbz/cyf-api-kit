@@ -4,7 +4,7 @@ import cn.jia.core.entity.JSONResult;
 import cn.jia.core.util.JSONUtil;
 import cn.jia.oauth.entity.Client;
 import cn.jia.oauth.service.ClientService;
-import cn.jia.user.common.ErrorConstants;
+import cn.jia.user.common.UserErrorConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -46,7 +46,7 @@ public class OAuth2Configuration {
                 log.warn(authException.getMessage(), authException);
                 JSONResult<Object> result = new JSONResult<>();
                 result.setMsg(authException.getMessage());
-                result.setCode(ErrorConstants.UNAUTHORIZED);
+                result.setCode(UserErrorConstants.UNAUTHORIZED);
                 result.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.setCharacterEncoding("UTF-8");
@@ -73,7 +73,7 @@ public class OAuth2Configuration {
                 } else {
                     result.setMsg(authException.getMessage());
                 }
-                result.setCode(ErrorConstants.UNAUTHORIZED);
+                result.setCode(UserErrorConstants.UNAUTHORIZED);
                 result.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.setCharacterEncoding("UTF-8");

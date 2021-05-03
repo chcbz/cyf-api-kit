@@ -14,6 +14,7 @@ import cn.jia.material.service.NewsService;
 import cn.jia.sms.entity.SmsConfig;
 import cn.jia.sms.entity.SmsSend;
 import cn.jia.sms.service.SmsService;
+import cn.jia.user.common.UserErrorConstants;
 import cn.jia.user.entity.User;
 import cn.jia.user.service.UserService;
 import cn.jia.wx.service.MpInfoService;
@@ -78,7 +79,7 @@ public class NewsController {
 		if(news == null) {
 			throw new EsRuntimeException(ErrorConstants.MEDIA_NOT_EXIST);
 		}
-//		String material_url = dictService.selectByDictTypeAndDictValue(Constants.DICT_TYPE_MODULE_URL, Constants.MODULE_URL_MATERIAL).getName();
+//		String material_url = dictService.getValue(Constants.DICT_TYPE_MODULE_URL, Constants.MODULE_URL_MATERIAL);
 //		news.setPicurl(material_url +"/"+news.getPicurl());
 //		news.setBodyurl(material_url +"/"+news.getBodyurl());
 		return JSONResult.success(news);
@@ -125,7 +126,7 @@ public class NewsController {
 	public Object list(@RequestBody JSONRequestPage<String> page) {
 		News example = JSONUtil.fromJson(page.getSearch(), News.class);
 		Page<News> newsList = newsService.list(page.getPageNum(), page.getPageSize(), example);
-//		String material_url = dictService.selectByDictTypeAndDictValue(Constants.DICT_TYPE_MODULE_URL, Constants.MODULE_URL_MATERIAL).getName();
+//		String material_url = dictService.getValue(Constants.DICT_TYPE_MODULE_URL, Constants.MODULE_URL_MATERIAL);
 //		List<News> newss = newsList.getResult().stream().map(news -> {
 //			news.setPicurl(material_url +"/"+news.getPicurl());
 //			news.setBodyurl(material_url +"/"+news.getBodyurl());
@@ -162,7 +163,7 @@ public class NewsController {
 
 		if(Constants.SEND_TYPE_WX.equals(type)) {
 			if(StringUtils.isEmpty(user.getOpenid())) {
-				throw new EsRuntimeException(cn.jia.user.common.ErrorConstants.USER_NOT_EXIST);
+				throw new EsRuntimeException(UserErrorConstants.USER_NOT_EXIST);
 			}
 			File file = new File(webRealPath+"/"+news.getPicurl());
 
@@ -221,26 +222,26 @@ public class NewsController {
 			}
 		} else if(Constants.SEND_TYPE_MAIL.equals(type)) {
 			if(StringUtils.isEmpty(user.getEmail())) {
-				throw new EsRuntimeException(cn.jia.user.common.ErrorConstants.USER_NOT_EXIST);
+				throw new EsRuntimeException(UserErrorConstants.USER_NOT_EXIST);
 			}
-			String from = dictService.selectByDictTypeAndDictValue(cn.jia.sms.common.Constants.DICT_TYPE_EMAIL_SERVER, cn.jia.sms.common.Constants.EMAIL_SERVER_FROM).getName();
-			String name = dictService.selectByDictTypeAndDictValue(cn.jia.sms.common.Constants.DICT_TYPE_EMAIL_SERVER, cn.jia.sms.common.Constants.EMAIL_SERVER_NAME).getName();
-			String password = dictService.selectByDictTypeAndDictValue(cn.jia.sms.common.Constants.DICT_TYPE_EMAIL_SERVER, cn.jia.sms.common.Constants.EMAIL_SERVER_PASSWORD).getName();
-			String smtp = dictService.selectByDictTypeAndDictValue(cn.jia.sms.common.Constants.DICT_TYPE_EMAIL_SERVER, cn.jia.sms.common.Constants.EMAIL_SERVER_SMTP).getName();
+			String from = dictService.getValue(cn.jia.sms.common.Constants.DICT_TYPE_EMAIL_SERVER, cn.jia.sms.common.Constants.EMAIL_SERVER_FROM);
+			String name = dictService.getValue(cn.jia.sms.common.Constants.DICT_TYPE_EMAIL_SERVER, cn.jia.sms.common.Constants.EMAIL_SERVER_NAME);
+			String password = dictService.getValue(cn.jia.sms.common.Constants.DICT_TYPE_EMAIL_SERVER, cn.jia.sms.common.Constants.EMAIL_SERVER_PASSWORD);
+			String smtp = dictService.getValue(cn.jia.sms.common.Constants.DICT_TYPE_EMAIL_SERVER, cn.jia.sms.common.Constants.EMAIL_SERVER_SMTP);
 
 			if(!EmailUtil.doSend(news.getTitle(), StreamUtil.readText(new FileInputStream(webRealPath + "/"+news.getBodyurl())), from, user.getEmail(), name, password, smtp)) {
 				throw new EsRuntimeException();
 			}
 		} else if(Constants.SEND_TYPE_SMS.equals(type)) {
 			if(StringUtils.isEmpty(user.getPhone())) {
-				throw new EsRuntimeException(cn.jia.user.common.ErrorConstants.USER_NOT_EXIST);
+				throw new EsRuntimeException(UserErrorConstants.USER_NOT_EXIST);
 			}
 			String tkey = DateUtil.getDate("yyyyMMddHHmmss");
-			String smsUsername = dictService.selectByDictTypeAndDictValue(cn.jia.sms.common.Constants.DICT_TYPE_SMS_CONFIG, cn.jia.sms.common.Constants.SMS_CONFIG_USERNAME).getName();
-			String smsPassword = dictService.selectByDictTypeAndDictValue(cn.jia.sms.common.Constants.DICT_TYPE_SMS_CONFIG, cn.jia.sms.common.Constants.SMS_CONFIG_PASSWORD).getName();
+			String smsUsername = dictService.getValue(cn.jia.sms.common.Constants.DICT_TYPE_SMS_CONFIG, cn.jia.sms.common.Constants.SMS_CONFIG_USERNAME);
+			String smsPassword = dictService.getValue(cn.jia.sms.common.Constants.DICT_TYPE_SMS_CONFIG, cn.jia.sms.common.Constants.SMS_CONFIG_PASSWORD);
 			String passwd = MD5Util.str2Base32MD5(MD5Util.str2Base32MD5(smsPassword) + tkey);
 
-			String jiaUrl =  dictService.selectByDictTypeAndDictValue(Constants.DICT_TYPE_JIA_CONFIG, Constants.JIA_CONFIG_SERVER_URL).getName();
+			String jiaUrl =  dictService.getValue(Constants.DICT_TYPE_JIA_CONFIG, Constants.JIA_CONFIG_SERVER_URL);
 			String mobile = user.getPhone();
 			SmsConfig config = smsService.selectConfig(EsSecurityHandler.clientId());
 			String content = "【" + config.getShortName() + "】" + news.getTitle() + " " + jiaUrl + "/file/res/"+ news.getBodyurl();

@@ -4,6 +4,7 @@ import cn.jia.core.service.DictService;
 import cn.jia.material.entity.VoteItem;
 import cn.jia.material.entity.VoteQuestion;
 import cn.jia.material.service.VoteService;
+import cn.jia.task.common.TaskConstants;
 import cn.jia.test.BaseTest;
 import cn.jia.user.entity.User;
 import cn.jia.user.service.UserService;
@@ -40,7 +41,7 @@ public class WxScheduleTest extends BaseTest {
     @Disabled
     void sendTemplateMessage() throws Exception {
         User user = userService.findByJiacn("oH2zD1PUPvspicVak69uB4wDaFLg");
-        String wxAppId = dictService.selectByDictTypeAndDictValue(cn.jia.task.common.Constants.DICT_TYPE_TASK_CONFIG, cn.jia.task.common.Constants.TASK_CONFIG_WX_APP_ID).getName();
+        String wxAppId = dictService.getValue(TaskConstants.DICT_TYPE_TASK_CONFIG, TaskConstants.TASK_CONFIG_WX_APP_ID);
         VoteQuestion question = voteService.findOneQuestion(user.getJiacn());
         List<WxMpTemplateData> data = new ArrayList<>();
         WxMpTemplateData keyword0 = new WxMpTemplateData();
@@ -70,10 +71,10 @@ public class WxScheduleTest extends BaseTest {
 
         WxMpTemplateMessage message = new WxMpTemplateMessage();
         message.setToUser(user.getOpenid());
-        String templateId = dictService.selectByDictTypeAndDictValue(cn.jia.task.common.Constants.DICT_TYPE_TASK_CONFIG, cn.jia.task.common.Constants.TASK_CONFIG_WX_MSG_TEMPLATE_ID).getName();
+        String templateId = dictService.getValue(TaskConstants.DICT_TYPE_TASK_CONFIG, TaskConstants.TASK_CONFIG_WX_MSG_TEMPLATE_ID);
         message.setTemplateId(templateId);
         message.setData(data);
-        String baseUrl = dictService.selectByDictTypeAndDictValue(cn.jia.task.common.Constants.DICT_TYPE_TASK_CONFIG, cn.jia.task.common.Constants.TASK_CONFIG_NOTIFY_URL).getName();
+        String baseUrl = dictService.getValue(TaskConstants.DICT_TYPE_TASK_CONFIG, TaskConstants.TASK_CONFIG_NOTIFY_URL);
         message.setUrl(baseUrl + "/vote");
         mpInfoService.findWxMpService(wxAppId).getTemplateMsgService().sendTemplateMsg(message);
     }

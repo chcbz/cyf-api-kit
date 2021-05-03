@@ -8,8 +8,8 @@ import cn.jia.core.util.ImgUtil;
 import cn.jia.core.util.StringUtils;
 import cn.jia.isp.entity.LdapUser;
 import cn.jia.isp.service.LdapUserService;
-import cn.jia.user.common.Constants;
-import cn.jia.user.common.ErrorConstants;
+import cn.jia.user.common.UserConstants;
+import cn.jia.user.common.UserErrorConstants;
 import cn.jia.user.dao.GroupRelMapper;
 import cn.jia.user.dao.OrgRelMapper;
 import cn.jia.user.dao.RoleRelMapper;
@@ -86,7 +86,7 @@ public class UserServiceImpl implements UserService {
 		searchUser.setOpenid(StringUtils.isEmpty(user.getOpenid()) ? null : user.getOpenid());
 		Page<User> curUser = this.search(searchUser, 1, 1);
 		if(curUser != null && curUser.getResult().size() > 0) {
-			throw new EsRuntimeException(ErrorConstants.USER_HAS_EXIST);
+			throw new EsRuntimeException(UserErrorConstants.USER_HAS_EXIST);
 		}else {
 			Long now = DateUtil.genTime(new Date());
 			user.setCreateTime(now);
@@ -94,7 +94,7 @@ public class UserServiceImpl implements UserService {
 			userMapper.insertSelective(user);
 			//设置默认角色
 			RoleRel rel = new RoleRel();
-			rel.setRoleId(Constants.DEFAULT_ROLE_ID);
+			rel.setRoleId(UserConstants.DEFAULT_ROLE_ID);
 			rel.setUserId(user.getId());
 			rel.setCreateTime(now);
 			rel.setUpdateTime(now);
@@ -134,13 +134,13 @@ public class UserServiceImpl implements UserService {
 	public void changePoint(String jiacn, int add) throws Exception{
 		User user = userMapper.selectByJiacn(jiacn);
 		if(user == null) {
-			throw new EsRuntimeException(ErrorConstants.USER_NOT_EXIST);
+			throw new EsRuntimeException(UserErrorConstants.USER_NOT_EXIST);
 		}
 		User upUser = new User();
 		upUser.setId(user.getId());
 		upUser.setPoint(user.getPoint() + add);
 		if(upUser.getPoint() < 0) {
-			throw new EsRuntimeException(ErrorConstants.POINT_NO_ENOUGH);
+			throw new EsRuntimeException(UserErrorConstants.POINT_NO_ENOUGH);
 		}
 		upUser.setUpdateTime(DateUtil.genTime(new Date()));
 		userMapper.updateByPrimaryKeySelective(upUser);
@@ -332,7 +332,7 @@ public class UserServiceImpl implements UserService {
 				userMapper.insertSelective(user);
 				//设置默认角色
 				RoleRel rel = new RoleRel();
-				rel.setRoleId(Constants.DEFAULT_ROLE_ID);
+				rel.setRoleId(UserConstants.DEFAULT_ROLE_ID);
 				rel.setUserId(user.getId());
 				rel.setCreateTime(now);
 				rel.setUpdateTime(now);
@@ -390,10 +390,10 @@ public class UserServiceImpl implements UserService {
 	public void changePassword(Integer userId, String oldPassword, String newPassword) throws Exception {
 		User user = userMapper.selectByPrimaryKey(userId);
 		if(user == null) {
-			throw new EsRuntimeException(ErrorConstants.USER_NOT_EXIST);
+			throw new EsRuntimeException(UserErrorConstants.USER_NOT_EXIST);
 		}
 		if(!user.getPassword().equals(oldPassword)) {
-			throw new EsRuntimeException(ErrorConstants.OLD_PASSWORD_WRONG);
+			throw new EsRuntimeException(UserErrorConstants.OLD_PASSWORD_WRONG);
 		}
 		User upUser = new User();
 		upUser.setId(userId);
@@ -405,7 +405,7 @@ public class UserServiceImpl implements UserService {
 	public void resetPassword(String phone, String newPassword) throws Exception {
 		User user = userMapper.selectByPhone(phone);
 		if(user == null) {
-			throw new EsRuntimeException(ErrorConstants.USER_NOT_EXIST);
+			throw new EsRuntimeException(UserErrorConstants.USER_NOT_EXIST);
 		}
 
 		User upUser = new User();

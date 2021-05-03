@@ -7,6 +7,6 @@ import cn.jia.core.exception.EsErrorConstants;
  * @author chc
  * @date 2017年12月8日 下午2:47:56
  */
-public class ErrorConstants extends EsErrorConstants {
+public class TaskErrorConstants extends EsErrorConstants {
 	
 }

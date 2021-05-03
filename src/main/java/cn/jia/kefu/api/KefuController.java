@@ -16,7 +16,7 @@ import cn.jia.isp.service.FileService;
 import cn.jia.kefu.entity.KefuFaq;
 import cn.jia.kefu.entity.KefuMessage;
 import cn.jia.kefu.service.KefuService;
-import cn.jia.user.common.ErrorConstants;
+import cn.jia.user.common.UserErrorConstants;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -71,7 +71,7 @@ public class KefuController {
 	public Object findFAQById(@RequestParam(name = "id") Integer id) throws Exception {
 		KefuFaq record = kefuService.findFAQ(id);
 		if(record == null) {
-			throw new EsRuntimeException(ErrorConstants.DATA_NOT_FOUND);
+			throw new EsRuntimeException(UserErrorConstants.DATA_NOT_FOUND);
 		}
 		return JSONResult.success(record);
 	}
@@ -111,7 +111,7 @@ public class KefuController {
 	public Object deleteFAQ(@RequestParam(name = "id") Integer id) throws Exception {
 		KefuFaq record = kefuService.findFAQ(id);
 		if(record == null || !Objects.equals(EsSecurityHandler.clientId(), record.getClientId())) {
-			throw new EsRuntimeException(ErrorConstants.DATA_NOT_FOUND);
+			throw new EsRuntimeException(UserErrorConstants.DATA_NOT_FOUND);
 		}
 		kefuService.deleteFAQ(id);
 		return JSONResult.success();
@@ -147,7 +147,7 @@ public class KefuController {
 	public Object findMessageById(@RequestParam(name = "id") Integer id) throws Exception {
 		KefuMessage record = kefuService.findMessage(id);
 		if(record == null) {
-			throw new EsRuntimeException(ErrorConstants.DATA_NOT_FOUND);
+			throw new EsRuntimeException(UserErrorConstants.DATA_NOT_FOUND);
 		}
 		return JSONResult.success(record);
 	}
@@ -207,7 +207,7 @@ public class KefuController {
 	public Object deleteMessage(@RequestParam(name = "id") Integer id) throws Exception {
 		KefuMessage record = kefuService.findMessage(id);
 		if(record == null || !Objects.equals(EsSecurityHandler.clientId(), record.getClientId())) {
-			throw new EsRuntimeException(ErrorConstants.DATA_NOT_FOUND);
+			throw new EsRuntimeException(UserErrorConstants.DATA_NOT_FOUND);
 		}
 		kefuService.deleteMessage(id);
 		return JSONResult.success();

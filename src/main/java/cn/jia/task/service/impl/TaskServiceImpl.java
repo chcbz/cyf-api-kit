@@ -2,7 +2,7 @@ package cn.jia.task.service.impl;
 
 import cn.jia.core.util.DateUtil;
 import cn.jia.core.util.LunarUtil;
-import cn.jia.task.common.Constants;
+import cn.jia.task.common.TaskConstants;
 import cn.jia.task.dao.TaskItemMapper;
 import cn.jia.task.dao.TaskItemVOMapper;
 import cn.jia.task.dao.TaskPlanMapper;
@@ -34,11 +34,11 @@ public class TaskServiceImpl implements TaskService {
 		task.setUpdateTime(now);
 		taskPlanMapper.insertSelective(task);
 		//保存任务执行明细
-		if(Constants.TASK_PERIOD_ALLTIME.equals(task.getType())) {
+		if(TaskConstants.TASK_PERIOD_ALLTIME.equals(task.getType())) {
 			TaskItem item = new TaskItem();
 			item.setPlanId(task.getId());
 			taskItemMapper.insertSelective(item);
-		} else if(Constants.TASK_PERIOD_DATE.equals(task.getType())) {
+		} else if(TaskConstants.TASK_PERIOD_DATE.equals(task.getType())) {
 			TaskItem item = new TaskItem();
 			item.setPlanId(task.getId());
 			item.setTime(task.getStartTime());
@@ -53,12 +53,12 @@ public class TaskServiceImpl implements TaskService {
 			do {
 				Calendar c = Calendar.getInstance();
 				c.setTime(new Date(time * 1000));
-				if(Constants.COMMON_YES.equals(task.getLunar())) {
+				if(TaskConstants.COMMON_YES.equals(task.getLunar())) {
 					LunarUtil.Lunar l = LunarUtil.solarToLunar(c.getTime());
 					int m = l.lunarMonth;
 					int d = l.lunarDay;
-					if((Constants.TASK_PERIOD_YEAR.equals(task.getPeriod()) && month == m && day == d) ||
-							(Constants.TASK_PERIOD_MONTH.equals(task.getPeriod()) && day == d)) {
+					if((TaskConstants.TASK_PERIOD_YEAR.equals(task.getPeriod()) && month == m && day == d) ||
+							(TaskConstants.TASK_PERIOD_MONTH.equals(task.getPeriod()) && day == d)) {
 						//保存当前执行点
 						TaskItem item = new TaskItem();
 						item.setPlanId(task.getId());
@@ -98,11 +98,11 @@ public class TaskServiceImpl implements TaskService {
 		//清空原有任务执行明细
 		taskItemMapper.deleteByPlan(task.getId());
 		//保存任务执行明细
-		if(Constants.TASK_PERIOD_ALLTIME.equals(task.getType())) {
+		if(TaskConstants.TASK_PERIOD_ALLTIME.equals(task.getType())) {
 			TaskItem item = new TaskItem();
 			item.setPlanId(task.getId());
 			taskItemMapper.insertSelective(item);
-		} else if(Constants.TASK_PERIOD_DATE.equals(task.getType())) {
+		} else if(TaskConstants.TASK_PERIOD_DATE.equals(task.getType())) {
 			TaskItem item = new TaskItem();
 			item.setPlanId(task.getId());
 			item.setTime(task.getStartTime());

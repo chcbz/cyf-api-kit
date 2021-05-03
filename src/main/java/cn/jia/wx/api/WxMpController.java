@@ -17,6 +17,7 @@ import cn.jia.material.service.VoteService;
 import cn.jia.point.entity.*;
 import cn.jia.point.service.GiftService;
 import cn.jia.point.service.PointService;
+import cn.jia.user.common.UserConstants;
 import cn.jia.user.entity.User;
 import cn.jia.user.service.UserService;
 import cn.jia.wx.common.Constants;
@@ -290,7 +291,7 @@ public class WxMpController {
 					item.setDescription(String.valueOf(gift.getDescription()));
 					item.setPicUrl(String.valueOf(gift.getPicUrl()));
 					item.setTitle(EsHandler.getMessage(request, "gift.title", new String[] {String.valueOf(gift.getName()), String.valueOf(gift.getPoint())}));
-					String pointWebUrl = dictService.selectByDictTypeAndDictValue(Constants.DICT_TYPE_WX_CONFIG, Constants.WX_CONFIG_POINT_WEB_URL).getName();
+					String pointWebUrl = dictService.getValue(Constants.DICT_TYPE_WX_CONFIG, Constants.WX_CONFIG_POINT_WEB_URL);
 					item.setUrl(pointWebUrl + "/pay?id=" + gift.getId());
 					newsMessage.addArticle(item);
 				}
@@ -304,13 +305,13 @@ public class WxMpController {
 				imageMessage.setToUserName(message.getFromUser());
 				imageMessage.setMsgType(WxConsts.XmlMsgType.IMAGE);
 				//生成二维码
-				String shareHandlerUrl = dictService.selectByDictTypeAndDictValue(Constants.DICT_TYPE_WX_CONFIG, Constants.WX_CONFIG_MP_SHARE_URL).getName();
+				String shareHandlerUrl = dictService.getValue(Constants.DICT_TYPE_WX_CONFIG, Constants.WX_CONFIG_MP_SHARE_URL);
 				shareHandlerUrl = HttpUtil.addUrlValue(shareHandlerUrl, "referrer", message.getFromUser());
 				String shareUrl = "https://open.weixin.qq.com/connect/oauth2/authorize?appid="+appid+"&redirect_uri="+URLEncoder.encode(shareHandlerUrl, "utf-8")+"&response_type=code&scope=snsapi_userinfo&state=wx_snsapi_userinfo&connect_redirect=1#wechat_redirect";
 				File qrFile = File.createTempFile("wx-qrcode", ".jpg");
-				String dwzServerUrl = dictService.selectByDictTypeAndDictValue(Constants.DICT_TYPE_WX_CONFIG, Constants.WX_CONFIG_DWZ_SERVER_URL).getName();
+				String dwzServerUrl = dictService.getValue(Constants.DICT_TYPE_WX_CONFIG, Constants.WX_CONFIG_DWZ_SERVER_URL);
 				QRCodeUtil.encode(qrFile.getParent(), qrFile.getName(), dwzServerUrl + "/" + dwzService.gen(mpUser.getJiacn(), shareUrl, null), 200, 200);
-				String logoUrl = dictService.selectByDictTypeAndDictValue(Constants.DICT_TYPE_WX_CONFIG, Constants.WX_CONFIG_MP_LOGO_URL).getName();
+				String logoUrl = dictService.getValue(Constants.DICT_TYPE_WX_CONFIG, Constants.WX_CONFIG_MP_LOGO_URL);
 				File logoFile = File.createTempFile("wx-logo", ".jpg");
 				IOUtils.write(ImgUtil.fromURL(logoUrl), new FileOutputStream(logoFile));
 				QRCodeUtil.composeLogo(qrFile, logoFile, qrFile);
@@ -331,7 +332,7 @@ public class WxMpController {
 
 			if("TD".equalsIgnoreCase(message.getContent())) {
 				List<String> subscribe = new ArrayList<>(Arrays.asList(mpUser.getSubscribeItems().split(",")));
-				subscribe.remove(cn.jia.user.common.Constants.SUBSCRIBE_VOTE);
+				subscribe.remove(UserConstants.SUBSCRIBE_VOTE);
 				MpUser upUser = new MpUser();
 				upUser.setId(mpUser.getId());
 				upUser.setSubscribeItems(Joiner.on(",").join(subscribe));

@@ -114,8 +114,8 @@ public class SmsController {
 		}
 		String content = "【" + config.getShortName() + "】" + smsService.findTemplate(templateId).getContent();
 		content = content.replace("{0}", smsCode);
-		String smsUsername = dictService.selectByDictTypeAndDictValue(Constants.DICT_TYPE_SMS_CONFIG, Constants.SMS_CONFIG_USERNAME).getName();
-		String smsPassword = dictService.selectByDictTypeAndDictValue(Constants.DICT_TYPE_SMS_CONFIG, Constants.SMS_CONFIG_PASSWORD).getName();
+		String smsUsername = dictService.getValue(Constants.DICT_TYPE_SMS_CONFIG, Constants.SMS_CONFIG_USERNAME);
+		String smsPassword = dictService.getValue(Constants.DICT_TYPE_SMS_CONFIG, Constants.SMS_CONFIG_PASSWORD);
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -162,8 +162,8 @@ public class SmsController {
 			throw new EsRuntimeException(ErrorConstants.SMS_NOT_ENOUGH);
 		}
 		
-		String smsUsername = dictService.selectByDictTypeAndDictValue(Constants.DICT_TYPE_SMS_CONFIG, Constants.SMS_CONFIG_USERNAME).getName();
-		String smsPassword = dictService.selectByDictTypeAndDictValue(Constants.DICT_TYPE_SMS_CONFIG, Constants.SMS_CONFIG_PASSWORD).getName();
+		String smsUsername = dictService.getValue(Constants.DICT_TYPE_SMS_CONFIG, Constants.SMS_CONFIG_USERNAME);
+		String smsPassword = dictService.getValue(Constants.DICT_TYPE_SMS_CONFIG, Constants.SMS_CONFIG_PASSWORD);
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -243,8 +243,8 @@ public class SmsController {
 	@PreAuthorize("hasAuthority('sms-balance')")
 	@RequestMapping(value = "/balance", method = RequestMethod.GET)
 	public Object balance() {
-		String smsUsername = dictService.selectByDictTypeAndDictValue(Constants.DICT_TYPE_SMS_CONFIG, Constants.SMS_CONFIG_USERNAME).getName();
-		String smsPassword = dictService.selectByDictTypeAndDictValue(Constants.DICT_TYPE_SMS_CONFIG, Constants.SMS_CONFIG_PASSWORD).getName();
+		String smsUsername = dictService.getValue(Constants.DICT_TYPE_SMS_CONFIG, Constants.SMS_CONFIG_USERNAME);
+		String smsPassword = dictService.getValue(Constants.DICT_TYPE_SMS_CONFIG, Constants.SMS_CONFIG_PASSWORD);
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -374,8 +374,8 @@ public class SmsController {
 	@RequestMapping(value = "/template/create", method = RequestMethod.POST)
 	public Object createTemplate(@RequestBody SmsTemplate sms) {
 		sms.setClientId(EsSecurityHandler.clientId());
-		String smsUsername = dictService.selectByDictTypeAndDictValue(Constants.DICT_TYPE_SMS_CONFIG, Constants.SMS_CONFIG_USERNAME).getName();
-		String smsPassword = dictService.selectByDictTypeAndDictValue(Constants.DICT_TYPE_SMS_CONFIG, Constants.SMS_CONFIG_PASSWORD).getName();
+		String smsUsername = dictService.getValue(Constants.DICT_TYPE_SMS_CONFIG, Constants.SMS_CONFIG_USERNAME);
+		String smsPassword = dictService.getValue(Constants.DICT_TYPE_SMS_CONFIG, Constants.SMS_CONFIG_PASSWORD);
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);

@@ -4,7 +4,7 @@ import cn.jia.core.common.EsSecurityHandler;
 import cn.jia.core.exception.EsRuntimeException;
 import cn.jia.core.util.DateUtil;
 import cn.jia.core.util.StringUtils;
-import cn.jia.user.common.ErrorConstants;
+import cn.jia.user.common.UserErrorConstants;
 import cn.jia.user.dao.OrgMapper;
 import cn.jia.user.dao.OrgRelMapper;
 import cn.jia.user.dao.RoleMapper;
@@ -113,7 +113,7 @@ public class OrgServiceImpl implements OrgService {
 	public String findDirector(Integer curOrgId, String role) throws Exception {
 		Role r = roleMapper.selectByCode(role);
 		if(r == null) {
-			throw new EsRuntimeException(ErrorConstants.ROLE_NOT_EXIST);
+			throw new EsRuntimeException(UserErrorConstants.ROLE_NOT_EXIST);
 		}
 		return findDirector(curOrgId, r.getId(), new HashSet<>());
 	}

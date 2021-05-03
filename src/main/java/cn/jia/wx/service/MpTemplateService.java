@@ -18,8 +18,8 @@ public class MpTemplateService {
 		return mpTemplateService.save(mpTemplate);
 	}
 
-	public MpTemplate find(Integer id) {
-		return mpTemplateService.getById(id);
+	public MpTemplate find(String templateId) {
+		return mpTemplateService.getById(templateId);
 	}
 
 	public PageInfo<MpTemplate> list(MpTemplate example, int pageNo, int pageSize) {

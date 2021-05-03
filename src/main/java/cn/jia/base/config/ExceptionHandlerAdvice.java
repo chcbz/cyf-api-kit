@@ -14,7 +14,7 @@ import cn.jia.core.entity.JSONResult;
 import cn.jia.core.entity.Result;
 import cn.jia.core.exception.EsRuntimeException;
 import cn.jia.core.service.DictService;
-import cn.jia.user.common.ErrorConstants;
+import cn.jia.user.common.UserErrorConstants;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -33,9 +33,9 @@ public class ExceptionHandlerAdvice {
 	public Result handleException(Exception e) {
 		log.error(e.getMessage(), e);
 		JSONResult<Object> result = new JSONResult<>();
-		result.setMsg(dictService.selectByDictTypeAndDictValue(EsConstants.DICT_TYPE_ERROR_CODE, ErrorConstants.DEFAULT_ERROR_CODE,
-				LocaleContextHolder.getLocale().toString()).getName());
-		result.setCode(ErrorConstants.DEFAULT_ERROR_CODE);
+		result.setMsg(dictService.getValue(EsConstants.DICT_TYPE_ERROR_CODE, UserErrorConstants.DEFAULT_ERROR_CODE,
+				LocaleContextHolder.getLocale().toString()));
+		result.setCode(UserErrorConstants.DEFAULT_ERROR_CODE);
 		return result;
 	}
 	
@@ -44,7 +44,7 @@ public class ExceptionHandlerAdvice {
 		log.warn(e.getMessage(), e);
 		JSONResult<Object> result = new JSONResult<>();
 		result.setMsg(e.getMessage());
-		result.setCode(ErrorConstants.DEFAULT_ERROR_CODE);
+		result.setCode(UserErrorConstants.DEFAULT_ERROR_CODE);
 		return result;
 	}
 	
@@ -55,8 +55,8 @@ public class ExceptionHandlerAdvice {
 		if(StringUtils.isNotEmpty(e.getMessage())){
 			result.setMsg(e.getMessage());
 		}else{
-			result.setMsg(dictService.selectByDictTypeAndDictValue(EsConstants.DICT_TYPE_ERROR_CODE, e.getMessageKey(),
-					LocaleContextHolder.getLocale().toString()).getName());
+			result.setMsg(dictService.getValue(EsConstants.DICT_TYPE_ERROR_CODE, e.getMessageKey(),
+					LocaleContextHolder.getLocale().toString()));
 		}
 		result.setCode(e.getMessageKey());
 		return result;
@@ -66,9 +66,9 @@ public class ExceptionHandlerAdvice {
 	public Result handleAccessDeniedException(AccessDeniedException e) {
 		log.warn(e.getMessage(), e);
 		JSONResult<Object> result = new JSONResult<>();
-		result.setMsg(dictService.selectByDictTypeAndDictValue(EsConstants.DICT_TYPE_ERROR_CODE, ErrorConstants.UNAUTHORIZED,
-				LocaleContextHolder.getLocale().toString()).getName());
-		result.setCode(ErrorConstants.UNAUTHORIZED);
+		result.setMsg(dictService.getValue(EsConstants.DICT_TYPE_ERROR_CODE, UserErrorConstants.UNAUTHORIZED,
+				LocaleContextHolder.getLocale().toString()));
+		result.setCode(UserErrorConstants.UNAUTHORIZED);
 		return result;
 	}
 }

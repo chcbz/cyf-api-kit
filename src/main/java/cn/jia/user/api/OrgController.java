@@ -9,8 +9,8 @@ import cn.jia.core.exception.EsRuntimeException;
 import cn.jia.core.util.*;
 import cn.jia.isp.entity.IspFile;
 import cn.jia.isp.service.FileService;
-import cn.jia.user.common.Constants;
-import cn.jia.user.common.ErrorConstants;
+import cn.jia.user.common.UserConstants;
+import cn.jia.user.common.UserErrorConstants;
 import cn.jia.user.entity.*;
 import cn.jia.user.service.OrgService;
 import cn.jia.user.service.RoleService;
@@ -49,7 +49,7 @@ public class OrgController {
 	public Object findAllById(@RequestParam(name = "id", required = true) Integer id) throws Exception {
 		Org org = orgService.find(id);
 		if(org == null) {
-			throw new EsRuntimeException(ErrorConstants.DATA_NOT_FOUND);
+			throw new EsRuntimeException(UserErrorConstants.DATA_NOT_FOUND);
 		}
 		//显示负责人名称列表
 		if(StringUtils.isNotEmpty(org.getDirector())) {
@@ -76,7 +76,7 @@ public class OrgController {
 	public Object findParent(@RequestParam(name = "id", required = true) Integer id) throws Exception {
 		Org org = orgService.findParent(id);
 		if(org == null) {
-			throw new EsRuntimeException(ErrorConstants.DATA_NOT_FOUND);
+			throw new EsRuntimeException(UserErrorConstants.DATA_NOT_FOUND);
 		}
 		return JSONResult.success(org);
 	}
@@ -92,7 +92,7 @@ public class OrgController {
 	public String findNameById(@RequestParam(name = "id", required = true) Integer id) throws Exception {
 		Org org = orgService.find(id);
 		if(org == null) {
-			throw new EsRuntimeException(ErrorConstants.DATA_NOT_FOUND);
+			throw new EsRuntimeException(UserErrorConstants.DATA_NOT_FOUND);
 		}
 		return org.getName();
 	}
@@ -194,7 +194,7 @@ public class OrgController {
 		}
 		//初始化用户权限
 		Role role = new Role();
-		role.setId(Constants.DEFAULT_ROLE_ID);
+		role.setId(UserConstants.DEFAULT_ROLE_ID);
 		role.setUserIds(org.getUserIds());
 		Org o = orgService.find(org.getId());
 		role.setClientId(o.getClientId());
@@ -230,19 +230,19 @@ public class OrgController {
 	public Object findDirector(@RequestParam("position") Integer position, @RequestParam("role") String role) throws Exception {
 		String director = orgService.findDirector(position, role);
 		if(StringUtils.isEmpty(director)) {
-			throw new EsRuntimeException(ErrorConstants.ORG_DIRECTOR_NOT_EXIST);
+			throw new EsRuntimeException(UserErrorConstants.ORG_DIRECTOR_NOT_EXIST);
 		}
 		UserVO user = null;
 		for(String s : director.split(",")) {
 			User u = userService.find(Integer.valueOf(s));
-			if(u != null && Constants.USER_STATUS_WORK.equals(u.getStatus())) {
+			if(u != null && UserConstants.USER_STATUS_WORK.equals(u.getStatus())) {
 				user = new UserVO();
 				BeanUtil.copyPropertiesIgnoreNull(u, user);
 				break;
 			}
 		}
 		if(user == null) {
-			throw new EsRuntimeException(ErrorConstants.ORG_DIRECTOR_NOT_EXIST);
+			throw new EsRuntimeException(UserErrorConstants.ORG_DIRECTOR_NOT_EXIST);
 		}
 		return JSONResult.success(user);
 	}

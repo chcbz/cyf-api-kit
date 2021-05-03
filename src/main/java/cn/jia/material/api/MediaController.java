@@ -48,7 +48,7 @@ public class MediaController {
 		if(media == null) {
 			throw new EsRuntimeException(ErrorConstants.MEDIA_NOT_EXIST);
 		}
-		media.setLink(dictService.selectByDictTypeAndDictValue(Constants.DICT_TYPE_MODULE_URL, Constants.MODULE_URL_MATERIAL).getName() +"/"+media.getUrl());
+		media.setLink(dictService.getValue(Constants.DICT_TYPE_MODULE_URL, Constants.MODULE_URL_MATERIAL) +"/"+media.getUrl());
 		return JSONResult.success(media);
 	}
 	
@@ -115,7 +115,7 @@ public class MediaController {
 	public Object list(@RequestBody JSONRequestPage<String> page) {
 		Media example = JSONUtil.fromJson(page.getSearch(), Media.class);
 		Page<Media> mediaList = mediaService.list(page.getPageNum(), page.getPageSize(), example);
-		List<Media> medias = mediaList.getResult().stream().peek(media -> media.setLink(dictService.selectByDictTypeAndDictValue(Constants.DICT_TYPE_MODULE_URL, Constants.MODULE_URL_MATERIAL).getName() +"/"+media.getUrl())).collect(Collectors.toList());
+		List<Media> medias = mediaList.getResult().stream().peek(media -> media.setLink(dictService.getValue(Constants.DICT_TYPE_MODULE_URL, Constants.MODULE_URL_MATERIAL) +"/"+media.getUrl())).collect(Collectors.toList());
 		JSONResultPage<Media> result = new JSONResultPage<>(medias);
 		result.setPageNum(mediaList.getPageNum());
 		result.setTotal(mediaList.getTotal());
@@ -133,7 +133,7 @@ public class MediaController {
 			throw new EsRuntimeException(ErrorConstants.MEDIA_TYPE_NEED);
 		}
 		Long now = DateUtil.genTime(new Date());
-		String mediaType = dictService.selectByDictTypeAndDictValue(Constants.DICT_TYPE_MEDIA_TYPE, String.valueOf(media.getType())).getName();
+		String mediaType = dictService.getValue(Constants.DICT_TYPE_MEDIA_TYPE, String.valueOf(media.getType()));
 		String filePath = webRealPath + "/" + mediaType;
 		log.debug(filePath);
 		File pathFile = new File(filePath);
@@ -168,7 +168,7 @@ public class MediaController {
 		}
 		
 		mediaService.create(media);
-		media.setLink(dictService.selectByDictTypeAndDictValue(Constants.DICT_TYPE_MODULE_URL, Constants.MODULE_URL_MATERIAL).getName() +"/"+media.getUrl());
+		media.setLink(dictService.getValue(Constants.DICT_TYPE_MODULE_URL, Constants.MODULE_URL_MATERIAL) +"/"+media.getUrl());
 		return JSONResult.success(media);
 	}
 	

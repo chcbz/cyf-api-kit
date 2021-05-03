@@ -2,8 +2,8 @@ package cn.jia.user.service.impl;
 
 import cn.jia.core.exception.EsRuntimeException;
 import cn.jia.core.util.DateUtil;
-import cn.jia.user.common.Constants;
-import cn.jia.user.common.ErrorConstants;
+import cn.jia.user.common.UserConstants;
+import cn.jia.user.common.UserErrorConstants;
 import cn.jia.user.dao.MsgMapper;
 import cn.jia.user.entity.Msg;
 import cn.jia.user.service.MsgService;
@@ -33,7 +33,7 @@ public class MsgServiceImpl implements MsgService {
 	public Msg find(Integer id) throws Exception {
 		Msg msg = msgMapper.selectByPrimaryKey(id);
 		if(msg == null) {
-			throw new EsRuntimeException(ErrorConstants.DATA_NOT_FOUND);
+			throw new EsRuntimeException(UserErrorConstants.DATA_NOT_FOUND);
 		}
 		return msg;
 	}
@@ -50,7 +50,7 @@ public class MsgServiceImpl implements MsgService {
 	public void recycle(Integer id) {
 		Msg msg = new Msg();
 		msg.setId(id);
-		msg.setStatus(Constants.MSG_STATUS_DELETE);
+		msg.setStatus(UserConstants.MSG_STATUS_DELETE);
 		Long now = DateUtil.genTime(new Date());
 		msg.setUpdateTime(now);
 		msgMapper.updateByPrimaryKeySelective(msg);
@@ -60,7 +60,7 @@ public class MsgServiceImpl implements MsgService {
 	public void restore(Integer id) {
 		Msg msg = new Msg();
 		msg.setId(id);
-		msg.setStatus(Constants.MSG_STATUS_READED);
+		msg.setStatus(UserConstants.MSG_STATUS_READED);
 		Long now = DateUtil.genTime(new Date());
 		msg.setUpdateTime(now);
 		msgMapper.updateByPrimaryKeySelective(msg);
@@ -81,7 +81,7 @@ public class MsgServiceImpl implements MsgService {
 	public void readAll(Integer userId) {
 		Msg record = new Msg();
 		record.setUserId(userId);
-		record.setStatus(Constants.MSG_STATUS_READED);
+		record.setStatus(UserConstants.MSG_STATUS_READED);
 		Long now = DateUtil.genTime(new Date());
 		record.setUpdateTime(now);
 		msgMapper.updateByUserId(record);

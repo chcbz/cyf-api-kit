@@ -8,7 +8,6 @@ plugins {
     id 'org.springframework.boot' version '2.2.7.RELEASE'
 }
 
-apply plugin: 'java'
 apply plugin: 'io.spring.dependency-management'
 
 repositories {
@@ -19,8 +18,8 @@ repositories {
 }
 
 dependencies {
-    implementation 'cn.jia:jia-core:1.0.19'
-    implementation 'cn.jia:jia-api-core:1.0.8'
+    implementation 'cn.jia:jia-core:1.0.20-SNAPSHOT'
+    implementation 'cn.jia:jia-api-core:1.0.9-SNAPSHOT'
     implementation 'cn.jia:jia-mapper-common:1.0.0-SNAPSHOT'
     implementation 'cn.jia:jia-mapper-core:1.0.2'
     implementation 'cn.jia:jia-mapper-oauth:1.0.1'
@@ -69,6 +68,8 @@ dependencies {
     testImplementation 'cn.jia:jia-core-test:1.0.0-SNAPSHOT'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.12'
     testImplementation 'org.projectlombok:lombok:1.18.12'
+    testImplementation('com.alibaba.testable:testable-all:0.5.1')
+    testAnnotationProcessor('com.alibaba.testable:testable-processor:0.5.1')
 }
 
 group = 'cn.jia'
@@ -100,5 +101,6 @@ tasks.withType(JavaCompile) {
 }
 
 test {
+    jvmArgs "-javaagent:${classpath.find { it.name.contains("testable-agent") }.absolutePath}"
     useJUnitPlatform()
 }

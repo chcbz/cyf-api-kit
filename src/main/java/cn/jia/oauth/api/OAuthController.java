@@ -11,7 +11,7 @@ import cn.jia.oauth.entity.Client;
 import cn.jia.oauth.entity.Resource;
 import cn.jia.oauth.service.ClientService;
 import cn.jia.oauth.service.ResourceService;
-import cn.jia.user.common.ErrorConstants;
+import cn.jia.user.common.UserErrorConstants;
 import cn.jia.user.entity.User;
 import cn.jia.user.service.UserService;
 import com.github.pagehelper.Page;
@@ -42,7 +42,7 @@ public class OAuthController {
 	public Object findClientId(@RequestParam(name = "appcn") String appcn) throws Exception {
 		Client client = clientService.findByAppcn(appcn);
 		if(client == null) {
-			throw new EsRuntimeException(ErrorConstants.DATA_NOT_FOUND);
+			throw new EsRuntimeException(UserErrorConstants.DATA_NOT_FOUND);
 		}
 		return JSONResult.success(client.getClientId());
 	}
@@ -157,7 +157,7 @@ public class OAuthController {
 	public Object userInfo() throws Exception {
 		String username = EsSecurityHandler.username();
 		if(StringUtils.isEmpty(username)) {
-			throw new EsRuntimeException(ErrorConstants.USER_NOT_EXIST);
+			throw new EsRuntimeException(UserErrorConstants.USER_NOT_EXIST);
 		}
 		User user;
 		if(username.startsWith("wx-")) {
@@ -168,7 +168,7 @@ public class OAuthController {
 			user = userService.findByUsername(username);
 		}
 		if(user == null) {
-			throw new EsRuntimeException(ErrorConstants.USER_NOT_EXIST);
+			throw new EsRuntimeException(UserErrorConstants.USER_NOT_EXIST);
 		}
 		user.setPassword("***");
 		return JSONResult.success(user);

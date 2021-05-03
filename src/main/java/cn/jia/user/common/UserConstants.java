@@ -2,7 +2,7 @@ package cn.jia.user.common;
 
 import cn.jia.core.common.EsConstants;
 
-public class Constants extends EsConstants {
+public class UserConstants extends EsConstants {
 	
 	/** 短信类型-验证码 */
 	public static final Integer SMS_TYPE_CODE = 1;

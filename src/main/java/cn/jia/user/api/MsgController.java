@@ -14,7 +14,7 @@ import cn.jia.core.entity.JSONRequestPage;
 import cn.jia.core.entity.JSONResult;
 import cn.jia.core.entity.JSONResultPage;
 import cn.jia.core.util.JSONUtil;
-import cn.jia.user.common.Constants;
+import cn.jia.user.common.UserConstants;
 import cn.jia.user.entity.Msg;
 import cn.jia.user.service.MsgService;
 
@@ -59,7 +59,7 @@ public class MsgController {
 	public Object read(@RequestParam(name = "id") Integer id) {
 		Msg msg = new Msg();
 		msg.setId(id);
-		msg.setStatus(Constants.MSG_STATUS_READED);
+		msg.setStatus(UserConstants.MSG_STATUS_READED);
 		msgService.update(msg);
 		return JSONResult.success();
 	}
@@ -68,7 +68,7 @@ public class MsgController {
 	public Object unread(@RequestParam(name = "id") Integer id) {
 		Msg msg = new Msg();
 		msg.setId(id);
-		msg.setStatus(Constants.MSG_STATUS_UNREAD);
+		msg.setStatus(UserConstants.MSG_STATUS_UNREAD);
 		msgService.update(msg);
 		return JSONResult.success();
 	}
