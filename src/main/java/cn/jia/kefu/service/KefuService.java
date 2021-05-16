@@ -100,7 +100,7 @@ public class KefuService {
 
 	public Boolean sendMessage(KefuMsgTypeCode msgType, String clientId, String... attr) throws Exception {
 		LambdaQueryWrapper<KefuMsgType> queryWrapper = Wrappers.lambdaQuery(new KefuMsgType())
-				.eq(KefuMsgType::getTypeCode, msgType).eq(KefuMsgType::getClientId, clientId);
+				.eq(KefuMsgType::getTypeCode, msgType.getCode()).eq(KefuMsgType::getClientId, clientId);
 		KefuMsgType kefuMsgType = kefuMsgTypeService.getOne(queryWrapper);
 		if (kefuMsgType == null) {
 			return false;
@@ -132,5 +132,11 @@ public class KefuService {
 			}
 		}
 		return true;
+	}
+
+	public static void main(String[] args) {
+		String str = "[{\"name\":\"first\",\"value\":\"有新的下单信息，请及时处理！\",\"color\":\"#173177\"},{\"name\":\"keyword1\",\"value\":\"礼品下单通知\",\"color\":\"#173177\"},{\"name\":\"keyword2\",\"value\":\"请及时处理\",\"color\":\"#173177\"},{\"name\":\"remark\",\"value\":\"\",\"color\":\"#173177\"}]";
+		List<WxMpTemplateData> data = JSONUtil.jsonToList(str, WxMpTemplateData.class);
+		System.out.println(data);
 	}
 }

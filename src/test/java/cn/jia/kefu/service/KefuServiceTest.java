@@ -1,5 +1,6 @@
 package cn.jia.kefu.service;
 
+import cn.jia.kefu.entity.KefuMsgSubscribe;
 import cn.jia.kefu.entity.KefuMsgTypeCode;
 import cn.jia.test.BaseTest;
 import org.junit.jupiter.api.Test;
@@ -20,7 +21,15 @@ class KefuServiceTest extends BaseTest {
 
     @Test
     void sendMessage() throws Exception {
-        String clientId = "";
+        String clientId = "jia_client";
         assertTrue(kefuService.sendMessage(KefuMsgTypeCode.GIFT_USAGE, clientId));
+    }
+
+    @Test
+    void listMsgSubscribe() {
+        KefuMsgSubscribe example = new KefuMsgSubscribe();
+        example.setClientId("jia_client");
+        example.setTypeCode(KefuMsgTypeCode.GIFT_USAGE.getCode());
+        assertTrue(kefuService.listMsgSubscribe(example).size() > 0);
     }
 }

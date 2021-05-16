@@ -848,6 +848,54 @@ CREATE TABLE wx_pay_order  (
   PRIMARY KEY (id)
 );
 
+DROP TABLE IF EXISTS kefu_msg_type;
+CREATE TABLE kefu_msg_type (
+  id int NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  client_id varchar(50) COMMENT '应用标识符',
+  type_code varchar(50) COMMENT '类型编码',
+  type_name varchar(50) COMMENT '类型名称',
+  parent_type varchar(50) DEFAULT NULL COMMENT '父类型',
+  type_category varchar(50) DEFAULT NULL COMMENT '类别',
+  wx_template_id varchar(50) COMMENT '微信模板ID',
+  wx_template varchar(2000) DEFAULT NULL COMMENT '微信模板',
+  sms_template_id varchar(50) COMMENT '短信模板ID',
+  sms_template varchar(2000) DEFAULT NULL COMMENT '短信模板',
+  url varchar(500) DEFAULT NULL COMMENT '链接地址',
+  status int DEFAULT '1' COMMENT '状态 0失效 1有效',
+  create_time bigint DEFAULT NULL COMMENT '创建时间',
+  update_time bigint DEFAULT NULL COMMENT '最后更新时间',
+  PRIMARY KEY (id)
+) COMMENT='留言类型';
+
+DROP TABLE IF EXISTS kefu_msg_subscribe;
+CREATE TABLE kefu_msg_subscribe (
+  id int NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  client_id varchar(50) DEFAULT NULL COMMENT '应用标识符',
+  type_code varchar(50) NOT NULL COMMENT '类型编码',
+  jiacn varchar(32) NOT NULL COMMENT 'Jia账号',
+  wx_rx_flag int DEFAULT '0' COMMENT '微信接收',
+  sms_rx_flag int DEFAULT '0' COMMENT '短信接收',
+  status int DEFAULT '1' COMMENT '状态 0失效 1有效',
+  create_time bigint DEFAULT NULL COMMENT '创建时间',
+  update_time bigint DEFAULT NULL COMMENT '最后更新时间',
+  PRIMARY KEY (id)
+) COMMENT='客户消息订阅';
+
+CREATE TABLE wx_mp_template (
+  template_id varchar(50) NOT NULL COMMENT '模板ID',
+  client_id varchar(50) DEFAULT NULL COMMENT '应用标识码',
+  appid varchar(50) DEFAULT NULL COMMENT '开发者ID',
+  title varchar(50) DEFAULT NULL COMMENT '标题',
+  primary_industry varchar(30) DEFAULT NULL COMMENT '主要行业',
+  deputy_industry varchar(30) DEFAULT NULL COMMENT '子行业',
+  content varchar(500) DEFAULT NULL COMMENT '模板内容',
+  example varchar(500) DEFAULT NULL COMMENT '示例',
+  status int DEFAULT '1' COMMENT '状态 1有效 0无效',
+  create_time bigint DEFAULT NULL COMMENT '创建日期',
+  update_time bigint DEFAULT NULL COMMENT '更新日期',
+  PRIMARY KEY (template_id)
+) COMMENT='微信公众号消息模板表';
+
 -- ----------------------------
 -- View structure for v_task_item
 -- ----------------------------
