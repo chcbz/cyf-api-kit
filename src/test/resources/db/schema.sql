@@ -522,26 +522,27 @@ CREATE TABLE task_item  (
 -- Table structure for task_plan
 -- ----------------------------
 DROP TABLE IF EXISTS task_plan;
-CREATE TABLE task_plan  (
+CREATE TABLE task_plan (
   id int NOT NULL AUTO_INCREMENT,
-  jiacn varchar(32) NOT NULL,
-  type int NOT NULL,
-  period int NOT NULL DEFAULT 0,
-  crond varchar(20) NULL DEFAULT NULL,
-  name varchar(30) NOT NULL,
-  description varchar(200) NULL DEFAULT NULL,
-  lunar int NULL DEFAULT 0,
-  start_time bigint NULL DEFAULT NULL,
-  end_time bigint NULL DEFAULT NULL,
-  amount decimal(10, 2) NULL DEFAULT NULL,
-  remind int NOT NULL DEFAULT 0,
-  remind_phone varchar(20) NULL DEFAULT NULL,
-  remind_msg varchar(200) NULL DEFAULT NULL,
-  status int NOT NULL DEFAULT 1,
-  create_time bigint NOT NULL,
-  update_time bigint NOT NULL,
+  client_id varchar(50) DEFAULT NULL COMMENT '应用标识符',
+  jiacn varchar(32) NOT NULL COMMENT 'JIA账号',
+  type int NOT NULL COMMENT '任务类型 1常规提醒 2目标 3还款计划 4固定收入',
+  period int NOT NULL DEFAULT '0' COMMENT '周期类型 0长期 1每年 2每月 3每周 5每日 11每小时 12每分钟 13每秒 6指定日期',
+  crond varchar(20) DEFAULT NULL COMMENT '周期表达式',
+  name varchar(30) NOT NULL COMMENT '任务名称',
+  description varchar(200) DEFAULT NULL COMMENT '任务描述',
+  lunar int DEFAULT '0' COMMENT '是否农历日期 1是 0否',
+  start_time bigint DEFAULT NULL COMMENT '开始时间',
+  end_time bigint DEFAULT NULL COMMENT '结束时间',
+  amount decimal(10,2) DEFAULT NULL COMMENT '数量/金额',
+  remind int NOT NULL DEFAULT '0' COMMENT '是否需要提醒 1是 0否',
+  remind_phone varchar(20) DEFAULT NULL COMMENT '提醒手机号码',
+  remind_msg varchar(200) DEFAULT NULL COMMENT '提醒信息',
+  status int NOT NULL DEFAULT '1' COMMENT '状态 1有效 0无效',
+  create_time bigint NOT NULL COMMENT '创建日期',
+  update_time bigint NOT NULL COMMENT '最后更新日期',
   PRIMARY KEY (id)
-);
+) COMMENT='任务计划';
 
 -- ----------------------------
 -- Table structure for user_auth
@@ -881,6 +882,20 @@ CREATE TABLE kefu_msg_subscribe (
   PRIMARY KEY (id)
 ) COMMENT='客户消息订阅';
 
+CREATE TABLE kefu_msg_log (
+  id int NOT NULL AUTO_INCREMENT,
+  client_id varchar(50) DEFAULT NULL COMMENT '应用标识符',
+  title varchar(100) DEFAULT NULL COMMENT '标题',
+  content varchar(2000) DEFAULT NULL COMMENT '内容',
+  url varchar(200) DEFAULT NULL COMMENT '地址',
+  type varchar(20) DEFAULT NULL COMMENT '类型',
+  jiacn varchar(32) DEFAULT NULL COMMENT 'Jia账号',
+  status int DEFAULT '1' COMMENT '状态 1未读 2已读 0已删除',
+  create_time bigint DEFAULT NULL COMMENT '创建时间',
+  update_time bigint DEFAULT NULL COMMENT '最后更新时间',
+  PRIMARY KEY (id)
+) COMMENT='消息内容';
+
 CREATE TABLE wx_mp_template (
   template_id varchar(50) NOT NULL COMMENT '模板ID',
   client_id varchar(50) DEFAULT NULL COMMENT '应用标识码',
@@ -900,4 +915,4 @@ CREATE TABLE wx_mp_template (
 -- View structure for v_task_item
 -- ----------------------------
 DROP VIEW IF EXISTS v_task_item;
-CREATE VIEW v_task_item AS select i.id AS id,i.plan_id AS plan_id,p.jiacn AS jiacn,p.type AS type,p.period AS period,p.crond AS crond,p.name AS name,p.description AS description,p.amount AS amount,p.remind AS remind,p.remind_phone AS remind_phone,p.remind_msg AS remind_msg,p.status AS status,i.time AS time from (task_plan p join task_item i on((p.id = i.plan_id))) order by i.time;
+CREATE VIEW v_task_item AS select i.id AS id,i.plan_id AS plan_id,p.client_id AS client_id,p.jiacn AS jiacn,p.type AS type,p.period AS period,p.crond AS crond,p.name AS name,p.description AS description,p.amount AS amount,p.remind AS remind,p.remind_phone AS remind_phone,p.remind_msg AS remind_msg,p.status AS status,i.time AS time from (task_plan p join task_item i on((p.id = i.plan_id))) order by i.time;

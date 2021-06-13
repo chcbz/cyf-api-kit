@@ -1,9 +1,11 @@
 package cn.jia.kefu.service;
 
 import cn.jia.core.common.EsConstants;
+import cn.jia.core.util.DateUtil;
 import cn.jia.core.util.JSONUtil;
 import cn.jia.core.util.StringUtils;
 import cn.jia.kefu.entity.*;
+import cn.jia.task.common.TaskConstants;
 import cn.jia.wx.entity.MpTemplate;
 import cn.jia.wx.entity.MpUser;
 import cn.jia.wx.service.MpInfoService;
@@ -32,6 +34,8 @@ public class KefuService {
 	private IKefuMsgTypeService kefuMsgTypeService;
 	@Autowired
 	private IKefuMsgSubscribeService kefuMsgSubscribeService;
+	@Autowired
+	private IKefuMsgLogService kefuMsgLogService;
 	@Autowired
 	private MpInfoService mpInfoService;
 	@Autowired
@@ -89,7 +93,6 @@ public class KefuService {
 	public List<KefuMsgType> listMsgType() {
 		return kefuMsgTypeService.list();
 	}
-
 	public List<KefuMsgSubscribe> listMsgSubscribe() {
 		return kefuMsgSubscribeService.list();
 	}
@@ -98,6 +101,23 @@ public class KefuService {
 		return kefuMsgSubscribeService.listByEntity(example);
 	}
 
+	public KefuMsgSubscribe findMsgSubscribe(String clientId, String typeCode, String jiacn) {
+		Wrapper<KefuMsgSubscribe> wrapper = Wrappers.lambdaQuery(new KefuMsgSubscribe())
+				.eq(KefuMsgSubscribe::getClientId, clientId)
+				.eq(KefuMsgSubscribe::getTypeCode, typeCode)
+				.eq(KefuMsgSubscribe::getJiacn, jiacn);
+		return kefuMsgSubscribeService.getOne(wrapper);
+	}
+
+	/**
+	 * 发送客服消息
+	 *
+	 * @param msgType 消息类型
+	 * @param clientId 应用标识符
+	 * @param attr 属性
+	 * @return 发送结果
+	 * @throws Exception 异常
+	 */
 	public Boolean sendMessage(KefuMsgTypeCode msgType, String clientId, String... attr) throws Exception {
 		LambdaQueryWrapper<KefuMsgType> queryWrapper = Wrappers.lambdaQuery(new KefuMsgType())
 				.eq(KefuMsgType::getTypeCode, msgType.getCode()).eq(KefuMsgType::getClientId, clientId);
@@ -106,32 +126,46 @@ public class KefuService {
 			return false;
 		}
 
-		// 通知管理员
+		// 通知订阅者
 		KefuMsgSubscribe example = new KefuMsgSubscribe();
 		example.setClientId(clientId);
 		example.setTypeCode(msgType.getCode());
 		List<KefuMsgSubscribe> kefuMsgSubscribeList = listMsgSubscribe(example);
 		for (KefuMsgSubscribe item : kefuMsgSubscribeList) {
-			if (EsConstants.COMMON_YES.equals(item.getWxRxFlag())
-					&& StringUtils.isNotEmpty(kefuMsgType.getWxTemplateId())) {
-				String msgContent = kefuMsgType.getWxTemplate();
-				for (int i = 0; i< attr.length; i++) {
-					msgContent = msgContent.replace("#" + i + "#", attr[i]);
-				}
-				List<WxMpTemplateData> data = JSONUtil.jsonToList(msgContent, WxMpTemplateData.class);
-				MpTemplate mpTemplate = mpTemplateService.find(kefuMsgType.getWxTemplateId());
-				MpUser mpUser = mpUserService.findByJiacn(item.getJiacn());
-				if (mpTemplate != null && mpUser != null) {
-					WxMpTemplateMessage message = new WxMpTemplateMessage();
-					message.setToUser(mpUser.getOpenId());
-					message.setTemplateId(mpTemplate.getTemplateId());
-					message.setData(data);
-					message.setUrl(kefuMsgType.getUrl());
-					mpInfoService.findWxMpService(mpTemplate.getAppid()).getTemplateMsgService().sendTemplateMsg(message);
-				}
-			}
+			sendTemplate(kefuMsgType, item, attr);
 		}
 		return true;
+	}
+
+	public void sendTemplate(KefuMsgType kefuMsgType, KefuMsgSubscribe item, String... attr) throws Exception {
+		if (EsConstants.COMMON_YES.equals(item.getWxRxFlag())
+				&& StringUtils.isNotEmpty(kefuMsgType.getWxTemplateId())) {
+			String msgContent = kefuMsgType.getWxTemplate();
+			for (int i = 0; i< attr.length; i++) {
+				msgContent = msgContent.replace("#" + i + "#", attr[i]);
+			}
+			List<WxMpTemplateData> data = JSONUtil.jsonToList(msgContent, WxMpTemplateData.class);
+			MpTemplate mpTemplate = mpTemplateService.find(kefuMsgType.getWxTemplateId());
+			MpUser mpUser = mpUserService.findByJiacn(item.getJiacn());
+			if (mpTemplate != null && mpUser != null) {
+				WxMpTemplateMessage message = new WxMpTemplateMessage();
+				message.setToUser(mpUser.getOpenId());
+				message.setTemplateId(mpTemplate.getTemplateId());
+				message.setData(data);
+				message.setUrl(kefuMsgType.getUrl());
+				mpInfoService.findWxMpService(mpTemplate.getAppid()).getTemplateMsgService().sendTemplateMsg(message);
+
+				KefuMsgLog msg = new KefuMsgLog();
+				msg.setType(TaskConstants.MESSAGE_TYPE_WX);
+				msg.setUpdateTime(DateUtil.genTime());
+				msg.setCreateTime(DateUtil.genTime());
+				msg.setJiacn(item.getJiacn());
+				msg.setTitle(kefuMsgType.getWxTemplateId());
+				msg.setContent(msgContent);
+				msg.setUrl(kefuMsgType.getUrl());
+				kefuMsgLogService.save(msg);
+			}
+		}
 	}
 
 	public static void main(String[] args) {
