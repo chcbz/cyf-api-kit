@@ -16,6 +16,8 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import me.chanjar.weixin.common.api.WxConsts;
+import me.chanjar.weixin.mp.bean.kefu.WxMpKefuMessage;
 import me.chanjar.weixin.mp.bean.template.WxMpTemplateData;
 import me.chanjar.weixin.mp.bean.template.WxMpTemplateMessage;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,6 +95,7 @@ public class KefuService {
 	public List<KefuMsgType> listMsgType() {
 		return kefuMsgTypeService.list();
 	}
+
 	public List<KefuMsgSubscribe> listMsgSubscribe() {
 		return kefuMsgSubscribeService.list();
 	}
@@ -138,34 +141,59 @@ public class KefuService {
 	}
 
 	public void sendTemplate(KefuMsgType kefuMsgType, KefuMsgSubscribe item, String... attr) throws Exception {
-		if (EsConstants.COMMON_YES.equals(item.getWxRxFlag())
-				&& StringUtils.isNotEmpty(kefuMsgType.getWxTemplateId())) {
-			String msgContent = kefuMsgType.getWxTemplate();
+		if (EsConstants.COMMON_YES.equals(item.getWxRxFlag())) {
+			sendWxTemplate(kefuMsgType, item, attr);
+		}
+	}
+
+	public boolean sendWxTemplate(KefuMsgType kefuMsgType, KefuMsgSubscribe item, String... attr) throws Exception {
+		MpUser mpUser = mpUserService.findByJiacn(item.getJiacn(), kefuMsgType.getClientId());
+		if (mpUser == null) {
+			return false;
+		}
+		String msgContent = "";
+		long twoDay = 2 * 24 * 60 * 60;
+		if (StringUtils.isNotEmpty(kefuMsgType.getWxTemplateTxt()) && mpUser.getUpdateTime() > DateUtil.genTime() - twoDay) {
+			WxMpKefuMessage kfmessage = new WxMpKefuMessage();
+			kfmessage.setToUser(mpUser.getOpenId());
+			kfmessage.setMsgType(WxConsts.KefuMsgType.TEXT);
+			msgContent = kefuMsgType.getWxTemplateTxt();
 			for (int i = 0; i< attr.length; i++) {
 				msgContent = msgContent.replace("#" + i + "#", attr[i]);
 			}
-			List<WxMpTemplateData> data = JSONUtil.jsonToList(msgContent, WxMpTemplateData.class);
+			kfmessage.setContent(msgContent);
+			boolean sendSuccess = mpInfoService.findWxMpService(mpUser.getAppid()).getKefuService().sendKefuMessage(kfmessage);
+			if (!sendSuccess) {
+				return false;
+			}
+		} else if (StringUtils.isNotEmpty(kefuMsgType.getWxTemplateId())) {
 			MpTemplate mpTemplate = mpTemplateService.find(kefuMsgType.getWxTemplateId());
-			MpUser mpUser = mpUserService.findByJiacn(item.getJiacn());
-			if (mpTemplate != null && mpUser != null) {
+			if (mpTemplate != null) {
+				msgContent = kefuMsgType.getWxTemplate();
+				for (int i = 0; i< attr.length; i++) {
+					msgContent = msgContent.replace("#" + i + "#", attr[i]);
+				}
+				List<WxMpTemplateData> data = JSONUtil.jsonToList(msgContent, WxMpTemplateData.class);
 				WxMpTemplateMessage message = new WxMpTemplateMessage();
 				message.setToUser(mpUser.getOpenId());
 				message.setTemplateId(mpTemplate.getTemplateId());
 				message.setData(data);
 				message.setUrl(kefuMsgType.getUrl());
-				mpInfoService.findWxMpService(mpTemplate.getAppid()).getTemplateMsgService().sendTemplateMsg(message);
-
-				KefuMsgLog msg = new KefuMsgLog();
-				msg.setType(TaskConstants.MESSAGE_TYPE_WX);
-				msg.setUpdateTime(DateUtil.genTime());
-				msg.setCreateTime(DateUtil.genTime());
-				msg.setJiacn(item.getJiacn());
-				msg.setTitle(kefuMsgType.getWxTemplateId());
-				msg.setContent(msgContent);
-				msg.setUrl(kefuMsgType.getUrl());
-				kefuMsgLogService.save(msg);
+				String messageId = mpInfoService.findWxMpService(mpTemplate.getAppid()).getTemplateMsgService().sendTemplateMsg(message);
+				if (StringUtils.isEmpty(messageId)) {
+					return false;
+				}
 			}
 		}
+		KefuMsgLog msg = new KefuMsgLog();
+		msg.setType(TaskConstants.MESSAGE_TYPE_WX);
+		msg.setUpdateTime(DateUtil.genTime());
+		msg.setCreateTime(DateUtil.genTime());
+		msg.setJiacn(item.getJiacn());
+		msg.setTitle(kefuMsgType.getWxTemplateId());
+		msg.setContent(msgContent);
+		msg.setUrl(kefuMsgType.getUrl());
+		return kefuMsgLogService.save(msg);
 	}
 
 	public static void main(String[] args) {

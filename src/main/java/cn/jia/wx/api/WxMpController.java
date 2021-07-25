@@ -323,7 +323,7 @@ public class WxMpController {
 			return outMessage.toXml();
 		}
 		//回答问题
-        Object obj = redisTemplate.opsForValue().get("vote_" + message.getFromUser());
+        Object obj = redisTemplate.opsForValue().get("vote_" + mpUser.getJiacn());
         if(obj != null && WxConsts.XmlMsgType.TEXT.equalsIgnoreCase(message.getMsgType())) {
 			WxMpXmlOutTextMessage outMessage = new WxMpXmlOutTextMessage();
 			outMessage.setCreateTime(message.getCreateTime());
@@ -369,7 +369,7 @@ public class WxMpController {
 				}
 
 			}
-			redisTemplate.delete("vote_" + message.getFromUser());
+			redisTemplate.delete("vote_" + mpUser.getJiacn());
             return outMessage.toXml();
         }
         //处理消息是否送达成功推送
@@ -400,7 +400,7 @@ public class WxMpController {
 					content.append(item.getOpt()).append(" ").append(item.getContent()).append("\n");
 				}
 				outMessage.setContent(content.toString());
-				redisTemplate.opsForValue().set("vote_" + message.getFromUser(), question.getId(), 2, TimeUnit.HOURS);
+				redisTemplate.opsForValue().set("vote_" + mpUser.getJiacn(), question.getId(), 2, TimeUnit.HOURS);
 			}
 			return outMessage.toXml();
 		} else if ("我的积分".equals(message.getContent())) {

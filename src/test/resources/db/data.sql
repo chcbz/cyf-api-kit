@@ -57,3 +57,12 @@ INSERT INTO wx_mp_template(template_id, client_id, appid, title, primary_industr
 INSERT INTO wx_mp_user(id, client_id, appid, subscribe, open_id, jiacn, subscribe_time, email, sex, language, nickname, head_img_url, city, country, province, union_id, group_id, subscribe_scene, qr_scene, qr_scene_str, subscribe_items, status, remark, create_time, update_time) VALUES (2, 'jia_client', 'wxd59557202ddff2d5', 1, 'oH2zD1PUPvspicVak69uB4wDaFLg', 'oH2zD1PUPvspicVak69uB4wDaFLg', NULL, NULL, 1, NULL, '陈惠超', 'http://thirdwx.qlogo.cn/mmopen/PiajxSqBRaELiciaN9EEjiaibxyEj2hMPicotQvlSqvhpoNziajxLqfHiaAdrXiaep99Viac8dhqLOLZkJiab3WDt9IBWibiaLQ/132', '东莞', '中国', '广东', NULL, NULL, NULL, NULL, NULL, 'vote', 1, NULL, 1595131250, 20200723010937);
 
 INSERT INTO user_info(id, username, password, openid, jiacn, phone, email, sex, nickname, avatar, city, country, province, latitude, longitude, point, referrer, birthday, tel, weixin, qq, position, status, remark, msg_type, subscribe, create_time, update_time) VALUES (5, 'chc', '123', 'oH2zD1PUPvspicVak69uB4wDaFLg', 'oH2zD1PUPvspicVak69uB4wDaFLg', '13450070072', NULL, 1, '陈惠超', 'avatar/20200621080100_oH2zD1PUPvspicVak69uB4wDaFLg.jpg', '东莞', '中国', '广东', '22.9347', '113.657997', 1079, NULL, NULL, NULL, NULL, NULL, '1', NULL, NULL, '1', 'vote,wxd59557202ddff2d5', 1525671442, 1621035182);
+
+INSERT INTO mat_vote(id, client_id, name, start_time, close_time, num) VALUES (1, 'jia_client', '保险基础知识考试试卷', 1572683060, 1604219060, 981);
+
+INSERT INTO mat_vote_question(id, vote_id, title, multi, point, opt) VALUES (1, 1, '企业、家庭或个人面临的和潜在的风险加以判断、归类和对风险性质进行鉴定的过程是（      ）。', 0, 1, 'C');
+
+INSERT INTO mat_vote_item(id, question_id, opt, content, tick, pic_url, num) VALUES (1, 1, 'A', '风险评价', 0, NULL, 6);
+INSERT INTO mat_vote_item(id, question_id, opt, content, tick, pic_url, num) VALUES (2, 1, 'B', '风险估测', 0, NULL, 7);
+INSERT INTO mat_vote_item(id, question_id, opt, content, tick, pic_url, num) VALUES (3, 1, 'C', '风险识别', 1, NULL, 25);
+INSERT INTO mat_vote_item(id, question_id, opt, content, tick, pic_url, num) VALUES (4, 1, 'D', '选择风险管理技术', 0, NULL, 6);

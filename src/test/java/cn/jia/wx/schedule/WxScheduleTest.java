@@ -9,9 +9,10 @@ import cn.jia.test.BaseTest;
 import cn.jia.user.entity.User;
 import cn.jia.user.service.UserService;
 import cn.jia.wx.service.MpInfoService;
+import com.github.springtestdbunit.annotation.DatabaseOperation;
+import com.github.springtestdbunit.annotation.DatabaseSetup;
 import me.chanjar.weixin.mp.bean.template.WxMpTemplateData;
 import me.chanjar.weixin.mp.bean.template.WxMpTemplateMessage;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -32,13 +33,12 @@ public class WxScheduleTest extends BaseTest {
     private DictService dictService;
 
     @Test
-    @Disabled
+    @DatabaseSetup(value = "classpath:testObject/wx/wx_schedule_init.xml", type = DatabaseOperation.CLEAN_INSERT)
     void sendVote() {
         wxSchedule.sendVote();
     }
 
     @Test
-    @Disabled
     void sendTemplateMessage() throws Exception {
         User user = userService.findByJiacn("oH2zD1PUPvspicVak69uB4wDaFLg");
         String wxAppId = dictService.getValue(TaskConstants.DICT_TYPE_TASK_CONFIG, TaskConstants.TASK_CONFIG_WX_APP_ID);

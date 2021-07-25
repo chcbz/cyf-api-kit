@@ -14,6 +14,7 @@ import cn.jia.user.dao.UserMapper;
 import cn.jia.user.entity.RoleRel;
 import cn.jia.user.entity.User;
 import cn.jia.wx.entity.MpUser;
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.BeanUtils;
@@ -116,9 +117,9 @@ public class MpUserService {
 		return mpUserService.getOne(queryWrapper);
 	}
 
-	public MpUser findByJiacn(String jiacn) {
+	public MpUser findByJiacn(String jiacn, String clientId) {
 		LambdaQueryWrapper<MpUser> queryWrapper = Wrappers.lambdaQuery(new MpUser())
-				.eq(MpUser::getJiacn, jiacn).last("LIMIT 1");
+				.eq(MpUser::getJiacn, jiacn).eq(MpUser::getClientId, clientId).last("LIMIT 1");
 		return mpUserService.getOne(queryWrapper);
 	}
 
@@ -128,6 +129,10 @@ public class MpUserService {
 
 	public List<MpUser> list() {
 		return mpUserService.list();
+	}
+
+	public List<MpUser> list(Wrapper<MpUser> queryWrapper) {
+		return mpUserService.list(queryWrapper);
 	}
 
 	public PageInfo<MpUser> list(MpUser example, int pageNo, int pageSize) {
