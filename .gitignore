@@ -24,5 +24,3 @@ nbdist/
 .nb-gradle/
 .gradle/
 gradle/
-gradlew
-gradlew.bat
