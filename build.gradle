@@ -27,7 +27,7 @@ dependencies {
     implementation 'cn.jia:jia-mapper-isp:1.0.1'
     implementation 'cn.jia:jia-mapper-wx:1.0.3-SNAPSHOT'
     implementation 'cn.jia:jia-mapper-sms:1.0.0'
-    implementation 'cn.jia:jia-mapper-task:1.0.6-snapshot'
+    implementation 'cn.jia:jia-mapper-task:1.0.6-SNAPSHOT'
     implementation 'cn.jia:jia-mapper-point:1.0.6-SNAPSHOT'
     implementation 'cn.jia:jia-mapper-dwz:1.0.0'
     implementation 'cn.jia:jia-mapper-material:1.0.9'
