@@ -27,7 +27,6 @@ class TaskScheduleTest extends BaseTest {
     @Value("classpath:testObject/task/task_plan_init.json")
     private Resource resource;
 
-
     @Test
     @DatabaseSetups({
             @DatabaseSetup(value = "classpath:testObject/kefu/kefu_msg_type_init.xml", type = DatabaseOperation.CLEAN_INSERT),
