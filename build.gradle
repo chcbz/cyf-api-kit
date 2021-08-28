@@ -103,4 +103,10 @@ tasks.withType(JavaCompile) {
 test {
     jvmArgs "-javaagent:${classpath.find { it.name.contains("testable-agent") }.absolutePath}"
     useJUnitPlatform()
+    testLogging.showStandardStreams = true
+//    onOutput { descriptor, event ->
+//        if (project.hasProperty('output')) {
+//            logger.lifecycle(event.message)
+//        }
+//    }
 }
