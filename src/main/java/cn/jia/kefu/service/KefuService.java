@@ -16,7 +16,9 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.api.WxConsts;
+import me.chanjar.weixin.common.error.WxErrorException;
 import me.chanjar.weixin.mp.bean.kefu.WxMpKefuMessage;
 import me.chanjar.weixin.mp.bean.template.WxMpTemplateData;
 import me.chanjar.weixin.mp.bean.template.WxMpTemplateMessage;
@@ -26,6 +28,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
+@Slf4j
 public class KefuService {
 	
 	@Autowired
@@ -153,23 +156,27 @@ public class KefuService {
 		}
 		String msgContent = "";
 		long twoDay = 2 * 24 * 60 * 60;
+		boolean sendSuccess = false;
 		if (StringUtils.isNotEmpty(kefuMsgType.getWxTemplateTxt()) && mpUser.getUpdateTime() > DateUtil.genTime() - twoDay) {
 			WxMpKefuMessage kfmessage = new WxMpKefuMessage();
 			kfmessage.setToUser(mpUser.getOpenId());
 			kfmessage.setMsgType(WxConsts.KefuMsgType.TEXT);
-			msgContent = kefuMsgType.getWxTemplateTxt();
-			for (int i = 0; i< attr.length; i++) {
+			msgContent = kefuMsgType.getWxTemplateTxt().replaceAll("\\\\n", "\n");
+			for (int i = 0; i < attr.length; i++) {
 				msgContent = msgContent.replace("#" + i + "#", attr[i]);
 			}
 			kfmessage.setContent(msgContent);
-			boolean sendSuccess = mpInfoService.findWxMpService(mpUser.getAppid()).getKefuService().sendKefuMessage(kfmessage);
-			if (!sendSuccess) {
-				return false;
+			try {
+				sendSuccess = mpInfoService.findWxMpService(mpUser.getAppid()).getKefuService().sendKefuMessage(kfmessage);
+			} catch (WxErrorException e) {
+				log.error("sendKefuMessage error: ", e);
 			}
-		} else if (StringUtils.isNotEmpty(kefuMsgType.getWxTemplateId())) {
+		}
+		// 如果客服消息发送失败，尝试用模板消息
+		if (!sendSuccess && StringUtils.isNotEmpty(kefuMsgType.getWxTemplateId())) {
 			MpTemplate mpTemplate = mpTemplateService.find(kefuMsgType.getWxTemplateId());
 			if (mpTemplate != null) {
-				msgContent = kefuMsgType.getWxTemplate();
+				msgContent = kefuMsgType.getWxTemplate().replaceAll("\\\\n", "\n");
 				for (int i = 0; i< attr.length; i++) {
 					msgContent = msgContent.replace("#" + i + "#", attr[i]);
 				}
@@ -180,20 +187,21 @@ public class KefuService {
 				message.setData(data);
 				message.setUrl(kefuMsgType.getUrl());
 				String messageId = mpInfoService.findWxMpService(mpTemplate.getAppid()).getTemplateMsgService().sendTemplateMsg(message);
-				if (StringUtils.isEmpty(messageId)) {
-					return false;
-				}
+				sendSuccess = StringUtils.isNotEmpty(messageId);
 			}
 		}
-		KefuMsgLog msg = new KefuMsgLog();
-		msg.setType(TaskConstants.MESSAGE_TYPE_WX);
-		msg.setUpdateTime(DateUtil.genTime());
-		msg.setCreateTime(DateUtil.genTime());
-		msg.setJiacn(item.getJiacn());
-		msg.setTitle(kefuMsgType.getWxTemplateId());
-		msg.setContent(msgContent);
-		msg.setUrl(kefuMsgType.getUrl());
-		return kefuMsgLogService.save(msg);
+		if (sendSuccess) {
+			KefuMsgLog msg = new KefuMsgLog();
+			msg.setType(TaskConstants.MESSAGE_TYPE_WX);
+			msg.setUpdateTime(DateUtil.genTime());
+			msg.setCreateTime(DateUtil.genTime());
+			msg.setJiacn(item.getJiacn());
+			msg.setTitle(kefuMsgType.getWxTemplateId());
+			msg.setContent(msgContent);
+			msg.setUrl(kefuMsgType.getUrl());
+			return kefuMsgLogService.save(msg);
+		}
+		return false;
 	}
 
 	public static void main(String[] args) {
