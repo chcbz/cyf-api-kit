@@ -23,6 +23,7 @@ import me.chanjar.weixin.mp.bean.kefu.WxMpKefuMessage;
 import me.chanjar.weixin.mp.bean.template.WxMpTemplateData;
 import me.chanjar.weixin.mp.bean.template.WxMpTemplateMessage;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -30,6 +31,7 @@ import java.util.List;
 @Service
 @Slf4j
 public class KefuService {
+	private static final String ACTIVE_MP_USER = "ACTIVE_MP_USER";
 	
 	@Autowired
 	private IKefuFaqService kefuFaqService;
@@ -47,6 +49,8 @@ public class KefuService {
 	private MpTemplateService mpTemplateService;
 	@Autowired
 	private MpUserService mpUserService;
+	@Autowired
+	private RedisTemplate<String, Object> redisTemplate;
 
 	public PageInfo<KefuFaq> listFAQ(KefuFaq example, int pageNo, int pageSize) {
 		PageHelper.startPage(pageNo, pageSize);
@@ -155,9 +159,9 @@ public class KefuService {
 			return false;
 		}
 		String msgContent = "";
-		long twoDay = 2 * 24 * 60 * 60;
 		boolean sendSuccess = false;
-		if (StringUtils.isNotEmpty(kefuMsgType.getWxTemplateTxt()) && mpUser.getUpdateTime() > DateUtil.genTime() - twoDay) {
+		Object activeMpUser = redisTemplate.opsForValue().get("active_mp_user_" + mpUser.getAppid());
+		if (StringUtils.isNotEmpty(kefuMsgType.getWxTemplateTxt()) && activeMpUser != null) {
 			WxMpKefuMessage kfmessage = new WxMpKefuMessage();
 			kfmessage.setToUser(mpUser.getOpenId());
 			kfmessage.setMsgType(WxConsts.KefuMsgType.TEXT);
@@ -176,7 +180,7 @@ public class KefuService {
 		if (!sendSuccess && StringUtils.isNotEmpty(kefuMsgType.getWxTemplateId())) {
 			MpTemplate mpTemplate = mpTemplateService.find(kefuMsgType.getWxTemplateId());
 			if (mpTemplate != null) {
-				msgContent = kefuMsgType.getWxTemplate().replaceAll("\\\\n", "\n");
+				msgContent = kefuMsgType.getWxTemplate();
 				for (int i = 0; i< attr.length; i++) {
 					msgContent = msgContent.replace("#" + i + "#", attr[i]);
 				}

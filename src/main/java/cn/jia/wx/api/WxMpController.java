@@ -60,6 +60,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.net.URLEncoder;
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -154,6 +155,8 @@ public class WxMpController {
 			params.setHeadImgUrl(wxMpUser.getHeadImgUrl());
 			mpUser = mpUserService.create(params);
 		}
+		// 将当前用户设置为活跃用户
+		redisTemplate.opsForValue().set("active_mp_user_" + mpUser.getAppid(), "Y", Duration.ofDays(2));
 		//关注
 		if(WxConsts.XmlMsgType.EVENT.equals(message.getMsgType()) && WxConsts.EventType.SUBSCRIBE.equals(message.getEvent())) {
 			WxMpXmlOutTextMessage outMessage = new WxMpXmlOutTextMessage();
