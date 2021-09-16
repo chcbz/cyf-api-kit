@@ -3,6 +3,7 @@ package cn.jia.wx.schedule;
 import cn.jia.base.entity.DelayObj;
 import cn.jia.core.util.DateUtil;
 import cn.jia.core.util.JSONUtil;
+import cn.jia.core.util.StringUtils;
 import cn.jia.core.util.thread.ThreadRequest;
 import cn.jia.core.util.thread.ThreadRequestContent;
 import cn.jia.kefu.entity.KefuMsgSubscribe;
@@ -52,7 +53,10 @@ public class WxSchedule {
 			String title = question.getTitle();
 			StringBuilder content = new StringBuilder();
 			for (VoteItem item : question.getItems()) {
-				content.append("\r\n").append(item.getOpt()).append(". ").append(item.getContent());
+				if (StringUtils.isNotEmpty(content)) {
+					content.append("\\n");
+				}
+				content.append(item.getOpt()).append(". ").append(item.getContent());
 			}
 			try {
 				boolean sendSuccess = kefuService.sendWxTemplate(kefuMsgType, kefuMsgSubscribe, title, content.toString());

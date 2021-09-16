@@ -16,7 +16,9 @@ import me.chanjar.weixin.mp.bean.template.WxMpTemplateMessage;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,10 +34,14 @@ public class WxScheduleTest extends BaseTest {
     private MpInfoService mpInfoService;
     @Autowired
     private DictService dictService;
+    @Autowired
+    private RedisTemplate<String, Object> redisTemplate;
 
     @Test
     @DatabaseSetup(value = "classpath:testObject/wx/wx_schedule_init.xml", type = DatabaseOperation.CLEAN_INSERT)
     void sendVote() {
+        wxSchedule.sendVote();
+        redisTemplate.opsForValue().set("active_mp_user_oH2zD1PUPvspicVak69uB4wDaFLg", "Y", Duration.ofDays(2));
         wxSchedule.sendVote();
     }
 

@@ -160,16 +160,16 @@ public class KefuService {
 		}
 		String msgContent = "";
 		boolean sendSuccess = false;
-		Object activeMpUser = redisTemplate.opsForValue().get("active_mp_user_" + mpUser.getAppid());
+		Object activeMpUser = redisTemplate.opsForValue().get("active_mp_user_" + mpUser.getOpenId());
 		if (StringUtils.isNotEmpty(kefuMsgType.getWxTemplateTxt()) && activeMpUser != null) {
 			WxMpKefuMessage kfmessage = new WxMpKefuMessage();
 			kfmessage.setToUser(mpUser.getOpenId());
 			kfmessage.setMsgType(WxConsts.KefuMsgType.TEXT);
-			msgContent = kefuMsgType.getWxTemplateTxt().replaceAll("\\\\n", "\n");
+			msgContent = kefuMsgType.getWxTemplateTxt();
 			for (int i = 0; i < attr.length; i++) {
 				msgContent = msgContent.replace("#" + i + "#", attr[i]);
 			}
-			kfmessage.setContent(msgContent);
+			kfmessage.setContent(msgContent.replaceAll("\\\\n", "\n"));
 			try {
 				sendSuccess = mpInfoService.findWxMpService(mpUser.getAppid()).getKefuService().sendKefuMessage(kfmessage);
 			} catch (WxErrorException e) {

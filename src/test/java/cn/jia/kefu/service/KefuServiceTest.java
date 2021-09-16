@@ -40,7 +40,7 @@ class KefuServiceTest extends BaseTest {
     })
     void sendMessage() throws Exception {
         String clientId = "jia_client";
-        assertTrue(kefuService.sendMessage(KefuMsgTypeCode.GIFT_USAGE, clientId));
+        assertTrue(kefuService.sendMessage(KefuMsgTypeCode.VOTE, clientId, ""));
     }
 
     @Test
