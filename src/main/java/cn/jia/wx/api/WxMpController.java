@@ -628,6 +628,19 @@ public class WxMpController {
 		oAuth2AccessToken.setAccessToken(accessToken);
 		return JSONResult.success(mpInfoService.findWxMpService(request).oauth2validateAccessToken(oAuth2AccessToken));
 	}
+
+	/**
+	 * 获取jsapi的签名信息
+	 *
+	 * @param url 页面地址
+	 * @param request 请求信息
+	 * @return 签名信息
+	 * @throws Exception 异常
+	 */
+	@RequestMapping("/jsapi/signature")
+	public Object createJsapiSignature(@RequestParam("url") String url, HttpServletRequest request) throws Exception {
+		return JSONResult.success(mpInfoService.findWxMpService(request).createJsapiSignature(url));
+	}
 	
 	/**
 	 * 获取所有客服账号
