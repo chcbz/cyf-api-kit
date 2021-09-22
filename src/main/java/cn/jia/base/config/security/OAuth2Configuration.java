@@ -57,7 +57,7 @@ public class OAuth2Configuration {
             }).and().authorizeRequests().antMatchers("/login", "/oauth/clientid", "/oauth/client/register",
                     "/user/create", "/user/check", "/favicon.ico", "/**/*.html", "/**/*.js", "/**/*.css", "/**/*.jpg",
                     "/**/*.png", "/**/*.ttf", "/**/*.woff", "/wx/mp/checksignature", "/wx/pay/parseScanPayNotifyResult",
-                    "/dwz/view/**", "/",
+                    "/dwz/view/**", "/", "/wx/mp/jsapi/signature",
                     "/file/res/**", "/wx/pay/parseOrderNotifyResult", "/wx/mp/oauth2/access_token").permitAll()
                     .and().authorizeRequests().anyRequest().authenticated().and().httpBasic();
         }
