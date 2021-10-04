@@ -1,6 +1,13 @@
 package cn.jia.base.config;
 
+import cn.jia.core.common.EsConstants;
+import cn.jia.core.entity.JSONResult;
+import cn.jia.core.entity.Result;
+import cn.jia.core.exception.EsRuntimeException;
+import cn.jia.core.service.DictService;
 import cn.jia.core.util.StringUtils;
+import cn.jia.user.common.UserErrorConstants;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.access.AccessDeniedException;
@@ -8,14 +15,6 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
-
-import cn.jia.core.common.EsConstants;
-import cn.jia.core.entity.JSONResult;
-import cn.jia.core.entity.Result;
-import cn.jia.core.exception.EsRuntimeException;
-import cn.jia.core.service.DictService;
-import cn.jia.user.common.UserErrorConstants;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * 全局异常处理配置类，主要将自定义异常信息以JSON格式返回给前端

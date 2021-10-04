@@ -7,7 +7,7 @@ import cn.jia.core.entity.JSONResultPage;
 import cn.jia.core.service.DictService;
 import cn.jia.core.util.DateUtil;
 import cn.jia.core.util.JSONUtil;
-import com.github.pagehelper.Page;
+import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -68,8 +68,8 @@ public class DictController {
 	@RequestMapping(value = "/list", method = RequestMethod.POST)
 	public Object list(@RequestBody JSONRequestPage<String> page) {
 		Dict dict = JSONUtil.fromJson(page.getSearch(), Dict.class);
-		Page<Dict> dictList = dictService.findByExamplePage(dict, page.getPageNum(), page.getPageSize());
-		JSONResultPage<Dict> result = new JSONResultPage<>(dictList.getResult());
+		PageInfo<Dict> dictList = dictService.findByExamplePage(dict, page.getPageNum(), page.getPageSize());
+		JSONResultPage<Dict> result = new JSONResultPage<>(dictList.getList());
 		result.setPageNum(dictList.getPageNum());
 		result.setTotal(dictList.getTotal());
 		return result;
