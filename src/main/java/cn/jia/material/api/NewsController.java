@@ -256,8 +256,8 @@ public class NewsController {
 			map.add("mobile", mobile);
 			map.add("content", content);
 
-			String sendSmsBatchURL = "http://api.zthysms.com/sendSmsBatch.do";
-			ResponseEntity<String> response = restTemplate.postForEntity(sendSmsBatchURL, new HttpEntity<>(map, headers) , String.class);
+			String sendSmsBatchUrl = "http://api.zthysms.com/sendSmsBatch.do";
+			ResponseEntity<String> response = restTemplate.postForEntity(sendSmsBatchUrl, new HttpEntity<>(map, headers) , String.class);
 
 			if("1".equals(response.getBody().split(",")[0])){
 				for(String m : mobile.split(",")) {

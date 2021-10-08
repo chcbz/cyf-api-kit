@@ -21,7 +21,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.DelayQueue;
@@ -74,13 +73,14 @@ public class WxSchedule {
 		subscribeList = kefuService.listMsgSubscribe(subscribe);
 		for (KefuMsgSubscribe kefuMsgSubscribe : subscribeList) {
 			int max = (int)(DateUtil.todayEnd().getTime() / 1000);
-			int min = (int)(new Date().getTime() / 1000);
+			int min = (int)(System.currentTimeMillis() / 1000);
 			Random random = new Random();
 			long i = random.nextInt(max) % (max - min + 1) * 1000;
 			delayQueue.offer(new DelayObj(i, JSONUtil.toJson(kefuMsgSubscribe)));
 		}
 		final int size = subscribeList.size();
 		new ThreadRequest(new ThreadRequestContent() {
+			@Override
 			public void doSomeThing() {
 				for(int i=0; i<size; i++) {
 					try {

@@ -17,6 +17,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 
+/**
+ * @author chc
+ */
 @Service
 public class PointService {
 	
@@ -141,9 +144,9 @@ public class PointService {
 		record.setRemain(userPoint);
 		pointRecordService.save(record);
 		//积分变化规则
-		if (DataUtil.getRandom(true, 4).equals("0519")) {
+		if ("0519".equals(DataUtil.getRandom(true, 4))) {
 			record.setChg(recordPoint * 100);
-		} else if (DataUtil.getRandom(true, 2).equals("11")) {
+		} else if ("11".equals(DataUtil.getRandom(true, 2))) {
 			record.setChg(recordPoint * 10);
 		} else if (Integer.parseInt(DataUtil.getRandom(true, 1)) % 4 == 0) {
 			record.setChg(recordPoint * 2);

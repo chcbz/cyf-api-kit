@@ -68,6 +68,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	private RestTemplate restTemplate;
 
 	@Bean
+	@Override
 	public UserDetailsService userDetailsService() {
 		return new UserDetailsService() {
 			/**
@@ -169,7 +170,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	/**
 	 * 获取Jia平台Token
-	 * @return
+	 * @return token
 	 */
 	public static String jiaToken() {
 		RedisTemplate<String, Object> redisTemplate = SpringContextHolder.getBean("redisTemplate");
@@ -177,13 +178,13 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 		RestTemplate restTemplate = SpringContextHolder.getBean("restTemplate");
 
 		String token = String.valueOf(redisTemplate.opsForValue().get("jia-token-for-cyf"));
-		if(token != null && !token.equals("null") && !token.equals("")) {
+		if(token != null && !"null".equals(token) && !"".equals(token)) {
 			return token;
 		}
 		String username = dictService.getValue(UserConstants.DICT_TYPE_USER_CONFIG, UserConstants.USER_CONFIG_JIA_CLIENT_ID);
 		String password = dictService.getValue(UserConstants.DICT_TYPE_USER_CONFIG, UserConstants.USER_CONFIG_JIA_CLIENT_SECRET);
 		String jiaUrl = dictService.getValue(UserConstants.DICT_TYPE_USER_CONFIG, UserConstants.USER_CONFIG_JIA_SERVER_URL);
-		Map<String, String> tokenParam = new HashMap<>();
+		Map<String, String> tokenParam = new HashMap<>(3);
 		tokenParam.put("grant_type", "client_credentials");
 		tokenParam.put("client_id", username);
 		tokenParam.put("client_secret", password);

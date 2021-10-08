@@ -17,21 +17,23 @@ public class DelayObj implements Delayed {
         this.delayTime = delayTime + System.currentTimeMillis();
         this.data = data;
     }
-    // get,set方法省略
 
-    // 获取剩余过期时间
+    /**
+     * 获取剩余过期时间
+     *
+     * @param unit 时间单位
+     * @return 剩余过期时间
+     */
     @Override
     public long getDelay(TimeUnit unit) {
         return unit.convert(this.delayTime - System.currentTimeMillis(), TimeUnit.MILLISECONDS);
     }
 
-    // 比较方法
     @Override
     public int compareTo(Delayed o) {
         return (int) (this.getDelay(TimeUnit.MILLISECONDS) - o.getDelay(TimeUnit.MILLISECONDS));
     }
 
-    // 重写toString方法
     @Override
     public String toString() {
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");

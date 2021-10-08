@@ -5,6 +5,7 @@ import cn.jia.core.entity.JSONResult;
 import cn.jia.core.util.JSONUtil;
 import cn.jia.core.util.StringUtils;
 import cn.jia.user.entity.User;
+import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -15,18 +16,30 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+/**
+ * @author chc
+ */
 @Slf4j
 @ServerEndpoint(value = "/websocket")
 @Component
+@EqualsAndHashCode
 public class WebSocketServer {
-
-	private static int onlineCount = 0; // 静态变量，用来记录当前在线连接数。应该把它设计成线程安全的。
-
-	private static CopyOnWriteArraySet<WebSocketServer> webSocketSet = new CopyOnWriteArraySet<>(); // concurrent包的线程安全Set，用来存放每个客户端对应的MyWebSocket对象。
-
-	private Session session; // 与某个客户端的连接会话，需要通过它来给客户端发送数据
-
-	private Integer fuserid; // 保存当前登录用户ID
+	/**
+	 * 静态变量，用来记录当前在线连接数。应该把它设计成线程安全的。
+	 */
+	private static int onlineCount = 0;
+	/**
+	 * concurrent包的线程安全Set，用来存放每个客户端对应的MyWebSocket对象。
+	 */
+	private static final CopyOnWriteArraySet<WebSocketServer> WEB_SOCKET_SET = new CopyOnWriteArraySet<>();
+	/**
+	 * 与某个客户端的连接会话，需要通过它来给客户端发送数据
+	 */
+	private Session session;
+	/**
+	 * 保存当前登录用户ID
+	 */
+	private Integer fuserid;
 
 	/**
 	 * 连接建立成功调用的方法
@@ -34,16 +47,19 @@ public class WebSocketServer {
 	@OnOpen
 	public void onOpen(Session session) {
 		try {
-			this.session = session; // 设置当前session
+			// 设置当前session
+			this.session = session;
 			String token = session.getRequestParameterMap().get("access_token").get(0);
 			User user = SecurityConfiguration.tokenUser(token);
 			this.fuserid = Objects.requireNonNull(user).getId();
-			WebSocketServer _this = getCurrentWebSocket(this.fuserid); // 当前登录用户校验 每个用户同时只能连接一次
-			if (_this != null) {
+			// 当前登录用户校验 每个用户同时只能连接一次
+			WebSocketServer currentWebSocket = getCurrentWebSocket(this.fuserid);
+			if (currentWebSocket != null) {
 				sendMessage(JSONUtil.toJson(JSONResult.failure("E999", "您已有连接信息，不能重复连接 !")));
 				return;
 			}
-			webSocketSet.add(this); // 将当前websocket加入set中
+			// 将当前websocket加入set中
+			WEB_SOCKET_SET.add(this);
 			addOnlineCount(); // 在线数加1
 			sendMessage(JSONUtil.toJson(JSONResult.success("连接成功！")));
 			System.out.println("有一新连接！当前在线人数为" + getOnlineCount());
@@ -58,9 +74,11 @@ public class WebSocketServer {
 	 */
 	@OnClose
 	public void onClose() {
-		boolean b = webSocketSet.remove(this); // 从set中删除
+		// 从set中删除
+		boolean b = WEB_SOCKET_SET.remove(this);
 		if (b && getOnlineCount() > 0) {
-			subOnlineCount(); // 在线数减1
+			// 在线数减1
+			subOnlineCount();
 		}
 		System.out.println("有一连接关闭！当前在线人数为" + getOnlineCount());
 	}
@@ -74,15 +92,15 @@ public class WebSocketServer {
 	@OnMessage
 	public void onMessage(String message, Session session) {
 		try {
-			WebSocketServer _this = null;
-			for (WebSocketServer item : webSocketSet) {
+			WebSocketServer webSocketServer = null;
+			for (WebSocketServer item : WEB_SOCKET_SET) {
 				if (item.session.getId().equals(session.getId())) {
-					_this = item;
+					webSocketServer = item;
 				}
 			}
 			JSONResult<String> result = JSONResult.success("");
 			result.setMsg("reply");
-			if (_this == null) {
+			if (webSocketServer == null) {
 				result.setData("未连接不能发送消息！");
 				this.sendMessage(JSONUtil.toJson(result));
 				return;
@@ -127,12 +145,12 @@ public class WebSocketServer {
 	 * @date 2017年6月2日上午10:35:32
 	 */
 	public static WebSocketServer getCurrentWebSocket(Integer fuserid) {
-		if (fuserid == null || fuserid < 1 || webSocketSet == null || webSocketSet.size() < 1) {
+		if (fuserid == null || fuserid < 1 || WEB_SOCKET_SET.size() < 1) {
 			return null;
 		}
-		for (WebSocketServer _this : webSocketSet) {
-			if (_this.fuserid.equals(fuserid)) {
-				return _this;
+		for (WebSocketServer socketServer : WEB_SOCKET_SET) {
+			if (socketServer.fuserid.equals(fuserid)) {
+				return socketServer;
 			}
 		}
 		return null;
@@ -168,11 +186,11 @@ public class WebSocketServer {
 			if (fuserid == null || fuserid < 1 || StringUtils.isBlank(message)) {
 				return;
 			}
-			WebSocketServer _this = getCurrentWebSocket(fuserid);
-			if (_this == null) {
+			WebSocketServer currentWebSocket = getCurrentWebSocket(fuserid);
+			if (currentWebSocket == null) {
 				return;
 			}
-			_this.sendMessage(message);
+			currentWebSocket.sendMessage(message);
 		} catch (IOException e) {
 			System.out.println("发送消息异常！");
 		}
@@ -194,11 +212,11 @@ public class WebSocketServer {
 				return;
 			}
 			for (Integer fuserid : fuseridList) {
-				WebSocketServer _this = getCurrentWebSocket(fuserid);
-				if (_this == null) {
+				WebSocketServer currentWebSocket = getCurrentWebSocket(fuserid);
+				if (currentWebSocket == null) {
 					continue;
 				}
-				_this.sendMessage(message);
+				currentWebSocket.sendMessage(message);
 			}
 		} catch (Exception e) {
 			System.out.println("发送消息异常！");
@@ -216,10 +234,10 @@ public class WebSocketServer {
 	 */
 	public static void sendMessageAll(String message) {
 		try {
-			if (webSocketSet == null || webSocketSet.size() < 1 || StringUtils.isBlank(message)) {
+			if (WEB_SOCKET_SET.size() < 1 || StringUtils.isBlank(message)) {
 				return;
 			}
-			for (WebSocketServer item : webSocketSet) {
+			for (WebSocketServer item : WEB_SOCKET_SET) {
 				item.sendMessage(message);
 			}
 		} catch (IOException e) {

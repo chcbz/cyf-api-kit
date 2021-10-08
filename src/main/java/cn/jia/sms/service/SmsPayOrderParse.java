@@ -6,14 +6,17 @@ import cn.jia.sms.common.Constants;
 import cn.jia.sms.dao.SmsBuyMapper;
 import cn.jia.sms.entity.SmsBuy;
 import cn.jia.wx.entity.PayOrder;
-import cn.jia.wx.service.PayOrderParse;
+import cn.jia.wx.service.AbstractPayOrderParse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
 
+/**
+ * @author chc
+ */
 @Service
-public class SmsPayOrderParse extends PayOrderParse {
+public class SmsPayOrderParse extends AbstractPayOrderParse {
 
     @Autowired
     private SmsBuyMapper smsBuyMapper;
@@ -24,7 +27,7 @@ public class SmsPayOrderParse extends PayOrderParse {
         PayOrder payOrder = new PayOrder();
         payOrder.setBody("+顺短信服务");
         payOrder.setDetail("+顺短信服务");
-        payOrder.setTotalFee(new Double(smsBuy.getMoney() * 100).intValue());
+        payOrder.setTotalFee(Double.valueOf(smsBuy.getMoney() * 100).intValue());
         return payOrder;
     }
 

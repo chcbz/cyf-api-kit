@@ -36,7 +36,7 @@ public class MpInfoService {
 	
 	@PostConstruct
 	public void init() {
-		wxMpServiceMap = new HashMap<>();
+		wxMpServiceMap = new HashMap<>(16);
 		List<MpInfo> mpInfoList = mpInfoService.list();
 		for(MpInfo mp : mpInfoList) {
 			WxMpService wxMpService = new WxMpServiceImpl();

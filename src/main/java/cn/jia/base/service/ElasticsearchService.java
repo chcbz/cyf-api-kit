@@ -38,17 +38,17 @@ public class ElasticsearchService {
     /**
      * 创建索引
      * @param idxName   索引名称
-     * @param idxSQL    索引描述
+     * @param idxSql    索引描述
      */
-    public void createIndex(String idxName,String idxSQL){
+    public void createIndex(String idxName,String idxSql){
         try {
             if (!this.indexExist(idxName)) {
-                log.error(" idxName={} 已经存在,idxSql={}",idxName,idxSQL);
+                log.error(" idxName={} 已经存在,idxSql={}",idxName,idxSql);
                 return;
             }
             CreateIndexRequest request = new CreateIndexRequest(idxName);
             buildSetting(request);
-            request.mapping(idxSQL, XContentType.JSON);
+            request.mapping(idxSql, XContentType.JSON);
 //            request.settings() 手工指定Setting
             CreateIndexResponse res = restHighLevelClient.indices().create(request, RequestOptions.DEFAULT);
             if (!res.isAcknowledged()) {

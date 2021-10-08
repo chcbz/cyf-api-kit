@@ -9,14 +9,14 @@ import cn.jia.sms.common.Constants;
 import cn.jia.user.dao.UserMapper;
 import cn.jia.user.entity.User;
 import cn.jia.wx.entity.PayOrder;
-import cn.jia.wx.service.PayOrderParse;
+import cn.jia.wx.service.AbstractPayOrderParse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
 
 @Service
-public class GiftPayOrderParse extends PayOrderParse {
+public class GiftPayOrderParse extends AbstractPayOrderParse {
 
     @Autowired
     private IPointGiftService pointGiftService;

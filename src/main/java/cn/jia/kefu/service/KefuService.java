@@ -52,23 +52,24 @@ public class KefuService {
 	@Autowired
 	private RedisTemplate<String, Object> redisTemplate;
 
-	public PageInfo<KefuFaq> listFAQ(KefuFaq example, int pageNo, int pageSize) {
+	public PageInfo<KefuFaq> listFaq(KefuFaq example, int pageNo, int pageSize) {
 		PageHelper.startPage(pageNo, pageSize);
 		List<KefuFaq> kefuFaqList = kefuFaqService.listByEntity(example);
 		return PageInfo.of(kefuFaqList);
 	}
-	public KefuFaq createFAQ(KefuFaq record) {
+	public KefuFaq createFaq(KefuFaq record) {
 		kefuFaqService.save(record);
 		return record;
 	}
-	public KefuFaq findFAQ(Integer id) {
+	public KefuFaq findFaq(Integer id) {
 		return kefuFaqService.getById(id);
 	}
-	public KefuFaq updateFAQ(KefuFaq record) {
+
+	public KefuFaq updateFaq(KefuFaq record) {
 		kefuFaqService.updateById(record);
 		return record;
 	}
-	public void deleteFAQ(Integer id) {
+	public void deleteFaq(Integer id) {
 		kefuFaqService.removeById(id);
 	}
 	
@@ -84,6 +85,7 @@ public class KefuService {
 	public KefuMessage findMessage(Integer id) {
 		return kefuMessageService.getById(id);
 	}
+	
 	public KefuMessage updateMessage(KefuMessage record) {
 		kefuMessageService.updateById(record);
 		return record;

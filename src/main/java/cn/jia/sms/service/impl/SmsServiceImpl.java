@@ -128,7 +128,7 @@ public class SmsServiceImpl implements SmsService {
 	}
 	
 	@Override
-	@Transactional
+	@Transactional(rollbackFor = Exception.class)
 	public void send(SmsSend smsSend) {
 		smsSendMapper.insertSelective(smsSend);
 		//设置最新剩余数量
@@ -183,7 +183,7 @@ public class SmsServiceImpl implements SmsService {
 	}
 
 	@Override
-	@Transactional
+	@Transactional(rollbackFor = Exception.class)
 	public SmsBuy buy(int packageId, String clientId) throws Exception {
 		SmsPackage smsPackage = smsPackageMapper.selectByPrimaryKey(packageId);
 		if(smsPackage == null){

@@ -93,7 +93,7 @@ public class GiftService {
 	 * 礼品兑换
 	 * @throws Exception 异常信息
 	 */
-	@Transactional
+	@Transactional(rollbackFor = Exception.class)
 	public void usage(PointGiftUsage record) throws Exception {
 		PointGift gift = pointGiftService.getById(record.getGiftId());
 		if (gift == null) {
@@ -136,7 +136,7 @@ public class GiftService {
 		pointGiftUsageService.save(record);
 	}
 
-	@Transactional
+	@Transactional(rollbackFor = Exception.class)
 	public void usageCancel(Integer giftUsageId) throws Exception {
 		PointGiftUsage giftUsage = pointGiftUsageService.getById(giftUsageId);
 		if (giftUsage == null) {

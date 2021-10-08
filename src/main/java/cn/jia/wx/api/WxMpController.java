@@ -555,7 +555,7 @@ public class WxMpController {
 	
 	/**
 	 * 生成授权URL
-	 * @param redirectURI
+	 * @param redirectUri
 	 * @param scope 1、snsapi_base 2、snsapi_userinfo
 	 * @param state
 	 * @param request
@@ -563,9 +563,9 @@ public class WxMpController {
 	 * @throws Exception
 	 */
 	@RequestMapping("/oauth2/authorize_url")
-	public Object oauth2Authorize(@RequestParam("redirect_uri") String redirectURI, @RequestParam("scope") String scope,
+	public Object oauth2Authorize(@RequestParam("redirect_uri") String redirectUri, @RequestParam("scope") String scope,
 			@RequestParam("state") String state, HttpServletRequest request) throws Exception {
-		return JSONResult.success(mpInfoService.findWxMpService(request).oauth2buildAuthorizationUrl(redirectURI, scope, state));
+		return JSONResult.success(mpInfoService.findWxMpService(request).oauth2buildAuthorizationUrl(redirectUri, scope, state));
 	}
 	
 	/**

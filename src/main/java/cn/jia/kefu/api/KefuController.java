@@ -48,13 +48,13 @@ public class KefuController {
 	 */
 	@PreAuthorize("hasAuthority('kefu-faq_list')")
 	@RequestMapping(value = "/faq/list", method = RequestMethod.POST)
-	public Object listFAQ(@RequestBody JSONRequestPage<KefuFaq> page) {
+	public Object listFaq(@RequestBody JSONRequestPage<KefuFaq> page) {
 		KefuFaq example = page.getSearch();
 		if(example == null) {
 			example = new KefuFaq();
 		}
 		example.setClientId(EsSecurityHandler.clientId());
-		PageInfo<KefuFaq> list = kefuService.listFAQ(example, page.getPageNum(), page.getPageSize());
+		PageInfo<KefuFaq> list = kefuService.listFaq(example, page.getPageNum(), page.getPageSize());
 		JSONResultPage<KefuFaq> result = new JSONResultPage<>(list.getList());
 		result.setPageNum(list.getPageNum());
 		result.setTotal(list.getTotal());
@@ -68,8 +68,8 @@ public class KefuController {
 	 */
 	@PreAuthorize("hasAuthority('kefu-faq_get')")
 	@RequestMapping(value = "/faq/get", method = RequestMethod.GET)
-	public Object findFAQById(@RequestParam(name = "id") Integer id) throws Exception {
-		KefuFaq record = kefuService.findFAQ(id);
+	public Object findFaqById(@RequestParam(name = "id") Integer id) throws Exception {
+		KefuFaq record = kefuService.findFaq(id);
 		if(record == null) {
 			throw new EsRuntimeException(UserErrorConstants.DATA_NOT_FOUND);
 		}
@@ -83,9 +83,9 @@ public class KefuController {
 	 */
 	@PreAuthorize("hasAuthority('kefu-faq_create')")
 	@RequestMapping(value = "/faq/create", method = RequestMethod.POST)
-	public Object createFAQ(@RequestBody KefuFaq record) {
+	public Object createFaq(@RequestBody KefuFaq record) {
 		record.setClientId(EsSecurityHandler.clientId());
-		kefuService.createFAQ(record);
+		kefuService.createFaq(record);
 		return JSONResult.success(record);
 	}
 
@@ -96,8 +96,8 @@ public class KefuController {
 	 */
 	@PreAuthorize("hasAuthority('kefu-faq_update')")
 	@RequestMapping(value = "/faq/update", method = RequestMethod.POST)
-	public Object updateFAQ(@RequestBody KefuFaq record) {
-		kefuService.updateFAQ(record);
+	public Object updateFaq(@RequestBody KefuFaq record) {
+		kefuService.updateFaq(record);
 		return JSONResult.success(record);
 	}
 
@@ -108,12 +108,12 @@ public class KefuController {
 	 */
 	@PreAuthorize("hasAuthority('kefu-faq_delete')")
 	@RequestMapping(value = "/faq/delete", method = RequestMethod.GET)
-	public Object deleteFAQ(@RequestParam(name = "id") Integer id) throws Exception {
-		KefuFaq record = kefuService.findFAQ(id);
+	public Object deleteFaq(@RequestParam(name = "id") Integer id) throws Exception {
+		KefuFaq record = kefuService.findFaq(id);
 		if(record == null || !Objects.equals(EsSecurityHandler.clientId(), record.getClientId())) {
 			throw new EsRuntimeException(UserErrorConstants.DATA_NOT_FOUND);
 		}
-		kefuService.deleteFAQ(id);
+		kefuService.deleteFaq(id);
 		return JSONResult.success();
 	}
 	

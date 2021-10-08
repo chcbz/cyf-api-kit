@@ -12,7 +12,7 @@ import cn.jia.wx.common.ErrorConstants;
 import cn.jia.wx.entity.PayInfo;
 import cn.jia.wx.entity.PayOrder;
 import cn.jia.wx.service.PayInfoService;
-import cn.jia.wx.service.PayOrderParse;
+import cn.jia.wx.service.AbstractPayOrderParse;
 import cn.jia.wx.service.PayOrderService;
 import com.github.binarywang.wxpay.bean.coupon.*;
 import com.github.binarywang.wxpay.bean.entpay.EntPayQueryResult;
@@ -131,11 +131,11 @@ public class WxPayController {
 							 @RequestParam(required = false) String outTradeNo, @RequestParam String tradeType,
 							 HttpServletRequest request) throws Exception {
 		WxPayService wxPayService = payInfoService.findWxPayService(request);
-		PayOrderParse payOrderParse;
+		AbstractPayOrderParse payOrderParse;
 		if(StringUtils.isNotBlank(outTradeNo)) {
-			payOrderParse = PayOrderParse.instance(outTradeNo);
+			payOrderParse = AbstractPayOrderParse.instance(outTradeNo);
 		} else {
-			payOrderParse = PayOrderParse.instance(productId, jiacn);
+			payOrderParse = AbstractPayOrderParse.instance(productId, jiacn);
 		}
 		PayOrder payOrder = payOrderParse.scanPayNotifyResult();
 		payOrder.setAppid(wxPayService.getConfig().getAppId());
@@ -264,7 +264,7 @@ public class WxPayController {
 	public WxPayUnifiedOrderResult unifiedOrder(@RequestParam String productId, @RequestParam String openid,
 												@RequestParam String tradeType, HttpServletRequest request) throws Exception {
         WxPayService wxPayService = payInfoService.findWxPayService(request);
-        PayOrder payOrder = PayOrderParse.instance(productId, openid).scanPayNotifyResult();
+        PayOrder payOrder = AbstractPayOrderParse.instance(productId, openid).scanPayNotifyResult();
         payOrder.setAppid(wxPayService.getConfig().getAppId());
         payOrder.setMchId(wxPayService.getConfig().getMchId());
         payOrder.setOpenid(openid);
@@ -356,7 +356,7 @@ public class WxPayController {
 				payOrder.setTransactionId(result.getTransactionId());
 				payOrderService.update(payOrder);
 
-				PayOrderParse.instance(outTradeNo).orderNotifyResult();
+				AbstractPayOrderParse.instance(outTradeNo).orderNotifyResult();
 			}
 		} catch (WxPayException e) {
 			return WxPayNotifyResponse.fail(e.getMessage());
@@ -386,7 +386,7 @@ public class WxPayController {
 		WxScanPayNotifyResult result = BaseWxPayResult.fromXML(xmlData, WxScanPayNotifyResult.class);
 		String appid = result.getAppid();
 		result =  payInfoService.findWxPayService(appid).parseScanPayNotifyResult(xmlData);
-		PayOrder payOrder = PayOrderParse.instance(result.getProductId(), result.getOpenid()).scanPayNotifyResult();
+		PayOrder payOrder = AbstractPayOrderParse.instance(result.getProductId(), result.getOpenid()).scanPayNotifyResult();
 		payOrder.setAppid(appid);
 		payOrder.setMchId(result.getMchId());
 		payOrder.setOpenid(result.getOpenid());

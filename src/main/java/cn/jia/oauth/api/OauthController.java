@@ -23,7 +23,7 @@ import java.security.Principal;
 
 @RestController
 @RequestMapping("/oauth")
-public class OAuthController {
+public class OauthController {
 	
 	@Autowired
 	private ClientService clientService;

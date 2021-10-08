@@ -16,6 +16,9 @@ import org.springframework.stereotype.Service;
 import java.util.Calendar;
 import java.util.Date;
 
+/**
+ * @author chc
+ */
 @Service
 public class TaskServiceImpl implements TaskService {
 	
@@ -24,7 +27,7 @@ public class TaskServiceImpl implements TaskService {
 	@Autowired
 	private TaskItemMapper taskItemMapper;
 	@Autowired
-	private TaskItemVOMapper taskItemVOMapper;
+	private TaskItemVOMapper taskItemVoMapper;
 
 	@Override
 	public TaskPlan create(TaskPlan task) {
@@ -140,7 +143,7 @@ public class TaskServiceImpl implements TaskService {
 	@Override
 	public Page<TaskItemVO> findItems(TaskItemVOExample example, int pageNo, int pageSize) {
 		PageHelper.startPage(pageNo, pageSize);
-		return taskItemVOMapper.selectByExample(example);
+		return taskItemVoMapper.selectByExample(example);
 	}
 
 	@Override

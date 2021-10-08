@@ -32,13 +32,16 @@ import org.springframework.security.oauth2.provider.token.store.redis.RedisToken
 import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
 
+/**
+ * @author chc
+ */
 @Slf4j
 @Configuration
-public class OAuth2Configuration {
+public class Oauth2Configuration {
 
     @Configuration
     @EnableResourceServer
-    public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
+    public static class ResourceServerConfig extends ResourceServerConfigurerAdapter {
 
         @Override
         public void configure(HttpSecurity http) throws Exception {

@@ -29,6 +29,9 @@ import org.springframework.web.client.RestTemplate;
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
+/**
+ * @author chc
+ */
 @Slf4j
 @RestController
 @RequestMapping("/sms")
@@ -41,7 +44,7 @@ public class SmsController {
 
 	private final RestTemplate restTemplate = new RestTemplate();
 	
-	private static final String smsURL = "http://106.ihuyi.com/webservice/sms.php";
+	private static final String SMS_URL = "http://106.ihuyi.com/webservice/sms.php";
 
 	/**
 	 * 获取短信验证码信息
@@ -130,7 +133,7 @@ public class SmsController {
 
 		HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
 
-		ResponseEntity<String> response = restTemplate.postForEntity(smsURL, request , String.class);
+		ResponseEntity<String> response = restTemplate.postForEntity(SMS_URL, request , String.class);
 		//将发送记录保存到系统里
 		if("1".equals(Objects.requireNonNull(response.getBody()).split(",")[0])){
 			SmsSend smsSend = new SmsSend();
@@ -178,7 +181,7 @@ public class SmsController {
 
 		HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
 
-		JSONObject response = restTemplate.postForObject(smsURL, request , JSONObject.class);
+		JSONObject response = restTemplate.postForObject(SMS_URL, request , JSONObject.class);
 		if (response == null) {
 			return JSONResult.failure("E999", "sms service fail");
 		}
@@ -257,7 +260,7 @@ public class SmsController {
 
 		HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
 
-		ResponseEntity<String> response = restTemplate.postForEntity(smsURL, request , String.class);
+		ResponseEntity<String> response = restTemplate.postForEntity(SMS_URL, request , String.class);
 		
 		return JSONResult.success(response.getBody());
 	}
@@ -267,22 +270,22 @@ public class SmsController {
 	 * @return 结果
 	 */
 	@RequestMapping(value = "/receive", method = RequestMethod.GET)
-	public Object receive(@RequestParam String mobilephone, @RequestParam String content, @RequestParam String smsid, @RequestParam String reply_time) {
+	public Object receive(@RequestParam String mobilePhone, @RequestParam String content, @RequestParam String smsid, @RequestParam String replyTime) {
 		SmsReply smsReply = new SmsReply();
 		smsReply.setContent(content);
-		smsReply.setMobile(mobilephone);
+		smsReply.setMobile(mobilePhone);
 		smsReply.setMsgid(smsid);
-		smsReply.setTime(DateUtil.genTime(DateUtil.parseDate(reply_time)));
+		smsReply.setTime(DateUtil.genTime(DateUtil.parseDate(replyTime)));
 		smsService.reply(smsReply);
 		
 		SmsSend send = smsService.selectSend(smsid);
 		SmsConfig config = smsService.selectConfig(send.getClientId());
 		if(config != null && StringUtils.isNotEmpty(config.getReplyUrl())) {
 			String replyUrl = config.getReplyUrl();
-			replyUrl = HttpUtil.addUrlValue(replyUrl, "mobilephone", mobilephone);
+			replyUrl = HttpUtil.addUrlValue(replyUrl, "mobilephone", mobilePhone);
 			replyUrl = HttpUtil.addUrlValue(replyUrl, "content", content);
 			replyUrl = HttpUtil.addUrlValue(replyUrl, "smsid", smsid);
-			replyUrl = HttpUtil.addUrlValue(replyUrl, "reply_time", reply_time);
+			replyUrl = HttpUtil.addUrlValue(replyUrl, "reply_time", replyTime);
 
 			String response = restTemplate.getForObject(replyUrl, String.class);
 			log.info("sms reply success: " + response);
@@ -389,7 +392,7 @@ public class SmsController {
 
 		HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
 
-		JSONObject response = restTemplate.postForObject(smsURL, request , JSONObject.class);
+		JSONObject response = restTemplate.postForObject(SMS_URL, request , JSONObject.class);
 		if (response == null) {
 			return JSONResult.failure("E999", "sms service fail");
 		}
@@ -478,7 +481,7 @@ public class SmsController {
 	@RequestMapping(value = "/buy/create", method = RequestMethod.GET)
 	public Object buy(@RequestParam Integer packageId) throws Exception {
 		SmsBuy smsBuy = smsService.buy(packageId, EsSecurityHandler.clientId());
-		Map<String, Object> result = new HashMap<>();
+		Map<String, Object> result = new HashMap<>(2);
 		result.put("productId", SmsPayOrderParse.genProductId(smsBuy.getId()));
 		result.put("buyId", smsBuy.getId());
 		return JSONResult.success(result);

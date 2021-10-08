@@ -37,7 +37,7 @@ public class PayInfoService {
 
     @PostConstruct
     public void init() {
-        wxPayServiceMap = new HashMap<>();
+        wxPayServiceMap = new HashMap<>(16);
         List<PayInfo> payInfoList = payInfoService.list();
         for(PayInfo pay : payInfoList) {
             WxPayService wxPayService = new WxPayServiceImpl();
