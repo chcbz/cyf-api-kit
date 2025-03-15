@@ -1,7 +1,7 @@
 package cn.jia.point.service;
 
-import cn.jia.point.entity.PointGift;
-import cn.jia.test.BaseTest;
+import cn.jia.point.entity.PointGiftEntity;
+import cn.jia.test.BaseDbUnitTest;
 import cn.jia.test.DbUnitHelper;
 import com.github.pagehelper.PageInfo;
 import com.github.springtestdbunit.annotation.DatabaseOperation;
@@ -18,7 +18,7 @@ import javax.sql.DataSource;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
-class GiftServiceTest extends BaseTest {
+class GiftServiceTest extends BaseDbUnitTest {
     @Autowired
     private GiftService giftService;
     @Autowired
@@ -28,7 +28,7 @@ class GiftServiceTest extends BaseTest {
 
     @Test
     void create() {
-        PointGift gift = DbUnitHelper.readJsonEntity(resource, PointGift.class);
+        PointGiftEntity gift = DbUnitHelper.readJsonEntity(resource, PointGiftEntity.class);
         gift = giftService.create(gift);
         assertNotNull(gift);
     }
@@ -36,14 +36,14 @@ class GiftServiceTest extends BaseTest {
     @Test
     @DatabaseSetup(value = "classpath:testObject/point/point_gift_init.xml", type = DatabaseOperation.CLEAN_INSERT)
     void find() throws Exception {
-        PointGift gift = giftService.find(1);
+        PointGiftEntity gift = giftService.find(1L);
         assertNotNull(gift);
     }
 
     @Test
     void update() {
-        PointGift gift = new PointGift();
-        gift.setId(1);
+        PointGiftEntity gift = new PointGiftEntity();
+        gift.setId(1L);
         gift.setName("testName");
         giftService.update(gift);
         assertTrue(true);
@@ -51,14 +51,14 @@ class GiftServiceTest extends BaseTest {
 
     @Test
     void delete() {
-        giftService.delete(1);
+        giftService.delete(1L);
         assertTrue(true);
     }
 
     @Test
     @DatabaseSetup(value = "classpath:testObject/point/point_gift_init.xml", type = DatabaseOperation.CLEAN_INSERT)
     void list() {
-        PageInfo<PointGift> giftPage = giftService.list(1, 10, null);
+        PageInfo<PointGiftEntity> giftPage = giftService.list(1, 10, null);
         assertNotEquals(giftPage.getList().size(), 0);
     }
 

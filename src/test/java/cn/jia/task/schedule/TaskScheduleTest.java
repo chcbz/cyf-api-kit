@@ -1,9 +1,9 @@
 package cn.jia.task.schedule;
 
 import cn.jia.core.util.DateUtil;
-import cn.jia.task.entity.TaskPlan;
+import cn.jia.task.entity.TaskPlanEntity;
 import cn.jia.task.service.TaskService;
-import cn.jia.test.BaseTest;
+import cn.jia.test.BaseDbUnitTest;
 import cn.jia.test.DbUnitHelper;
 import com.github.springtestdbunit.annotation.DatabaseOperation;
 import com.github.springtestdbunit.annotation.DatabaseSetup;
@@ -17,7 +17,7 @@ import org.springframework.core.io.Resource;
 import javax.sql.DataSource;
 
 @Slf4j
-class TaskScheduleTest extends BaseTest {
+class TaskScheduleTest extends BaseDbUnitTest {
     @Autowired
     private TaskSchedule taskSchedule;
     @Autowired
@@ -36,9 +36,9 @@ class TaskScheduleTest extends BaseTest {
             @DatabaseSetup(value = "classpath:testObject/kefu/kefu_msg_subscribe_init.xml", type = DatabaseOperation.CLEAN_INSERT)
     })
     void taskAlert() {
-        TaskPlan taskPlan = DbUnitHelper.readJsonEntity(resource, TaskPlan.class);
-        taskPlan.setStartTime(DateUtil.genTime() + 50);
-        taskPlan.setEndTime(DateUtil.genTime() + 100);
+        TaskPlanEntity taskPlan = DbUnitHelper.readJsonEntity(resource, TaskPlanEntity.class);
+        taskPlan.setStartTime(DateUtil.nowTime() + 50);
+        taskPlan.setEndTime(DateUtil.nowTime() + 100);
         taskPlan.setClientId("jia_client");
         taskService.create(taskPlan);
         taskSchedule.taskAlert();

@@ -1,10 +1,9 @@
 package cn.jia.wx.service;
 
-import cn.jia.test.BaseTest;
+import cn.jia.test.BaseDbUnitTest;
 import cn.jia.test.DbUnitHelper;
-import cn.jia.wx.entity.MpInfo;
-import cn.jia.wx.entity.MpInfoExample;
-import com.alibaba.testable.core.annotation.MockMethod;
+import cn.jia.wx.entity.MpInfoEntity;
+import cn.jia.wx.entity.MpInfoVO;
 import com.github.springtestdbunit.annotation.DatabaseOperation;
 import com.github.springtestdbunit.annotation.DatabaseSetup;
 import lombok.extern.slf4j.Slf4j;
@@ -16,14 +15,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 
 import javax.sql.DataSource;
-import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
-class MpInfoServiceTest extends BaseTest {
+class MpInfoServiceTest extends BaseDbUnitTest {
     @Autowired
     private MpInfoService mpInfoService;
     @Autowired
@@ -31,30 +29,23 @@ class MpInfoServiceTest extends BaseTest {
     @Value("classpath:testObject/wx/mp_info_init.json")
     private Resource mpInfoResource;
 
-    public static class Mock {
-        @MockMethod(targetClass = IMpInfoService.class)
-        private <T> T getById(Serializable id) {
-            return (T)new MpInfo();
-        }
-    }
-
     @Test
     @DatabaseSetup(value = "classpath:testObject/wx/mp_info_init.xml", type = DatabaseOperation.CLEAN_INSERT)
-    void findWxMpService() throws Exception {
+    void findWxMpService() {
         WxMpService wxMpService = mpInfoService.findWxMpService("wxd59557202ddff2d5");
         assertNotNull(wxMpService);
     }
 
     @Test
     void create() {
-        MpInfo mpInfo = DbUnitHelper.readJsonEntity(mpInfoResource, MpInfo.class);
-        assertTrue(mpInfoService.create(Objects.requireNonNull(mpInfo)));
+        MpInfoEntity mpInfo = DbUnitHelper.readJsonEntity(mpInfoResource, MpInfoEntity.class);
+        assertNotNull(mpInfoService.create(Objects.requireNonNull(mpInfo)));
     }
 
     @Test
     @DatabaseSetup(value = "classpath:testObject/wx/mp_info_init.xml", type = DatabaseOperation.CLEAN_INSERT)
     void find() {
-        assertNotNull(mpInfoService.find(1));
+        assertNotNull(mpInfoService.get(1L));
     }
 
     @Test
@@ -66,27 +57,27 @@ class MpInfoServiceTest extends BaseTest {
     @Test
     @DatabaseSetup(value = "classpath:testObject/wx/mp_info_init.xml", type = DatabaseOperation.CLEAN_INSERT)
     void list() {
-        MpInfoExample mpInfoExample = new MpInfoExample();
+        MpInfoVO mpInfoExample = new MpInfoVO();
         mpInfoExample.setOriginal("gh_336235a5d843");
         mpInfoExample.setClientIdList(Arrays.asList("jia_client", "234"));
-        assertEquals(mpInfoService.list(mpInfoExample).size(), 1);
+        assertEquals(mpInfoService.findList(mpInfoExample).size(), 1);
     }
 
     @Test
     @DatabaseSetup(value = "classpath:testObject/wx/mp_info_init.xml", type = DatabaseOperation.CLEAN_INSERT)
     void testList() {
-        MpInfoExample mpInfoExample = new MpInfoExample();
+        MpInfoVO mpInfoExample = new MpInfoVO();
         mpInfoExample.setOriginal("gh_336235a5d843");
-        assertEquals(mpInfoService.list(mpInfoExample, 1, 10).getSize(), 1);
+        assertEquals(mpInfoService.findPage(mpInfoExample, 1, 10).getSize(), 1);
     }
 
     @Test
     @DatabaseSetup(value = "classpath:testObject/wx/mp_info_init.xml", type = DatabaseOperation.CLEAN_INSERT)
     void update() {
-        MpInfo mpInfo = new MpInfo();
-        mpInfo.setAcid(1);
+        MpInfoEntity mpInfo = new MpInfoEntity();
+        mpInfo.setAcid(1L);
         mpInfo.setCity("dg");
-        assertTrue(mpInfoService.update(mpInfo));
+        assertNotNull(mpInfoService.update(mpInfo));
     }
 
     @Test
@@ -99,7 +90,7 @@ class MpInfoServiceTest extends BaseTest {
     @Test
     @DatabaseSetup(value = "classpath:testObject/wx/mp_info_init.xml", type = DatabaseOperation.CLEAN_INSERT)
     void selectAll() {
-        assertEquals(mpInfoService.selectAll().size(), 1);
+        assertEquals(mpInfoService.findList(new MpInfoVO()).size(), 1);
     }
 
     @Test

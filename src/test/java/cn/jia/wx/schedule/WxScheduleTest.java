@@ -1,12 +1,12 @@
 package cn.jia.wx.schedule;
 
-import cn.jia.core.service.DictService;
-import cn.jia.material.entity.VoteItem;
-import cn.jia.material.entity.VoteQuestion;
-import cn.jia.material.service.VoteService;
+import cn.jia.base.service.DictService;
+import cn.jia.mat.entity.MatVoteItemEntity;
+import cn.jia.mat.entity.MatVoteQuestionVO;
+import cn.jia.mat.service.MatVoteService;
 import cn.jia.task.common.TaskConstants;
-import cn.jia.test.BaseTest;
-import cn.jia.user.entity.User;
+import cn.jia.test.BaseDbUnitTest;
+import cn.jia.user.entity.UserEntity;
 import cn.jia.user.service.UserService;
 import cn.jia.wx.service.MpInfoService;
 import com.github.springtestdbunit.annotation.DatabaseOperation;
@@ -22,14 +22,14 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
-public class WxScheduleTest extends BaseTest {
+public class WxScheduleTest extends BaseDbUnitTest {
 
     @Autowired
     private WxSchedule wxSchedule;
     @Autowired
     private UserService userService;
     @Autowired
-    private VoteService voteService;
+    private MatVoteService matVoteService;
     @Autowired
     private MpInfoService mpInfoService;
     @Autowired
@@ -48,14 +48,14 @@ public class WxScheduleTest extends BaseTest {
     @Test
     @Disabled
     void sendTemplateMessage() throws Exception {
-        User user = userService.findByJiacn("oH2zD1PUPvspicVak69uB4wDaFLg");
+        UserEntity user = userService.findByJiacn("oH2zD1PUPvspicVak69uB4wDaFLg");
         String wxAppId = dictService.getValue(TaskConstants.DICT_TYPE_TASK_CONFIG, TaskConstants.TASK_CONFIG_WX_APP_ID);
-        VoteQuestion question = voteService.findOneQuestion(user.getJiacn());
+        MatVoteQuestionVO question = matVoteService.findOneQuestion(user.getJiacn());
         List<WxMpTemplateData> data = new ArrayList<>();
         WxMpTemplateData keyword0 = new WxMpTemplateData();
         keyword0.setName("first");
         StringBuilder content = new StringBuilder("每天答题时间(两小时有效)\r\n\r\n").append(question.getTitle()).append("\r\n");
-        for (VoteItem item : question.getItems()) {
+        for (MatVoteItemEntity item : question.getItems()) {
             content.append("\r\n").append(item.getOpt()).append(". ").append(item.getContent());
         }
         keyword0.setValue(content.toString());

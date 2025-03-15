@@ -1,9 +1,10 @@
 package cn.jia.base.entity;
 
+import cn.jia.core.entity.DelayObj;
 import cn.jia.core.util.DateUtil;
+import cn.jia.core.util.thread.AbstractThreadRequestContent;
 import cn.jia.core.util.thread.ThreadRequest;
-import cn.jia.core.util.thread.ThreadRequestContent;
-import cn.jia.user.entity.User;
+import cn.jia.user.entity.UserEntity;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
@@ -19,14 +20,14 @@ public class DelayObjTest {
     @Test
     void delayObj() {
         DelayQueue<DelayObj> delayQueue = new DelayQueue<>();
-        List<User> phraseUserList = new ArrayList<>();
-        User u = new User();
+        List<UserEntity> phraseUserList = new ArrayList<>();
+        UserEntity u = new UserEntity();
         u.setOpenid("23423423423432");
         phraseUserList.add(u);
-        User u2 = new User();
+        UserEntity u2 = new UserEntity();
         u2.setOpenid("2342343253525");
         phraseUserList.add(u2);
-        for(User user : phraseUserList) {
+        for(UserEntity user : phraseUserList) {
             int max = (int)(DateUtil.todayEnd().getTime() / 1000);
             int min = (int)(new Date().getTime() / 1000);
             Random random = new Random();
@@ -34,7 +35,7 @@ public class DelayObjTest {
             delayQueue.offer(new DelayObj(i, user.getOpenid()));
         }
         final int size = phraseUserList.size();
-        new ThreadRequest(new ThreadRequestContent() {
+        new ThreadRequest(new AbstractThreadRequestContent() {
             public void doSomeThing() {
                 for(int i=0; i<size; i++) {
                     try {

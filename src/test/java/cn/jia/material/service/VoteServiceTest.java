@@ -1,16 +1,17 @@
 package cn.jia.material.service;
 
 import cn.jia.core.util.StreamUtil;
-import cn.jia.test.BaseTest;
+import cn.jia.mat.service.MatVoteService;
+import cn.jia.test.BaseDbUnitTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 
-public class VoteServiceTest extends BaseTest {
+public class VoteServiceTest extends BaseDbUnitTest {
 
     @Autowired
-    private VoteService voteService;
+    private MatVoteService matVoteService;
     @Value("classpath:testObject/material/question.txt")
     private Resource questionResource;
     @Value("classpath:testObject/material/answer.txt")
@@ -20,6 +21,6 @@ public class VoteServiceTest extends BaseTest {
     void batchImport() throws Exception {
         String question = StreamUtil.readText(questionResource.getInputStream());
         String answer = StreamUtil.readText(answerResource.getInputStream());
-        voteService.batchImport("题目", question, answer);
+        matVoteService.batchImport("题目", question, answer);
     }
 }

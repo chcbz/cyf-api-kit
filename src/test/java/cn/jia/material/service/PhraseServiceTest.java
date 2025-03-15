@@ -3,8 +3,9 @@ package cn.jia.material.service;
 import cn.jia.core.util.DateUtil;
 import cn.jia.core.util.HttpUtil;
 import cn.jia.core.util.StreamUtil;
-import cn.jia.material.entity.Phrase;
-import cn.jia.test.BaseTest;
+import cn.jia.mat.entity.MatPhraseEntity;
+import cn.jia.mat.service.MatPhraseService;
+import cn.jia.test.BaseDbUnitTest;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,10 +14,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.Date;
 
-public class PhraseServiceTest extends BaseTest {
+public class PhraseServiceTest extends BaseDbUnitTest {
 
     @Autowired
-    private PhraseService phraseService;
+    private MatPhraseService matPhraseService;
 
     @Test
     @Disabled
@@ -34,14 +35,14 @@ public class PhraseServiceTest extends BaseTest {
         while (txt.contains((++i) + "、")) {
             String seq = i + "、";
             txt = txt.substring(txt.indexOf(seq));
-            Phrase phrase = new Phrase();
+            MatPhraseEntity phrase = new MatPhraseEntity();
             phrase.setClientId("jia_client");
             phrase.setCreateTime(now);
             phrase.setUpdateTime(now);
             phrase.setTag("毒鸡汤");
             phrase.setContent(txt.substring(seq.length(), !txt.contains("\n") ? txt.length() : txt.indexOf("\n")));
             txt = txt.substring(!txt.contains("\n") ? 0 : txt.indexOf("\n") + 1);
-            phraseService.create(phrase);
+            matPhraseService.create(phrase);
         }
     }
 
@@ -61,13 +62,13 @@ public class PhraseServiceTest extends BaseTest {
             link = html.substring(0, html.indexOf("\""));
             System.out.println(content + " " + link);
 
-            Phrase phrase = new Phrase();
+            MatPhraseEntity phrase = new MatPhraseEntity();
             phrase.setClientId("jia_client");
             phrase.setCreateTime(now);
             phrase.setUpdateTime(now);
             phrase.setTag("毒鸡汤");
             phrase.setContent(content);
-            phraseService.create(phrase);
+            matPhraseService.create(phrase);
 
             Thread.sleep(200);
         }

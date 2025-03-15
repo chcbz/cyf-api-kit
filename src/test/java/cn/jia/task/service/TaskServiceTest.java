@@ -2,14 +2,14 @@ package cn.jia.task.service;
 
 import cn.jia.core.util.DateUtil;
 import cn.jia.task.common.TaskConstants;
-import cn.jia.task.entity.TaskPlan;
-import cn.jia.test.BaseTest;
+import cn.jia.task.entity.TaskPlanEntity;
+import cn.jia.test.BaseDbUnitTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Calendar;
 
-public class TaskServiceTest extends BaseTest {
+public class TaskServiceTest extends BaseDbUnitTest {
 
     @Autowired
     private TaskService taskService;
@@ -22,7 +22,7 @@ public class TaskServiceTest extends BaseTest {
         String[] births = "1984/4/26,1970/5/21,1973/12/27,2015/2/7,1973/10/9,1989/5/21,1984/4/17,1976/12/25,1989/2/10,1968/1/8,1961/7/24,1968/7/16,1970/5/1,1996/9/22,1977/2/5,1973/6/3,1976/9/28,1992/12/27,1991/1/31,1973/2/3,1943/3/22,1956/8/27,1987/1/24,1975/9/12,1989/8/29,1967/11/12".split(",");
         String[] phones = "13612818816,13632627934,13728628693,15112547017,18923769250,15112547017,13528426367,13728927744,13823733523,13927415670,15014073453,13602516516,13533862374,18789084625,13622379272,13417401806,13724374758,13670323707,13927415670,13360099138,18922833633,13612818816,13714078329,13544080352,15622814560,13544085016".split(",");
         for(int i=0;i<names.length;i++) {
-            TaskPlan task = new TaskPlan();
+            TaskPlanEntity task = new TaskPlanEntity();
             task.setJiacn("oH2zD1PUPvspicVak69uB4wDaFLg");
             task.setName(names[i] + sexs[i] + "生日");
             task.setDescription("手机号码是" + phones[i] + "，请送上诚挚的问候。");
