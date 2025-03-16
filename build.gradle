@@ -76,22 +76,3 @@ repositories {
         url 'https://maven.aliyun.com/repository/public'
     }
 }
-
-afterEvaluate {
-    publishing {
-        publications {
-            mavenJava(MavenPublication) {
-                from components.java
-            }
-        }
-        repositories {
-            maven {
-                url = version.endsWith('SNAPSHOT') ? rootProject.ext.snapshotsRepoUrl : rootProject.ext.releasesRepoUrl
-                credentials {
-                    username rootProject.ext.repoUsername
-                    password rootProject.ext.repoPassword
-                }
-            }
-        }
-    }
-}
