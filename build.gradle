@@ -1,5 +1,6 @@
 apply plugin: 'java-library'
 apply plugin: 'maven-publish'
+apply plugin: 'jacoco'
 
 ext {
     jiaVersion = '1.1.1-SNAPSHOT'
@@ -54,6 +55,25 @@ tasks.withType(JavaCompile).tap {
 
 test {
     useJUnitPlatform()
+}
+
+jacocoTestReport {
+    dependsOn test // 确保先运行测试
+    reports {
+        xml.required = true
+        html.required = true
+        csv.required = false
+    }
+    // 多模块项目需聚合子模块报告
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: [
+                    '**/config/**',
+                    '**/entity/**',
+                    '**/dto/**'
+            ])
+        }))
+    }
 }
 
 repositories {
