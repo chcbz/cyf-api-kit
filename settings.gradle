@@ -1,3 +1,26 @@
+pluginManagement {
+    repositories {
+        mavenLocal()
+        maven {
+            url 'https://packages.aliyun.com/5fb7d76ee6f9d07f148529c7/maven/2049636-release-r6d3t8'
+            credentials {
+                username '67d63fdb36ec628799f13840'
+                password 'MMJZVe0JXIBE'
+            }
+        }
+        maven {
+            url 'https://packages.aliyun.com/5fb7d76ee6f9d07f148529c7/maven/2049636-snapshot-tdmfld'
+            credentials {
+                username '67d63fdb36ec628799f13840'
+                password 'MMJZVe0JXIBE'
+            }
+        }
+        maven {
+            url 'https://maven.aliyun.com/repository/public'
+        }
+    }
+}
+
 plugins {
     id 'cn.jia.jia-dependency-management' version '1.1.1-SNAPSHOT'
 }
