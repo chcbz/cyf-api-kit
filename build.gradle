@@ -53,6 +53,14 @@ tasks.withType(JavaCompile).tap {
     }
 }
 
+jar {
+    manifest {
+        attributes(
+                'Main-Class': 'cn.jia.JiaApplication'
+        )
+    }
+}
+
 test {
     useJUnitPlatform()
 }
