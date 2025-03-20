@@ -1,5 +1,8 @@
+plugins {
+    id 'org.springframework.boot' version '3.2.4'
+}
+
 apply plugin: 'java-library'
-apply plugin: 'maven-publish'
 apply plugin: 'jacoco'
 
 ext {
@@ -53,11 +56,9 @@ tasks.withType(JavaCompile).tap {
     }
 }
 
-jar {
+bootJar {
     manifest {
-        attributes(
-                'Main-Class': 'cn.jia.JiaApplication'
-        )
+        attributes 'Start-Class': 'cn.jia.JiaApplication' // Spring Boot 主类
     }
 }
 
