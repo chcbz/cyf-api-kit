@@ -56,6 +56,11 @@ tasks.withType(JavaCompile).tap {
     }
 }
 
+// 禁用普通 JAR
+jar {
+    enabled = false
+}
+
 bootJar {
     manifest {
         attributes 'Start-Class': 'cn.jia.JiaApplication' // Spring Boot 主类
