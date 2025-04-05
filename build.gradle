@@ -16,7 +16,7 @@ dependencies {
     implementation "cn.jia:jia-isp-mapper:$jiaVersion"
     implementation "cn.jia:jia-kefu-mapper:$jiaVersion"
     implementation "cn.jia:jia-material-mapper:$jiaVersion"
-//    implementation "cn.jia:jia-oauth-mapper:$jiaVersion"
+    implementation "cn.jia:jia-oauth-mapper:$jiaVersion"
     implementation "cn.jia:jia-point-mapper:$jiaVersion"
     implementation "cn.jia:jia-sms-mapper:$jiaVersion"
     implementation "cn.jia:jia-task-mapper:$jiaVersion"
