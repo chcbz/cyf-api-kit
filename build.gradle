@@ -17,11 +17,13 @@ dependencies {
     implementation "cn.jia:jia-kefu-mapper:$jiaVersion"
     implementation "cn.jia:jia-material-mapper:$jiaVersion"
     implementation "cn.jia:jia-oauth-mapper:$jiaVersion"
+    implementation "cn.jia:jia-oauth-resource:$jiaVersion"
     implementation "cn.jia:jia-point-mapper:$jiaVersion"
     implementation "cn.jia:jia-sms-mapper:$jiaVersion"
     implementation "cn.jia:jia-task-mapper:$jiaVersion"
     implementation "cn.jia:jia-user-mapper:$jiaVersion"
     implementation "cn.jia:jia-wx-mapper:$jiaVersion"
+    implementation "cn.jia:jia-mcp-client:$jiaVersion"
 
     implementation(libs.spring.boot.starter.redisson)
     implementation(libs.spring.boot.starter.thymeleaf)
@@ -48,7 +50,7 @@ group = 'cn.jia'
 version = '1.1.1-SNAPSHOT'
 description = 'cyf-api-kit'
 
-sourceCompatibility = JavaVersion.VERSION_17
+sourceCompatibility = JavaVersion.VERSION_21
 
 tasks.withType(JavaCompile).tap {
     configureEach {

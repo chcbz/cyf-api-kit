@@ -241,7 +241,7 @@ INSERT INTO wx_pay_info (acid, client_id, name, account, country, province, city
                          sign_type, key_path, key_content)
 VALUES (1, 'jiafewnnv58ec2379c', '超有范', 'fanliweiketang', '', '', '', '1215040519@qq.com',
         '1838b143c56d3caa37eaffc67a91dc84', null, 0, 1, 'wxd59557202ddff2d5', null, '1504956961',
-        '0pHgPMSwZ1IlQ1j3plzOrMwXPhVAPpOx', null, null, null, null, 'classpath:apiclient_cert.p12', null);
+        '0pHgPMSwZ1IlQ1j3plzOrMwXPhVAPpOx', null, null, null, null, 'classpath:wxpay_apiclient_cert.p12', null);
 
 INSERT INTO wx_pay_order (id, appid, mch_id, openid, out_trade_no, product_id, prepay_id, body, detail, total_fee,
                           trade_type, spbill_create_ip, transaction_id, create_time, update_time)
