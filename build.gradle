@@ -28,6 +28,7 @@ dependencies {
     implementation(libs.spring.boot.starter.redisson)
     implementation(libs.spring.boot.starter.thymeleaf)
     implementation(libs.spring.boot.starter.security)
+    implementation(libs.spring.boot.starter.amqp)
     implementation(libs.spring.boot.starter.data.elasticsearch)
 
     implementation libs.slf4j.api
