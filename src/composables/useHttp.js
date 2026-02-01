@@ -46,7 +46,7 @@ function createTimeoutSignal (milliseconds) {
  * @param {Object} options.headers - 自定义请求头
  * @param {boolean} options.autoLoading - 是否自动管理loading状态，默认为true
  * @param {boolean} options.needAuth - 是否需要认证，默认为true
- * @param {string} options.responseType - 响应类型，支持 'json'（默认）和 'stream'（流式响应）
+ * @param {string} options.responseType - 响应类型，支持 'json'（默认）、'text'（文本）和 'stream'（流式响应）
  * @param {Function} options.onSuccess - 成功回调
  * @param {Function} options.onError - 错误回调
  * @param {Function} options.onFinally - 最终回调
@@ -248,14 +248,47 @@ export function useHttp (options = {}) {
         }
       }
 
-      // 处理普通 JSON 响应
-      const result = await response.json()
-      const resultObj = {
-        data: result,
-        status: response.status,
-        statusText: response.statusText,
-        headers: Object.fromEntries(response.headers.entries()),
-        config: fetchConfig
+      // 处理响应数据
+      let result
+      let resultObj
+      
+      // 首先读取响应文本
+      const responseText = await response.text()
+      if (responseType === 'text') {
+        // 处理文本响应
+        result = responseText
+        resultObj = {
+          data: responseText,
+          status: response.status,
+          statusText: response.statusText,
+          headers: Object.fromEntries(response.headers.entries()),
+          config: fetchConfig
+        }
+      } else {
+        // 处理 JSON 响应（默认）
+        // 尝试解析为 JSON
+        try {
+          const jsonResult = JSON.parse(responseText)
+          result = jsonResult
+          resultObj = {
+            data: jsonResult,
+            status: response.status,
+            statusText: response.statusText,
+            headers: Object.fromEntries(response.headers.entries()),
+            config: fetchConfig
+          }
+        } catch (jsonError) {
+          // JSON 解析失败，作为文本处理
+          console.warn('Failed to parse response as JSON, treating as text:', jsonError.message)
+          result = responseText
+          resultObj = {
+            data: responseText,
+            status: response.status,
+            statusText: response.statusText,
+            headers: Object.fromEntries(response.headers.entries()),
+            config: fetchConfig
+          }
+        }
       }
 
       response.value = resultObj

@@ -73,13 +73,22 @@ export default [
     }
   },
   {
+    path: '/gift',
+    name: 'GiftList',
+    component: () => import('@/components/GiftList'),
+    meta: {
+      title: 'gift.title',
+      showInMenu: true,
+      menuOrder: 3
+    }
+  },
+  {
     path: '/pay',
     name: 'GiftPay',
     component: () => import('@/components/GiftPay'),
     meta: {
       title: 'gift.title',
-      showInMenu: false,
-      menuOrder: 3
+      showInMenu: false
     }
   },
   {
@@ -88,8 +97,7 @@ export default [
     component: () => import('@/components/OrderList'),
     meta: {
       title: 'gift.order_list',
-      showInMenu: false,
-      menuOrder: 4
+      showInMenu: false
     }
   },
   {
@@ -98,8 +106,8 @@ export default [
     component: () => import('@/components/VoteTick'),
     meta: {
       title: 'vote.title',
-      showInMenu: false,
-      menuOrder: 5
+      showInMenu: true,
+      menuOrder: 4
     }
   },
   {
@@ -109,7 +117,7 @@ export default [
     meta: {
       title: 'phrase.title',
       showInMenu: true,
-      menuOrder: 6
+      menuOrder: 5
     }
   },
   {
@@ -119,7 +127,7 @@ export default [
     meta: {
       title: 'dwz.title',
       showInMenu: true,
-      menuOrder: 7
+      menuOrder: 6
     }
   },
   {

@@ -11,6 +11,7 @@ declare module 'vue' {
     Chat: typeof import('./components/Chat.vue')['default']
     DateRangePicker: typeof import('./components/DateRangePicker.vue')['default']
     DateRangePickerDialog: typeof import('./components/DateRangePickerDialog.vue')['default']
+    GiftList: typeof import('./components/GiftList.vue')['default']
     GiftPay: typeof import('./components/GiftPay.vue')['default']
     HelloWorld: typeof import('./components/HelloWorld.vue')['default']
     OrderList: typeof import('./components/OrderList.vue')['default']

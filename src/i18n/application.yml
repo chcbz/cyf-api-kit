@@ -83,6 +83,7 @@ en:
     cancel_alert: Confirm to cancel order?
     del: Delete Order
     cancel: Cancel Order
+    qrcode_tip: Scan QR code to pay
   vote:
     title: Daily Question
     right_alert: Congratulations! Correct answer, earned {point} points!
@@ -98,6 +99,7 @@ en:
     others: ↙↘Say, what else do you want?↙↘
     copy: Copy
     copy_success: Copied successfully!
+    copy_failed: Copy failed!
     next: Next
     add: Add
     close: Close
@@ -138,6 +140,8 @@ en:
     status_unpaid: Unpaid
     status_paid: Paid
     status_canceled: Canceled
+    status_unknown: Unknown
+    empty: No orders
 zh-CN:
   app:
     start_date: 开始日期
@@ -223,6 +227,7 @@ zh-CN:
     cancel_alert: 确定取消订单？
     del: 删除订单
     cancel: 取消订单
+    qrcode_tip: 扫码支付
   vote:
     title: 每日一题
     right_alert: 恭喜你，答案正确，增加{point}积分！
@@ -238,6 +243,7 @@ zh-CN:
     others: ↙↘说吧，你还想怎样↙↘
     copy: 剽窃
     copy_success: 拿好，不谢！
+    copy_failed: 复制失败！
     next: 继续
     add: 我来
     close: 再见
@@ -278,3 +284,5 @@ zh-CN:
     status_unpaid: 未支付
     status_paid: 已支付
     status_canceled: 已取消
+    status_unknown: 未知
+    empty: 暂无订单

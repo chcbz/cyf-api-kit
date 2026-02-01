@@ -46,6 +46,7 @@
             </template>
           </var-cell>
         </var-list>
+        <var-back-top :duration="300" />
       </div>
     </div>
 

@@ -41,7 +41,7 @@ export default {
     const _this = this;
     
     // 使用 voteApi 替换 $http
-    voteApi.get('/random', {
+    voteApi.get('/get/random', {
         jiacn: jiacn
     }, {
       onSuccess: (data) => {
@@ -64,7 +64,7 @@ export default {
       const _this = this;
       
       // 使用 voteApi 替换 $http
-      voteApi.post('/tick', {
+      voteApi.update('/tick', {
         jiacn: jiacn,
         questionId: this.question.id,
         opt: opt
