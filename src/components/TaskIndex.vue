@@ -591,7 +591,7 @@ onMounted(() => {
   flex-direction: column;
   /* 使用 flex 布局填充剩余空间 */
   flex: 1 1 auto;
-  min-height: 200px;
+  min-height: 160px;
   max-height: none;
 }
 
@@ -807,23 +807,11 @@ onMounted(() => {
   }
   
   .tasks-section {
-    min-height: 180px;
+    min-height: 160px;
   }
   
   .tasks-header {
     padding: 16px 16px 12px;
-  }
-}
-
-@media (min-width: 376px) and (max-width: 768px) {
-  .tasks-section {
-    min-height: 220px;
-  }
-}
-
-@media (min-width: 769px) {
-  .tasks-section {
-    min-height: 250px;
   }
 }
 </style>
