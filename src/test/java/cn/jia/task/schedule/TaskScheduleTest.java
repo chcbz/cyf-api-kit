@@ -5,9 +5,7 @@ import cn.jia.task.entity.TaskPlanEntity;
 import cn.jia.task.service.TaskService;
 import cn.jia.test.BaseDbUnitTest;
 import cn.jia.test.DbUnitHelper;
-import com.github.springtestdbunit.annotation.DatabaseOperation;
-import com.github.springtestdbunit.annotation.DatabaseSetup;
-import com.github.springtestdbunit.annotation.DatabaseSetups;
+import org.springframework.test.context.jdbc.Sql;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,13 +26,13 @@ class TaskScheduleTest extends BaseDbUnitTest {
     private Resource resource;
 
     @Test
-    @DatabaseSetups({
-            @DatabaseSetup(value = "classpath:testObject/kefu/kefu_msg_type_init.xml", type = DatabaseOperation.CLEAN_INSERT),
-            @DatabaseSetup(value = "classpath:testObject/wx/mp_info_init.xml", type = DatabaseOperation.CLEAN_INSERT),
-            @DatabaseSetup(value = "classpath:testObject/wx/mp_template_init.xml", type = DatabaseOperation.CLEAN_INSERT),
-            @DatabaseSetup(value = "classpath:testObject/wx/mp_user_init.xml", type = DatabaseOperation.CLEAN_INSERT),
-            @DatabaseSetup(value = "classpath:testObject/kefu/kefu_msg_subscribe_init.xml", type = DatabaseOperation.CLEAN_INSERT)
-    })
+    @Sql(scripts = {
+            "classpath:testObject/kefu/kefu_msg_type_init.sql",
+            "classpath:testObject/wx/mp_info_init.sql",
+            "classpath:testObject/wx/mp_template_init.sql",
+            "classpath:testObject/wx/mp_user_init.sql",
+            "classpath:testObject/kefu/kefu_msg_subscribe_init.sql"
+    }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     void taskAlert() {
         TaskPlanEntity taskPlan = DbUnitHelper.readJsonEntity(resource, TaskPlanEntity.class);
         taskPlan.setStartTime(DateUtil.nowTime() + 50);

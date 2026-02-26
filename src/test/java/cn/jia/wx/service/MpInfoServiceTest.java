@@ -4,8 +4,6 @@ import cn.jia.test.BaseDbUnitTest;
 import cn.jia.test.DbUnitHelper;
 import cn.jia.wx.entity.MpInfoEntity;
 import cn.jia.wx.entity.MpInfoVO;
-import com.github.springtestdbunit.annotation.DatabaseOperation;
-import com.github.springtestdbunit.annotation.DatabaseSetup;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.mp.api.WxMpService;
 import org.junit.jupiter.api.Disabled;
@@ -13,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
+import org.springframework.test.context.jdbc.Sql;
 
 import javax.sql.DataSource;
 import java.util.Arrays;
@@ -30,7 +29,7 @@ class MpInfoServiceTest extends BaseDbUnitTest {
     private Resource mpInfoResource;
 
     @Test
-    @DatabaseSetup(value = "classpath:testObject/wx/mp_info_init.xml", type = DatabaseOperation.CLEAN_INSERT)
+    @Sql(scripts = "classpath:testObject/wx/mp_info_init.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     void findWxMpService() {
         WxMpService wxMpService = mpInfoService.findWxMpService("wxd59557202ddff2d5");
         assertNotNull(wxMpService);
@@ -43,19 +42,19 @@ class MpInfoServiceTest extends BaseDbUnitTest {
     }
 
     @Test
-    @DatabaseSetup(value = "classpath:testObject/wx/mp_info_init.xml", type = DatabaseOperation.CLEAN_INSERT)
+    @Sql(scripts = "classpath:testObject/wx/mp_info_init.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     void find() {
         assertNotNull(mpInfoService.get(1L));
     }
 
     @Test
-    @DatabaseSetup(value = "classpath:testObject/wx/mp_info_init.xml", type = DatabaseOperation.CLEAN_INSERT)
+    @Sql(scripts = "classpath:testObject/wx/mp_info_init.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     void findByKey() {
         assertNotNull(mpInfoService.findByKey("wxd59557202ddff2d5"));
     }
 
     @Test
-    @DatabaseSetup(value = "classpath:testObject/wx/mp_info_init.xml", type = DatabaseOperation.CLEAN_INSERT)
+    @Sql(scripts = "classpath:testObject/wx/mp_info_init.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     void list() {
         MpInfoVO mpInfoExample = new MpInfoVO();
         mpInfoExample.setOriginal("gh_336235a5d843");
@@ -64,7 +63,7 @@ class MpInfoServiceTest extends BaseDbUnitTest {
     }
 
     @Test
-    @DatabaseSetup(value = "classpath:testObject/wx/mp_info_init.xml", type = DatabaseOperation.CLEAN_INSERT)
+    @Sql(scripts = "classpath:testObject/wx/mp_info_init.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     void testList() {
         MpInfoVO mpInfoExample = new MpInfoVO();
         mpInfoExample.setOriginal("gh_336235a5d843");
@@ -72,7 +71,7 @@ class MpInfoServiceTest extends BaseDbUnitTest {
     }
 
     @Test
-    @DatabaseSetup(value = "classpath:testObject/wx/mp_info_init.xml", type = DatabaseOperation.CLEAN_INSERT)
+    @Sql(scripts = "classpath:testObject/wx/mp_info_init.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     void update() {
         MpInfoEntity mpInfo = new MpInfoEntity();
         mpInfo.setAcid(1L);
@@ -81,14 +80,14 @@ class MpInfoServiceTest extends BaseDbUnitTest {
     }
 
     @Test
-    @DatabaseSetup(value = "classpath:testObject/wx/mp_info_init.xml", type = DatabaseOperation.CLEAN_INSERT)
+    @Sql(scripts = "classpath:testObject/wx/mp_info_init.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     void delete() {
         assertTrue(mpInfoService.delete(1));
         assertFalse(mpInfoService.delete(1));
     }
 
     @Test
-    @DatabaseSetup(value = "classpath:testObject/wx/mp_info_init.xml", type = DatabaseOperation.CLEAN_INSERT)
+    @Sql(scripts = "classpath:testObject/wx/mp_info_init.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     void selectAll() {
         assertEquals(mpInfoService.findList(new MpInfoVO()).size(), 1);
     }

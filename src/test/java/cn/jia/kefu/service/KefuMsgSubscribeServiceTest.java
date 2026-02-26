@@ -3,8 +3,7 @@ package cn.jia.kefu.service;
 import cn.jia.kefu.entity.KefuMsgSubscribeEntity;
 import cn.jia.kefu.entity.KefuMsgTypeCode;
 import cn.jia.test.BaseDbUnitTest;
-import com.github.springtestdbunit.annotation.DatabaseOperation;
-import com.github.springtestdbunit.annotation.DatabaseSetup;
+import org.springframework.test.context.jdbc.Sql;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +16,7 @@ class KefuMsgSubscribeServiceTest extends BaseDbUnitTest {
     private KefuMsgSubscribeService kefuMsgSubscribeService;
 
     @Test
-    @DatabaseSetup(value = "classpath:testObject/kefu/kefu_msg_subscribe_init.xml", type = DatabaseOperation.CLEAN_INSERT)
+    @Sql(scripts = "classpath:testObject/kefu/kefu_msg_subscribe_init.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     void listMsgSubscribe() {
         KefuMsgSubscribeEntity example = new KefuMsgSubscribeEntity();
         example.setClientId("jia_client");

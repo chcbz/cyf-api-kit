@@ -4,8 +4,7 @@ import cn.jia.point.entity.PointGiftEntity;
 import cn.jia.test.BaseDbUnitTest;
 import cn.jia.test.DbUnitHelper;
 import com.github.pagehelper.PageInfo;
-import com.github.springtestdbunit.annotation.DatabaseOperation;
-import com.github.springtestdbunit.annotation.DatabaseSetup;
+import org.springframework.test.context.jdbc.Sql;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -34,7 +33,7 @@ class GiftServiceTest extends BaseDbUnitTest {
     }
 
     @Test
-    @DatabaseSetup(value = "classpath:testObject/point/point_gift_init.xml", type = DatabaseOperation.CLEAN_INSERT)
+    @Sql(scripts = "classpath:testObject/point/point_gift_init.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     void find() throws Exception {
         PointGiftEntity gift = giftService.find(1L);
         assertNotNull(gift);
@@ -56,9 +55,9 @@ class GiftServiceTest extends BaseDbUnitTest {
     }
 
     @Test
-    @DatabaseSetup(value = "classpath:testObject/point/point_gift_init.xml", type = DatabaseOperation.CLEAN_INSERT)
+    @Sql(scripts = "classpath:testObject/point/point_gift_init.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     void list() {
-        PageInfo<PointGiftEntity> giftPage = giftService.list(1, 10, null);
+        PageInfo<PointGiftEntity> giftPage = giftService.list(1, 10, null, null);
         assertNotEquals(giftPage.getList().size(), 0);
     }
 

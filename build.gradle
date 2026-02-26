@@ -1,12 +1,12 @@
 plugins {
-    id 'org.springframework.boot' version '3.2.4'
+    id 'org.springframework.boot' version '4.0.1'
 }
 
 apply plugin: 'java-library'
 apply plugin: 'jacoco'
 
 ext {
-    jiaVersion = '1.1.1-SNAPSHOT'
+    jiaVersion = '1.1.2-SNAPSHOT'
 }
 
 dependencies {
@@ -27,9 +27,16 @@ dependencies {
 
     implementation(libs.spring.boot.starter.redisson)
     implementation(libs.spring.boot.starter.thymeleaf)
+    implementation(libs.spring.boot.starter.data.redis)
+    implementation(libs.spring.boot.starter.data.ldap)
+    implementation(libs.spring.boot.starter.cache)
     implementation(libs.spring.boot.starter.security)
+    implementation(libs.spring.security.oauth2.authorization.server)
+    implementation(libs.spring.boot.starter.oauth2.resource.server)
+    implementation(libs.spring.boot.starter.oauth2.client)
+    implementation(libs.spring.boot.starter.elasticsearch)
     implementation(libs.spring.boot.starter.amqp)
-    implementation(libs.spring.boot.starter.data.elasticsearch)
+    implementation(libs.spring.boot.starter.actuator)
 
     implementation libs.slf4j.api
     implementation libs.jakarta.inject.api
@@ -48,10 +55,8 @@ dependencies {
 }
 
 group = 'cn.jia'
-version = '1.1.1-SNAPSHOT'
+version = '1.1.2-SNAPSHOT'
 description = 'cyf-api-kit'
-
-sourceCompatibility = JavaVersion.VERSION_21
 
 tasks.withType(JavaCompile).tap {
     configureEach {

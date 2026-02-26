@@ -9,8 +9,7 @@ import cn.jia.test.BaseDbUnitTest;
 import cn.jia.user.entity.UserEntity;
 import cn.jia.user.service.UserService;
 import cn.jia.wx.service.MpInfoService;
-import com.github.springtestdbunit.annotation.DatabaseOperation;
-import com.github.springtestdbunit.annotation.DatabaseSetup;
+import org.springframework.test.context.jdbc.Sql;
 import me.chanjar.weixin.mp.bean.template.WxMpTemplateData;
 import me.chanjar.weixin.mp.bean.template.WxMpTemplateMessage;
 import org.junit.jupiter.api.Disabled;
@@ -38,7 +37,7 @@ public class WxScheduleTest extends BaseDbUnitTest {
     private RedisTemplate<String, Object> redisTemplate;
 
     @Test
-    @DatabaseSetup(value = "classpath:testObject/wx/wx_schedule_init.xml", type = DatabaseOperation.CLEAN_INSERT)
+    @Sql(scripts = "classpath:testObject/wx/wx_schedule_init.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     void sendVote() {
         wxSchedule.sendVote();
         redisTemplate.opsForValue().set("active_mp_user_oH2zD1PUPvspicVak69uB4wDaFLg", "Y", Duration.ofDays(2));
