@@ -1,5 +1,6 @@
 plugins {
     id 'org.springframework.boot' version '4.0.1'
+    id 'org.graalvm.buildtools.native' version '0.10.5'
 }
 
 apply plugin: 'java-library'
@@ -37,6 +38,8 @@ dependencies {
     implementation(libs.spring.boot.starter.elasticsearch)
     implementation(libs.spring.boot.starter.amqp)
     implementation(libs.spring.boot.starter.actuator)
+    implementation(libs.spring.ai.starter.model.minimax)
+    implementation(libs.spring.ai.starter.model.zhipuai)
 
     implementation libs.slf4j.api
     implementation libs.jakarta.inject.api
@@ -64,9 +67,11 @@ tasks.withType(JavaCompile).tap {
     }
 }
 
-// 禁用普通 JAR
 jar {
-    enabled = false
+    enabled = true
+    manifest {
+        attributes 'Start-Class': 'cn.jia.JiaApplication'
+    }
 }
 
 bootJar {
