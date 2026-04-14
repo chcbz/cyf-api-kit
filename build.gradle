@@ -1,6 +1,5 @@
 plugins {
     id 'org.springframework.boot' version '4.0.1'
-    id 'org.graalvm.buildtools.native' version '0.10.5'
 }
 
 apply plugin: 'java-library'
@@ -68,10 +67,7 @@ tasks.withType(JavaCompile).tap {
 }
 
 jar {
-    enabled = true
-    manifest {
-        attributes 'Start-Class': 'cn.jia.JiaApplication'
-    }
+    enabled = false
 }
 
 bootJar {
