@@ -23,7 +23,7 @@ dependencies {
     implementation "cn.jia:jia-task-mapper:$jiaVersion"
     implementation "cn.jia:jia-user-mapper:$jiaVersion"
     implementation "cn.jia:jia-wx-mapper:$jiaVersion"
-    implementation "cn.jia:jia-mcp-client:$jiaVersion"
+    implementation "cn.jia:jia-chat-mapper:$jiaVersion"
 
     implementation(libs.spring.boot.starter.redisson)
     implementation(libs.spring.boot.starter.thymeleaf)
@@ -51,6 +51,7 @@ dependencies {
     annotationProcessor libs.mapstruct.processor
     compileOnly libs.lombok
 
+    testImplementation(libs.spring.ai.starter.model.deepseek)
     testImplementation "cn.jia:jia-common-test:$jiaVersion"
     testAnnotationProcessor libs.lombok
     testCompileOnly libs.lombok

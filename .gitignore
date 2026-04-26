@@ -24,3 +24,5 @@ nbdist/
 .nb-gradle/
 .gradle/
 .vscode/
+.cline/
+.clinerules/
